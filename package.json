@@ -1,7 +1,17 @@
 {
-  "dependencies": {
-    "@hono/zod-openapi": "^1.3.0",
-    "@scalar/hono-api-reference": "^0.10.9",
-    "zod": "^4.3.6"
-  }
+	"name": "orbit",
+	"private": true,
+	"workspaces": [
+		"packages/*"
+	],
+	"scripts": {
+		"export:spec": "bun --cwd packages/orbit-api run export:spec",
+		"generate": "bun --cwd packages/client run generate",
+		"dev:api": "bun --cwd packages/orbit-api run dev",
+		"dev:frontend": "bun --cwd packages/orbit-frontend run dev",
+		"build:api": "bun --cwd packages/orbit-api run build",
+		"build:client": "bun --cwd packages/client run build",
+		"build:frontend": "bun --cwd packages/orbit-frontend run build",
+		"typecheck": "bun --cwd packages/orbit-api run typecheck && bun --cwd packages/client run typecheck && bun --cwd packages/orbit-frontend run typecheck"
+	}
 }
