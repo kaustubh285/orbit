@@ -1,12 +1,13 @@
 import configureOpenAPI from "./lib/configure-openapi.js"
 import createApp from "./lib/create-app.js"
 import index from "./routes/index.route.js"
-import calendar from "./routes/calendar/calendar.route.js"
+import quests from "./routes/quests/quests.route.js"
 const app = createApp()
-
 configureOpenAPI(app)
 
-const routes = [index, calendar]
+// app.route("/", index)
+// app.route("/api", quests)
+const routes = [index, quests]
 
 routes.forEach((route) => {
 	app.route("/", route)

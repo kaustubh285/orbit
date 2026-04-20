@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+    postgres:
+        image: postgres:15
+        container_name: orbit-postgres
+        environment:
+            POSTGRES_DB: orbitv1
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: orbitv1019da0c6-81d4-75d2-81a8-8cf1800ba241
+        ports:
+            - "5432:5432"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        restart: unless-stopped
+
+volumes:
+    postgres_data:
