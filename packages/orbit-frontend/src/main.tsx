@@ -6,7 +6,7 @@ import { router } from "./router"
 import { queryClient } from "./lib/query"
 import { createTheme, MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
-// import '@mantine/dates/styles.css';
+import '@mantine/dates/styles.css';
 
 const theme = createTheme({
 	fontFamily: 'Open Sans, sans-serif',

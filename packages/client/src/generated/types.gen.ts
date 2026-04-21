@@ -25,6 +25,10 @@ export type GetQuestsData = {
         type?: 'todo' | 'note' | 'event' | 'daily';
         status?: 'active' | 'completed' | 'archived';
         priority?: 'urgent' | 'important' | 'quick_win' | 'deep_work' | 'someday' | 'waiting';
+        /**
+         * Filter by date in YYYY-MM-DD format
+         */
+        date?: string;
     };
     url: '/quests';
 };

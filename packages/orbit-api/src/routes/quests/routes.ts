@@ -52,6 +52,7 @@ const listQuerySchema = z.object({
 	type: z.enum(questTypeEnum.enumValues).optional(),
 	status: z.enum(questStatusEnum.enumValues).optional(),
 	priority: z.enum(questPriorityEnum.enumValues).optional(),
+	date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().openapi({ description: "Filter by date in YYYY-MM-DD format" }),
 });
 
 export const list = createRoute({

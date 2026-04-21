@@ -1,0 +1,14 @@
+.mini-calendar {
+	/* Hide scrollbar while maintaining scroll functionality */
+	overflow: auto;
+	scrollbar-width: none;
+	/* Firefox */
+	-ms-overflow-style: none;
+	/* Internet Explorer and Edge */
+	border-bottom: 1px solid #ccc;
+}
+
+.mini-calendar::-webkit-scrollbar {
+	display: none;
+	/* Chrome, Safari, and Opera */
+}
