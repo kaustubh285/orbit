@@ -4,6 +4,7 @@ import { App } from "./App"
 import ROUTES from "./routes"
 import { HomePage } from "./pages/home/home"
 import { SettingsPage } from "./pages/settings"
+import SavesPage from "./pages/saves/saves.page"
 
 const rootRoute = createRootRouteWithContext<{ queryClient: QueryClient }>()({
 	component: App,
@@ -21,7 +22,13 @@ const settingsRoute = createRoute({
 	component: SettingsPage,
 })
 
-const routeTree = rootRoute.addChildren([homeRoute, settingsRoute])
+const savesRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: ROUTES.SAVES,
+	component: SavesPage,
+})
+
+const routeTree = rootRoute.addChildren([homeRoute, settingsRoute, savesRoute])
 
 export const router = createRouter({
 	routeTree,

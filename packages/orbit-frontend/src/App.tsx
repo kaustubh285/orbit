@@ -4,6 +4,7 @@ import { Outlet } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/router-devtools"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import "./app.css"
+import { AppHeader } from "./components/app-header.component"
 export function App() {
 	const [mobileOpened, { toggle: toggleMobile }] = useDisclosure()
 	const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true)
@@ -23,21 +24,7 @@ export function App() {
 				transitionTimingFunction="ease"
 			>
 				<AppShell.Header>
-					<Group h="100%" px="md">
-						<Burger
-							opened={mobileOpened}
-							onClick={toggleMobile}
-							hiddenFrom="sm"
-							size="sm"
-						/>
-						<Burger
-							opened={desktopOpened}
-							onClick={toggleDesktop}
-							visibleFrom="sm"
-							size="sm"
-						/>
-						<div>Logo</div>
-					</Group>
+					<AppHeader mobileOpened={mobileOpened} desktopOpened={desktopOpened} toggleMobile={toggleMobile} toggleDesktop={toggleDesktop} />
 				</AppShell.Header>
 
 				<AppShell.Navbar>

@@ -12,6 +12,7 @@
 	"dependencies": {
 		"@mantine/core": "^9.1.0",
 		"@mantine/dates": "^9.1.0",
+		"@mantine/form": "^9.1.0",
 		"@mantine/hooks": "^9.1.0",
 		"@orbit/client": "workspace:*",
 		"@tabler/icons-react": "^3.41.1",

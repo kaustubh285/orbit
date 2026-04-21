@@ -18,7 +18,7 @@ const theme = createTheme({
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
-		<MantineProvider theme={theme}>
+		<MantineProvider theme={theme} defaultColorScheme="dark">
 			<QueryClientProvider client={queryClient}>
 				<RouterProvider router={router} context={{ queryClient }} />
 			</QueryClientProvider>

@@ -13,7 +13,7 @@ export function HomePage() {
 	const { quests, submitQuest, toggleQuest, editQuest } = useHome(selectedDate)
 
 	return (
-		<Stack>
+		<Stack gap="xs">
 			<CalendarScroll value={selectedDate} onChange={setSelectedDate} />
 			<ListQuestsComponent
 				quests={quests.data ?? []}

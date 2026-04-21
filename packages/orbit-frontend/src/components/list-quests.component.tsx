@@ -101,7 +101,7 @@ function NewQuestRow({ onSubmit }: { onSubmit: (title: string, type: Quest["type
 				display: "flex",
 				alignItems: "center",
 				gap: 8,
-				padding: "6px 4px",
+				padding: "1px 4px",
 				borderBottom: "1px dotted var(--mantine-color-gray-4)",
 			}}
 		>
@@ -148,7 +148,7 @@ export default function ListQuestsComponent({
 	return (
 		<div
 			style={{
-				borderTop: "1px dotted var(--mantine-color-gray-4)",
+				borderBottom: "1px dotted var(--mantine-color-gray-4)",
 				fontFamily: "inherit",
 			}}
 		>
