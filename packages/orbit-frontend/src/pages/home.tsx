@@ -1,3 +1,5 @@
+import { Text } from "@mantine/core";
+
 export function HomePage() {
-	return <h1>Home</h1>
+	return <Text>Home</Text>
 }
