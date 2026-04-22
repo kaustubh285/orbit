@@ -6,10 +6,10 @@ import {
 	uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
-import { id, createdAt, updatedAt } from "../schema.helper.js";
-import { usersTable } from "./users.schema.js";
-import { questsTable } from "./quests.schema.js";
-import { savesTable } from "./saves.schema.js"; // wired in when saves lands
+import { id, createdAt, updatedAt } from "../schema.helper";
+import { usersTable } from "./users.schema";
+import { questsTable } from "./quests.schema";
+import { savesTable } from "./saves.schema"; // wired in when saves lands
 
 
 export const listsTable = pgTable("lists", {

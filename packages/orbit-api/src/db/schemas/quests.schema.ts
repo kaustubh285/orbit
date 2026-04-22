@@ -6,8 +6,8 @@ import {
 	timestamp,
 	index,
 } from "drizzle-orm/pg-core";
-import { id, createdAt, updatedAt } from "../schema.helper.js";
-import { usersTable } from "./users.schema.js";
+import { id, createdAt, updatedAt } from "../schema.helper";
+import { usersTable } from "./users.schema";
 
 
 export const questTypeEnum = pgEnum("quest_type", [

@@ -57,12 +57,13 @@ function AddSaveCard({ onAdd, isAdding }: { onAdd: (url: string) => void; isAddi
 	}
 
 	return (
-		<Card withBorder radius="md" padding={0} style={{ overflow: "hidden" }}>
+		<Card withBorder radius="md" padding={0} style={{ overflow: "hidden" }} >
 			<Box
 				style={{
 					aspectRatio: THUMB_RATIO,
 					display: "flex",
 					alignItems: "stretch",
+					// flex: 1,
 					background: "var(--mantine-color-gray-0)",
 					padding: 12,
 				}}
@@ -77,15 +78,17 @@ function AddSaveCard({ onAdd, isAdding }: { onAdd: (url: string) => void; isAddi
 					styles={{ input: { height: "100%", resize: "none" } }}
 				/>
 			</Box>
-			<Button
-				bg="indigo"
-				fullWidth
-				radius={0}
-				loading={isAdding}
-				onClick={handleSave}
-			>
-				Save
-			</Button>
+			<Box flex={1} h="auto" p="xs" >
+				<Button
+					bg="indigo"
+					fullWidth
+					radius={0}
+					loading={isAdding}
+					onClick={handleSave}
+				>
+					Save
+				</Button>
+			</Box>
 		</Card>
 	)
 }
@@ -233,7 +236,6 @@ export default function SavesView({
 
 	return (
 		<Stack>
-			<AddSaveCard onAdd={onAdd} isAdding={isAdding} />
 			<Group justify="space-between">
 				<Group gap="xs">
 					{FILTERS.map((f) => {
@@ -259,18 +261,17 @@ export default function SavesView({
 				</Tooltip>
 			</Group>
 
-			{isLoading ? (
-				<SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-					{[1, 2, 3, 4, 5, 6].map((i) => <SaveCardSkeleton key={i} />)}
-				</SimpleGrid>
-			) : filtered.length === 0 ? (
+			<SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
+				<AddSaveCard onAdd={onAdd} isAdding={isAdding} />
+				{isLoading
+					? [1, 2, 3, 4, 5].map((i) => <SaveCardSkeleton key={i} />)
+					: filtered.map((save) => <SaveCard key={save.id} save={save} />)}
+			</SimpleGrid>
+
+			{!isLoading && filtered.length === 0 && (
 				<Text c="dimmed" ta="center" size="sm" mt="xl">
 					No saves yet
 				</Text>
-			) : (
-				<SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-					{filtered.map((save) => <SaveCard key={save.id} save={save} />)}
-				</SimpleGrid>
 			)}
 		</Stack>
 	)

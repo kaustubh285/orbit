@@ -2,6 +2,8 @@ import ROUTES from "@/routes";
 import { AppShell, Burger, Button, Flex, Group } from "@mantine/core";
 import { IconFileDatabase, IconNotebook } from "@tabler/icons-react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
+import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/react'
+
 
 export function AppHeader({ mobileOpened, toggleMobile, desktopOpened, toggleDesktop }: {
 	mobileOpened: boolean,
@@ -36,6 +38,15 @@ export function AppHeader({ mobileOpened, toggleMobile, desktopOpened, toggleDes
 						:
 						<Button variant="default" onClick={() => navigate({ to: ROUTES.HOME })} bg="cyan" leftSection={<IconNotebook size={16} />}></Button>
 					}
+
+					<Show when="signed-out">
+						<Button variant="default" onClick={() => navigate({ to: "/sign-in" })}>Sign In</Button>
+					</Show>
+					<Show when="signed-in">
+						<UserButton />
+					</Show>
+
+
 				</Group>
 			</Flex>
 		</AppShell.Header>

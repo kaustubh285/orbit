@@ -1,7 +1,7 @@
 import env from '@/env.js';
 
 import { drizzle } from "drizzle-orm/node-postgres";
-import * as schema from "./schema.js";
+import * as schema from "./schema";
 
 export const db = drizzle({
 	schema,

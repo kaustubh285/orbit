@@ -1,18 +1,11 @@
 import { createAppRouter } from "@/lib/create-app.js";
-import * as HttpStatusCodes from "stoker/http-status-codes";
 import * as handlers from "./saves.handlers.js";
 import * as routes from "./routes.js";
+import { resolveUser } from "@/middlewares/resolve-user.middleware.js";
 
 const router = createAppRouter();
 
-router.use("*", async (c, next) => {
-	const userId = c.req.header("x-user-id");
-	if (!userId) {
-		return c.json({ message: "Missing x-user-id header" }, HttpStatusCodes.UNAUTHORIZED);
-	}
-	c.set("userId", userId);
-	await next();
-});
+router.use("*", resolveUser);
 
 router
 	.openapi(routes.list, handlers.listSaves)

@@ -1,7 +1,7 @@
 import { boolean, integer, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
 import { relations } from "drizzle-orm";
-import { createdAt, id, updatedAt } from "../schema.helper.js";
+import { createdAt, id, updatedAt } from "../schema.helper";
 
 export const usersTable = pgTable("users", {
 	id: id.primaryKey(),

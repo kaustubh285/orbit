@@ -7,6 +7,10 @@ import { queryClient } from "./lib/query"
 import { createTheme, MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
+import { ClerkProvider, useAuth } from "@clerk/react"
+
+
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
 const theme = createTheme({
 	fontFamily: 'Open Sans, sans-serif',
@@ -16,12 +20,35 @@ const theme = createTheme({
 	primaryColor: 'ocean-blue',
 });
 
+
+
+function AppRouter() {
+	const { isLoaded, isSignedIn, userId } = useAuth()
+	return (
+		<RouterProvider
+			router={router}
+			context={{
+				queryClient,
+				auth: {
+					isLoaded,
+					isSignedIn: !!isSignedIn,
+					userId: userId ?? null,
+				},
+			}}
+		/>
+	)
+}
+
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
 		<MantineProvider theme={theme} defaultColorScheme="dark">
-			<QueryClientProvider client={queryClient}>
-				<RouterProvider router={router} context={{ queryClient }} />
-			</QueryClientProvider>
+			<ClerkProvider publishableKey={clerkPubKey || ""}>
+				<QueryClientProvider client={queryClient}>
+					{/*<RouterProvider router={router} context={{ queryClient }} />*/}
+					<AppRouter />
+				</QueryClientProvider>
+
+			</ClerkProvider>
 		</MantineProvider>
 	</StrictMode>,
 )

@@ -10,6 +10,7 @@
 		"typecheck": "tsc -p tsconfig.json --noEmit"
 	},
 	"dependencies": {
+		"@clerk/react": "^6.4.3",
 		"@mantine/core": "^9.1.0",
 		"@mantine/dates": "^9.1.0",
 		"@mantine/form": "^9.1.0",
