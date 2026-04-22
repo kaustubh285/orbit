@@ -1,4 +1,4 @@
-import { StrictMode } from "react"
+import { StrictMode, useEffect } from "react"
 import { createRoot } from "react-dom/client"
 import { RouterProvider } from "@tanstack/react-router"
 import { QueryClientProvider } from "@tanstack/react-query"
@@ -24,6 +24,11 @@ const theme = createTheme({
 
 function AppRouter() {
 	const { isLoaded, isSignedIn, userId } = useAuth()
+
+	useEffect(() => {
+		router.invalidate()
+	}, [isLoaded, isSignedIn])
+
 	return (
 		<RouterProvider
 			router={router}

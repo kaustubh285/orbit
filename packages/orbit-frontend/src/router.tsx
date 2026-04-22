@@ -26,45 +26,31 @@ const rootRoute = createRootRouteWithContext<{
 	component: App,
 })
 
+function requireAuth({ context, location }: { context: { auth: AuthContext }, location: { href: string } }) {
+	if (!context.auth.isLoaded) return
+	if (!context.auth.isSignedIn) {
+		throw redirect({ to: ROUTES.LOGIN, search: { redirect: location.href } })
+	}
+}
+
 const homeRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: ROUTES.HOME,
+	beforeLoad: requireAuth,
 	component: HomePage,
 })
 
 const settingsRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: ROUTES.SETTINGS,
-	beforeLoad: ({ context, location }) => {
-		if (!context.auth.isLoaded) return
-
-		if (!context.auth.isSignedIn) {
-			throw redirect({
-				to: ROUTES.LOGIN,
-				search: {
-					redirect: location.href,
-				},
-			})
-		}
-	},
+	beforeLoad: requireAuth,
 	component: SettingsPage,
 })
 
 const savesRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: ROUTES.SAVES,
-	beforeLoad: ({ context, location }) => {
-		if (!context.auth.isLoaded) return
-
-		if (!context.auth.isSignedIn) {
-			throw redirect({
-				to: ROUTES.LOGIN,
-				search: {
-					redirect: location.href,
-				},
-			})
-		}
-	},
+	beforeLoad: requireAuth,
 	component: SavesPage,
 })
 
