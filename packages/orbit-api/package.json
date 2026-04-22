@@ -6,19 +6,18 @@
 		".": "./src/app.ts"
 	},
 	"scripts": {
-		"dev": "tsx watch src/index.ts",
-		"build": "tsc",
-		"start": "node dist/index.js",
+		"dev": "bun --watch src/index.ts",
+		"start": "bun src/index.ts",
+		"build": "bun build src/index.ts --outdir dist --target bun",
 		"typecheck": "tsc --noEmit",
 		"api:spec": "bun scripts/export-spec.ts",
 		"spec-client": "bun run api:spec && cd ../client && bun run generate && cd ../orbit-api",
-		"db:generate": "tsx node_modules/drizzle-kit/bin.cjs generate --config=drizzle.config.mjs",
-		"db:migrate": "tsx node_modules/drizzle-kit/bin.cjs migrate --config=drizzle.config.mjs",
-		"db:push": "tsx node_modules/drizzle-kit/bin.cjs push --config=drizzle.config.mjs",
-		"db:studio": "tsx node_modules/drizzle-kit/bin.cjs studio --config=drizzle.config.mjs"
+		"db:generate": "bunx drizzle-kit generate --config=drizzle.config.mjs",
+		"db:migrate": "bunx drizzle-kit migrate --config=drizzle.config.mjs",
+		"db:push": "bunx drizzle-kit push --config=drizzle.config.mjs",
+		"db:studio": "bunx drizzle-kit studio --config=drizzle.config.mjs"
 	},
 	"dependencies": {
-		"@hono/node-server": "^1.19.14",
 		"@hono/zod-openapi": "^0.19.1",
 		"@scalar/hono-api-reference": "^0.10.9",
 		"dotenv-expand": "^13.0.0",
@@ -34,10 +33,9 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.12",
-		"@types/node": "^20.11.17",
+		"@types/bun": "^1.1.0",
 		"@types/pg": "^8.11.10",
 		"drizzle-kit": "^0.30.4",
-		"tsx": "^4.7.1",
 		"typescript": "^5.8.3"
 	}
 }

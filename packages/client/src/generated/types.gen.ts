@@ -260,6 +260,231 @@ export type PatchQuestsByIdResponses = {
 
 export type PatchQuestsByIdResponse = PatchQuestsByIdResponses[keyof PatchQuestsByIdResponses];
 
+export type GetSavesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        platform?: 'youtube' | 'reddit' | 'instagram' | 'web';
+        status?: 'active' | 'archived';
+    };
+    url: '/saves';
+};
+
+export type GetSavesResponses = {
+    /**
+     * List of saves
+     */
+    200: Array<{
+        id: string;
+        userId: string;
+        sourceUrl: string;
+        sourcePlatform: 'youtube' | 'reddit' | 'instagram' | 'web';
+        title: string | null;
+        description: string | null;
+        thumbnailUrl: string | null;
+        author: string | null;
+        publishedAt: string | null;
+        note: string | null;
+        status: 'active' | 'archived';
+        createdAt: string;
+        updatedAt: string;
+    }>;
+};
+
+export type GetSavesResponse = GetSavesResponses[keyof GetSavesResponses];
+
+export type PostSavesData = {
+    /**
+     * Save to create
+     */
+    body: {
+        sourceUrl: string;
+        sourcePlatform?: 'youtube' | 'reddit' | 'instagram' | 'web';
+        title?: string | null;
+        description?: string | null;
+        thumbnailUrl?: string | null;
+        author?: string | null;
+        publishedAt?: string | null;
+        note?: string | null;
+        status?: 'active' | 'archived';
+    };
+    path?: never;
+    query?: never;
+    url: '/saves';
+};
+
+export type PostSavesErrors = {
+    /**
+     * Validation error
+     */
+    422: {
+        error: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type PostSavesError = PostSavesErrors[keyof PostSavesErrors];
+
+export type PostSavesResponses = {
+    /**
+     * Created save
+     */
+    201: {
+        id: string;
+        userId: string;
+        sourceUrl: string;
+        sourcePlatform: 'youtube' | 'reddit' | 'instagram' | 'web';
+        title: string | null;
+        description: string | null;
+        thumbnailUrl: string | null;
+        author: string | null;
+        publishedAt: string | null;
+        note: string | null;
+        status: 'active' | 'archived';
+        createdAt: string;
+        updatedAt: string;
+    };
+};
+
+export type PostSavesResponse = PostSavesResponses[keyof PostSavesResponses];
+
+export type DeleteSavesByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/saves/{id}';
+};
+
+export type DeleteSavesByIdErrors = {
+    /**
+     * Save not found
+     */
+    404: {
+        message: string;
+    };
+};
+
+export type DeleteSavesByIdError = DeleteSavesByIdErrors[keyof DeleteSavesByIdErrors];
+
+export type DeleteSavesByIdResponses = {
+    /**
+     * Save archived
+     */
+    204: void;
+};
+
+export type DeleteSavesByIdResponse = DeleteSavesByIdResponses[keyof DeleteSavesByIdResponses];
+
+export type GetSavesByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/saves/{id}';
+};
+
+export type GetSavesByIdErrors = {
+    /**
+     * Save not found
+     */
+    404: {
+        message: string;
+    };
+};
+
+export type GetSavesByIdError = GetSavesByIdErrors[keyof GetSavesByIdErrors];
+
+export type GetSavesByIdResponses = {
+    /**
+     * A save
+     */
+    200: {
+        id: string;
+        userId: string;
+        sourceUrl: string;
+        sourcePlatform: 'youtube' | 'reddit' | 'instagram' | 'web';
+        title: string | null;
+        description: string | null;
+        thumbnailUrl: string | null;
+        author: string | null;
+        publishedAt: string | null;
+        note: string | null;
+        status: 'active' | 'archived';
+        createdAt: string;
+        updatedAt: string;
+    };
+};
+
+export type GetSavesByIdResponse = GetSavesByIdResponses[keyof GetSavesByIdResponses];
+
+export type PatchSavesByIdData = {
+    /**
+     * Save fields to update
+     */
+    body: {
+        sourceUrl?: string;
+        sourcePlatform?: 'youtube' | 'reddit' | 'instagram' | 'web';
+        title?: string | null;
+        description?: string | null;
+        thumbnailUrl?: string | null;
+        author?: string | null;
+        publishedAt?: string | null;
+        note?: string | null;
+        status?: 'active' | 'archived';
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/saves/{id}';
+};
+
+export type PatchSavesByIdErrors = {
+    /**
+     * Save not found
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Validation error
+     */
+    422: {
+        error: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type PatchSavesByIdError = PatchSavesByIdErrors[keyof PatchSavesByIdErrors];
+
+export type PatchSavesByIdResponses = {
+    /**
+     * Updated save
+     */
+    200: {
+        id: string;
+        userId: string;
+        sourceUrl: string;
+        sourcePlatform: 'youtube' | 'reddit' | 'instagram' | 'web';
+        title: string | null;
+        description: string | null;
+        thumbnailUrl: string | null;
+        author: string | null;
+        publishedAt: string | null;
+        note: string | null;
+        status: 'active' | 'archived';
+        createdAt: string;
+        updatedAt: string;
+    };
+};
+
+export type PatchSavesByIdResponse = PatchSavesByIdResponses[keyof PatchSavesByIdResponses];
+
 export type ClientOptions = {
     baseUrl: 'http://localhost:9999' | (string & {});
 };

@@ -5,6 +5,7 @@ import { TanStackRouterDevtools } from "@tanstack/router-devtools"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import "./app.css"
 import { AppHeader } from "./components/app-header.component"
+import { AppNavbar } from "./components/app-navbar.component"
 export function App() {
 	const [mobileOpened, { toggle: toggleMobile }] = useDisclosure()
 	const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true)
@@ -23,27 +24,10 @@ export function App() {
 				transitionDuration={200}
 				transitionTimingFunction="ease"
 			>
-				<AppShell.Header>
-					<AppHeader mobileOpened={mobileOpened} desktopOpened={desktopOpened} toggleMobile={toggleMobile} toggleDesktop={toggleDesktop} />
-				</AppShell.Header>
 
-				<AppShell.Navbar>
-					<AppShell.Section p="md">
-						<Group justify="space-between">
-							<div>Nav header</div>
-							<Burger
-								opened={mobileOpened}
-								onClick={toggleMobile}
-								hiddenFrom="sm"
-								size="sm"
-							/>
-						</Group>
-					</AppShell.Section>
-					<AppShell.Section grow component={ScrollArea} p="md">
-						Nav links
-					</AppShell.Section>
-					<AppShell.Section p="md">Nav footer</AppShell.Section>
-				</AppShell.Navbar>
+				<AppHeader mobileOpened={mobileOpened} desktopOpened={desktopOpened} toggleMobile={toggleMobile} toggleDesktop={toggleDesktop} />
+
+				<AppNavbar mobileOpened={mobileOpened} toggleMobile={toggleMobile} ScrollArea={ScrollArea} />
 
 				<AppShell.Main>
 					<Outlet />
