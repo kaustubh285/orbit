@@ -15,6 +15,7 @@ const EnvSchema = z.object({
 	DB_NAME: z.string(),
 	DB_HOST: z.string(),
 	DB_PORT: z.string(),
+	ANTHROPIC_API_KEY: z.string().optional(),
 }).refine((input) => {
 	if (input.NODE_ENV === "production") {
 		return !!input.DB_NAME

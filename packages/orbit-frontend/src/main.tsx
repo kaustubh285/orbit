@@ -8,6 +8,9 @@ import { createTheme, MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import { ClerkProvider, useAuth } from "@clerk/react"
+import { client } from "@orbit/client"
+
+client.setConfig({ baseUrl: import.meta.env.VITE_API_URL || "http://localhost:9999" })
 
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY

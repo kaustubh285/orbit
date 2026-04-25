@@ -17,7 +17,7 @@ declare module '*.jpg' {
 
 interface ImportMetaEnv {
 	readonly VITE_CLERK_PUBLISHABLE_KEY: string
-	// Add more env variables here as needed
+	readonly VITE_API_URL: string
 }
 
 interface ImportMeta {

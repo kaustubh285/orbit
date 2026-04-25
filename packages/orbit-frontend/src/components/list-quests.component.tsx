@@ -55,7 +55,7 @@ function QuestRow({
 				onClick={isToggleable ? () => onToggle(quest) : undefined}
 			/>
 			<Text
-				size="sm"
+				size="lg"
 				td={isCompleted ? "line-through" : undefined}
 				c={isCompleted ? "dimmed" : undefined}
 				style={{ flex: 1 }}
@@ -114,9 +114,9 @@ function NewQuestRow({ onSubmit }: { onSubmit: (title: string, type: Quest["type
 				onChange={(e) => setTitle(e.currentTarget.value)}
 				onKeyDown={(e) => { if (e.key === "Enter") submit() }}
 				onBlur={submit}
-				size="sm"
+				size="md"
 				style={{ flex: 1 }}
-				styles={{ input: { padding: 0, fontSize: "var(--mantine-font-size-sm)" } }}
+				styles={{ input: { padding: 0, fontSize: "var(--mantine-font-size-md)" } }}
 			/>
 		</div>
 	)

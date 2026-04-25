@@ -18,6 +18,7 @@
 		"db:studio": "npx drizzle-kit studio --config=drizzle.config.mjs"
 	},
 	"dependencies": {
+		"@anthropic-ai/sdk": "^0.91.1",
 		"@hono/zod-openapi": "^0.19.1",
 		"@scalar/hono-api-reference": "^0.10.9",
 		"dotenv-expand": "^13.0.0",
