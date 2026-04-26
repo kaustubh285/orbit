@@ -1,4 +1,4 @@
-import { and, eq, gte, lt, or } from "drizzle-orm";
+import { and, desc, eq, gte, lt, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { db } from "../../db/db.js";
 import { questsTable } from "../../db/schemas/quests.schema.js";
@@ -45,6 +45,32 @@ export const createQuest: AppRouteHandler<CreateRoute> = async (c) => {
 	const userId = c.var.userId;
 	const { dueAt, completedAt, startAt, endAt, lastCompletedAt, ...rest } = c.req.valid("json");
 
+	let resolvedLastCompletedAt = toDate(lastCompletedAt);
+
+
+	const [previousQuest] = await db
+		.select()
+		.from(questsTable)
+		.where(
+			and(
+				eq(questsTable.userId, userId),
+				// eq(questsTable.type, rest.type),
+				eq(questsTable.title, rest.title),
+				eq(questsTable.status, "completed"),
+			),
+		)
+		.orderBy(desc(questsTable.completedAt))
+		.limit(1);
+
+	if (previousQuest) {
+		resolvedLastCompletedAt = previousQuest.completedAt ?? previousQuest.lastCompletedAt ?? previousQuest.updatedAt;
+	}
+
+	console.log(previousQuest)
+
+
+	console.log({ resolvedLastCompletedAt, lastCompletedAt, message: "resolvedLastCompletedAt" })
+
 	const [quest] = await db
 		.insert(questsTable)
 		.values({
@@ -54,7 +80,7 @@ export const createQuest: AppRouteHandler<CreateRoute> = async (c) => {
 			completedAt: toDate(completedAt),
 			startAt: toDate(startAt),
 			endAt: toDate(endAt),
-			lastCompletedAt: toDate(lastCompletedAt),
+			lastCompletedAt: resolvedLastCompletedAt,
 		})
 		.returning();
 
@@ -81,12 +107,16 @@ export const updateQuest: AppRouteHandler<UpdateRoute> = async (c) => {
 	const { id } = c.req.valid("param");
 	const { dueAt, completedAt, startAt, endAt, lastCompletedAt, ...rest } = c.req.valid("json");
 
+	const resolvedCompletedAt = rest.status === "completed" && completedAt === undefined
+		? new Date()
+		: toDate(completedAt);
+
 	const [updated] = await db
 		.update(questsTable)
 		.set({
 			...rest,
 			dueAt: toDate(dueAt),
-			completedAt: toDate(completedAt),
+			completedAt: resolvedCompletedAt,
 			startAt: toDate(startAt),
 			endAt: toDate(endAt),
 			lastCompletedAt: toDate(lastCompletedAt),

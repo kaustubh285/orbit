@@ -1,12 +1,12 @@
 import ROUTES from "@/routes"
-import { AppShell, Group, UnstyledButton, Stack, Text } from "@mantine/core"
-import { IconHome, IconBookmark, IconSettings } from "@tabler/icons-react"
+import { AppShell, Group, Text, UnstyledButton } from "@mantine/core"
+import { IconBookmark, IconRocket, IconSettings } from "@tabler/icons-react"
 import { useLocation, useNavigate } from "@tanstack/react-router"
 
 const NAV_ITEMS = [
-	{ label: "Home", icon: IconHome, to: ROUTES.HOME },
-	{ label: "Saves", icon: IconBookmark, to: ROUTES.SAVES },
-	{ label: "Settings", icon: IconSettings, to: ROUTES.SETTINGS },
+	{ label: "Quests", icon: IconRocket, to: ROUTES.HOME, accent: "ocean-blue", shade: 4 },
+	{ label: "Saves", icon: IconBookmark, to: ROUTES.SAVES, accent: "amber", shade: 5 },
+	{ label: "Settings", icon: IconSettings, to: ROUTES.SETTINGS, accent: "ocean-blue", shade: 4 },
 ]
 
 export function AppFooter() {
@@ -14,9 +14,9 @@ export function AppFooter() {
 	const location = useLocation()
 
 	return (
-		<AppShell.Footer>
-			<Group h="100%" justify="space-around" align="center" px="md">
-				{NAV_ITEMS.map(({ label, icon: Icon, to }) => {
+		<AppShell.Footer style={{ borderTop: "1px solid var(--mantine-color-dark-4)" }}>
+			<Group h="100%" justify="space-around" align="center" px="sm" gap={0}>
+				{NAV_ITEMS.map(({ label, icon: Icon, to, accent, shade }) => {
 					const active = location.pathname === to
 					return (
 						<UnstyledButton
@@ -24,19 +24,37 @@ export function AppFooter() {
 							onClick={() => navigate({ to })}
 							style={{ flex: 1 }}
 						>
-							<Stack gap={2} align="center">
+							<div
+								style={{
+									display: "flex",
+									flexDirection: "column",
+									alignItems: "center",
+									gap: 4,
+									padding: "7px 8px",
+									margin: "4px 6px",
+									borderRadius: 12,
+									background: active ? "var(--mantine-color-dark-6)" : "transparent",
+									transition: "background 0.12s ease",
+								}}
+							>
 								<Icon
 									size={22}
-									color={active ? "var(--mantine-color-ocean-blue-4)" : "var(--mantine-color-dimmed)"}
+									stroke={active ? 2.5 : 1.5}
+									color={
+										active
+											? `var(--mantine-color-${accent}-${shade})`
+											: "var(--mantine-color-dimmed)"
+									}
 								/>
 								<Text
 									size="xs"
-									c={active ? "ocean-blue.4" : "dimmed"}
-									fw={active ? 600 : 400}
+									lh={1}
+									fw={active ? 700 : 400}
+									c={active ? `${accent}.${shade}` : "dimmed"}
 								>
 									{label}
 								</Text>
-							</Stack>
+							</div>
 						</UnstyledButton>
 					)
 				})}

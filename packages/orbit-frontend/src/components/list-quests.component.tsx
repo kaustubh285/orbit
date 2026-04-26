@@ -1,7 +1,7 @@
 import { PRIORITY_COLOR, TYPE_COLOR, TYPE_ICON } from "@/CONSTANTS"
 import type { Quest } from "@/types"
-import { ActionIcon, Skeleton, Stack, Text, TextInput } from "@mantine/core"
-import { IconCircleDot, IconDots } from "@tabler/icons-react"
+import { ActionIcon, Badge, Skeleton, Stack, Text, TextInput } from "@mantine/core"
+import { IconCheck, IconCircleDot, IconDots } from "@tabler/icons-react"
 import { useState } from "react"
 
 const QUEST_TYPES: Quest["type"][] = ["todo", "note", "event", "daily"]
@@ -27,6 +27,14 @@ function TypeIcon({ type, onClick, size = 16 }: { type: Quest["type"]; onClick?:
 	)
 }
 
+function daysAgoLabel(iso: string): string {
+	const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000)
+	if (days === 0) return "today"
+	if (days < 30) return `${days}d ago`
+	const months = Math.floor(days / 30)
+	return `${months}mo ago`
+}
+
 function QuestRow({
 	quest,
 	onToggle,
@@ -38,6 +46,7 @@ function QuestRow({
 }) {
 	const isCompleted = quest.status === "completed"
 	const isToggleable = quest.type === "todo" || quest.type === "daily"
+	const showLastDone = (quest.type === "todo" || quest.type === "event") && quest.lastCompletedAt
 	return (
 		<div
 			style={{
@@ -62,6 +71,17 @@ function QuestRow({
 			>
 				{quest.title}
 			</Text>
+			{showLastDone && (
+				<Badge
+					color="green"
+					variant="light"
+					size="xs"
+					style={{ flexShrink: 0 }}
+					leftSection={<IconCheck size={10} />}
+				>
+					{daysAgoLabel(quest.lastCompletedAt!)}
+				</Badge>
+			)}
 			{quest.priority && (
 				<div
 					style={{

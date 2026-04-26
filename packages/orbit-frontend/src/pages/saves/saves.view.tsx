@@ -33,7 +33,7 @@ const PLATFORM_META: Record<Platform, { label: string; color: string; Icon: Reac
 	youtube: { label: "YouTube", color: "red", Icon: IconBrandYoutube },
 	reddit: { label: "Reddit", color: "orange", Icon: IconBrandReddit },
 	instagram: { label: "Instagram", color: "grape", Icon: IconBrandInstagram },
-	web: { label: "Web", color: "blue", Icon: IconWorld },
+	web: { label: "Web", color: "cyan", Icon: IconWorld },
 }
 
 const FILTERS: { label: string; value: Platform | "all" }[] = [
@@ -80,7 +80,6 @@ function AddSaveCard({ onAdd, isAdding }: { onAdd: (url: string) => void; isAddi
 			</Box>
 			<Box flex={1} h="auto" p="xs" >
 				<Button
-					bg="indigo"
 					fullWidth
 					radius={0}
 					loading={isAdding}
@@ -244,7 +243,7 @@ export default function SavesView({
 							<Badge
 								key={f.value}
 								variant={active ? "filled" : "light"}
-								color={active ? "dark" : "gray"}
+								color={active ? "amber" : "gray"}
 								onClick={() => setPlatform(f.value)}
 								style={{ cursor: "pointer" }}
 								size="sm"

@@ -5,7 +5,7 @@ export const PRIORITY_COLOR: Record<NonNullable<Quest["priority"]>, string> = {
 	urgent: "red",
 	important: "orange",
 	quick_win: "green",
-	deep_work: "blue",
+	deep_work: "indigo",
 	someday: "gray",
 	waiting: "yellow",
 }
@@ -20,6 +20,6 @@ export const TYPE_ICON = {
 export const TYPE_COLOR = {
 	todo: "blue",
 	note: "gray",
-	event: "violet",
+	event: "pink",
 	daily: "teal",
 }

@@ -1,15 +1,13 @@
-import { Box } from "@mantine/core"
-import { useMediaQuery } from "@mantine/hooks"
+import { Button } from "@mantine/core"
+import { useMediaQuery, useElementSize } from "@mantine/hooks"
 import { MiniCalendar } from "@mantine/dates"
 import dayjs from "dayjs"
-import { useEffect, useRef } from "react"
+import { useEffect, useState } from "react"
 
-const today = dayjs().format("YYYY-MM-DD")
+const todayStr = dayjs().format("YYYY-MM-DD")
 
-const MOBILE_BEFORE = 5
-const MOBILE_AFTER = 5
-const DESKTOP_BEFORE = 15
-const DESKTOP_AFTER = 15
+// Approximate combined width of the two prev/next nav buttons at size="md"
+const NAV_BUTTONS_PX = 72
 
 interface CalendarScrollProps {
 	value: string | null
@@ -17,39 +15,60 @@ interface CalendarScrollProps {
 }
 
 export default function CalendarScroll({ value, onChange }: CalendarScrollProps) {
-	const containerRef = useRef<HTMLDivElement>(null)
+	const { ref, width } = useElementSize<HTMLDivElement>()
 	const isDesktop = useMediaQuery("(min-width: 768px)")
 
-	const daysBefore = isDesktop ? DESKTOP_BEFORE : MOBILE_BEFORE
-	const daysAfter = isDesktop ? DESKTOP_AFTER : MOBILE_AFTER
-	const startDate = dayjs().subtract(daysBefore, "day").toDate()
+	const numberOfDays = isDesktop ? 14 : 7
+	const daysBefore = Math.floor(numberOfDays / 2)
+
+	const todayViewStart = dayjs().subtract(daysBefore, "day").toDate()
+	const [viewDate, setViewDate] = useState(todayViewStart)
+
+	const cellSize = width > 0
+		? Math.floor((width - NAV_BUTTONS_PX) / numberOfDays)
+		: 40
+
+	const isToday = value === todayStr
 
 	useEffect(() => {
-		const todayEl = containerRef.current?.querySelector<HTMLElement>("[data-today]")
+		const todayEl = ref.current?.querySelector<HTMLElement>("[data-today]")
 		todayEl?.scrollIntoView({ behavior: "instant", block: "nearest", inline: "center" })
 	}, [isDesktop])
 
+	function goToToday() {
+		onChange(todayStr)
+		setViewDate(todayViewStart)
+	}
+
 	return (
-		<Box
-			ref={containerRef}
-			w="100%"
-			style={{
-				overflowX: "auto",
-				display: "flex",
-				justifyContent: isDesktop ? "center" : "flex-start",
-			}}
-			className="mini-calendar"
-			pb="sm"
-			pl={isDesktop ? "390px" : "0"}
-		>
-			<MiniCalendar
-				value={value}
-				onChange={onChange}
-				defaultDate={startDate}
-				numberOfDays={daysBefore + daysAfter}
-				size="md"
-				getDayProps={(date) => (date === today ? { "data-today": true } : {})}
-			/>
-		</Box>
+		<div ref={ref} style={{ width: "100%" }}>
+			<div className="mini-calendar" style={{ paddingBottom: 4 }}>
+				<MiniCalendar
+					value={value}
+					onChange={onChange}
+					date={viewDate}
+					onDateChange={setViewDate}
+					numberOfDays={numberOfDays}
+					size="md"
+					getDayProps={(date) => (date === todayStr ? { "data-today": true } : {})}
+					styles={{
+						root: { width: "100%" },
+						calendarHeader: { maxWidth: "100%" },
+						day: { width: cellSize, minWidth: "unset" },
+					}}
+				/>
+			</div>
+			<div style={{ display: "flex", justifyContent: "flex-end", paddingRight: 4 }}>
+				<Button
+					size="compact-xs"
+					variant={isToday ? "subtle" : "light"}
+					color="ocean-blue"
+					disabled={isToday}
+					onClick={goToToday}
+				>
+					Today
+				</Button>
+			</div>
+		</div>
 	)
 }

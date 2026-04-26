@@ -40,7 +40,10 @@ export function useHome(date: string | null) {
 		const newStatus = quest.status === "completed" ? "active" : "completed"
 		updateQuest.mutate({
 			path: { id: quest.id },
-			body: { status: newStatus },
+			body: {
+				status: newStatus,
+				completedAt: newStatus === "completed" ? new Date().toISOString() : null,
+			},
 			headers: { "x-user-id": userId ?? "" },
 		} as Parameters<typeof updateQuest.mutate>[0])
 	}
