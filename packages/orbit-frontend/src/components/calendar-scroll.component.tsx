@@ -3,18 +3,17 @@ import { useMediaQuery, useElementSize } from "@mantine/hooks"
 import { MiniCalendar } from "@mantine/dates"
 import dayjs from "dayjs"
 import { useEffect, useState } from "react"
+import { useQuestsStore } from "@/store/quests.store"
 
 const todayStr = dayjs().format("YYYY-MM-DD")
 
 // Approximate combined width of the two prev/next nav buttons at size="md"
 const NAV_BUTTONS_PX = 72
 
-interface CalendarScrollProps {
-	value: string | null
-	onChange: (date: string) => void
-}
+export default function CalendarScroll() {
+	const selectedDate = useQuestsStore((state) => state.selectedDate)
+	const setSelectedDate = useQuestsStore((state) => state.actions.setSelectedDate)
 
-export default function CalendarScroll({ value, onChange }: CalendarScrollProps) {
 	const { ref, width } = useElementSize<HTMLDivElement>()
 	const isDesktop = useMediaQuery("(min-width: 768px)")
 
@@ -28,7 +27,7 @@ export default function CalendarScroll({ value, onChange }: CalendarScrollProps)
 		? Math.floor((width - NAV_BUTTONS_PX) / numberOfDays)
 		: 40
 
-	const isToday = value === todayStr
+	const isToday = selectedDate === todayStr
 
 	useEffect(() => {
 		const todayEl = ref.current?.querySelector<HTMLElement>("[data-today]")
@@ -36,7 +35,7 @@ export default function CalendarScroll({ value, onChange }: CalendarScrollProps)
 	}, [isDesktop])
 
 	function goToToday() {
-		onChange(todayStr)
+		setSelectedDate(todayStr)
 		setViewDate(todayViewStart)
 	}
 
@@ -44,8 +43,8 @@ export default function CalendarScroll({ value, onChange }: CalendarScrollProps)
 		<div ref={ref} style={{ width: "100%" }}>
 			<div className="mini-calendar" style={{ paddingBottom: 4 }}>
 				<MiniCalendar
-					value={value}
-					onChange={onChange}
+					value={selectedDate}
+					onChange={setSelectedDate}
 					date={viewDate}
 					onDateChange={setViewDate}
 					numberOfDays={numberOfDays}

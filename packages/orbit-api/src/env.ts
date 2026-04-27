@@ -10,30 +10,21 @@ const EnvSchema = z.object({
 	PORT: z.coerce.number().default(9999),
 	LOG_LEVEL: z.enum(["fatal", "debug", "info", "warn", "error"]),
 	VERSION: z.string(),
-	DB_PASSWORD: z.string(),
-	DB_USER: z.string(),
-	DB_NAME: z.string(),
-	DB_HOST: z.string(),
-	DB_PORT: z.string(),
+	DATABASE_URL: z.string().url(),
+	FRONTEND_URL: z.string().default("*"),
 	ANTHROPIC_API_KEY: z.string().optional(),
-}).refine((input) => {
-	if (input.NODE_ENV === "production") {
-		return !!input.DB_NAME
-	}
-	return true
-})
+});
 
-export type env = z.infer<typeof EnvSchema>
+export type Env = z.infer<typeof EnvSchema>;
 
-let env: env;
+let env: Env;
 try {
-	env = EnvSchema.parse(process.env)
-
+	env = EnvSchema.parse(process.env);
 } catch (e) {
 	const error = e as ZodError;
-	console.error("Invalid env")
-	console.error(error.flatten().fieldErrors)
-	process.exit(1)
-
+	console.error("Invalid env");
+	console.error(error.flatten().fieldErrors);
+	process.exit(1);
 }
-export default env
+
+export default env;
