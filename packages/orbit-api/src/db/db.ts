@@ -6,6 +6,6 @@ export const db = drizzle({
 	schema,
 	connection: {
 		connectionString: env.DATABASE_URL,
-		ssl: env.NODE_ENV === "production",
+		ssl: env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
 	},
 });
