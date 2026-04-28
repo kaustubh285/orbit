@@ -1,6 +1,6 @@
 {
-  "installCommand": "bun install --frozen-lockfile",
-  "buildCommand": "cd packages/orbit-frontend && bun run build",
-  "outputDirectory": "packages/orbit-frontend/dist",
+  "installCommand": "cd ../.. && bun install",
+  "buildCommand": "bun run build",
+  "outputDirectory": "dist",
   "framework": "vite"
 }
