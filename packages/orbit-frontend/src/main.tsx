@@ -1,4 +1,4 @@
-import { StrictMode, useEffect } from "react"
+import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
 import { RouterProvider } from "@tanstack/react-router"
 import { QueryClientProvider } from "@tanstack/react-query"
@@ -12,6 +12,17 @@ import { client } from "@orbit/client"
 
 client.setConfig({ baseUrl: import.meta.env.VITE_API_URL || "http://localhost:9999" })
 
+// Module-level token getter — updated during render so it's always current
+// before any effects (including React Query's initial fetch) fire.
+let _getToken: (() => Promise<string | null>) | null = null
+
+client.interceptors.request.use(async (request) => {
+	if (_getToken) {
+		const token = await _getToken()
+		if (token) request.headers.set("Authorization", `Bearer ${token}`)
+	}
+	return request
+})
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
@@ -24,23 +35,12 @@ const theme = createTheme({
 	primaryColor: 'ocean-blue',
 });
 
-
-
 function AppRouter() {
 	const { isLoaded, isSignedIn, userId, getToken } = useAuth()
 
-	useEffect(() => {
-		const interceptorId = client.interceptors.request.use(async (request) => {
-			const token = await getToken()
-			if (token) request.headers.set("Authorization", `Bearer ${token}`)
-			return request
-		})
-		return () => client.interceptors.request.eject(interceptorId)
-	}, [getToken])
-
-	useEffect(() => {
-		router.invalidate()
-	}, [isLoaded, isSignedIn])
+	// Update module-level getter during render — happens before any effects run,
+	// so React Query's initial fetch always has a token getter available.
+	_getToken = isSignedIn ? getToken : null
 
 	return (
 		<RouterProvider
@@ -62,10 +62,8 @@ createRoot(document.getElementById("root")!).render(
 		<MantineProvider theme={theme} defaultColorScheme="dark">
 			<ClerkProvider publishableKey={clerkPubKey || ""}>
 				<QueryClientProvider client={queryClient}>
-					{/*<RouterProvider router={router} context={{ queryClient }} />*/}
 					<AppRouter />
 				</QueryClientProvider>
-
 			</ClerkProvider>
 		</MantineProvider>
 	</StrictMode>,
