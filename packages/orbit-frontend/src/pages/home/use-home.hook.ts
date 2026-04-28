@@ -2,30 +2,23 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { getQuestsOptions, getQuestsQueryKey, patchQuestsByIdMutation, postQuestsMutation } from "@orbit/client"
 import type { Quest } from "@/types"
 import { useQuestsStore } from "@/store/quests.store"
-import { useAuth } from "@clerk/react"
 
 export function useHome() {
 	const selectedDate = useQuestsStore((state) => state.selectedDate)
 	const queryClient = useQueryClient()
-	const { isLoaded, isSignedIn } = useAuth()
 
-	const quests = useQuery({
-		...getQuestsOptions({ query: { date: selectedDate ?? undefined } }),
-		enabled: isLoaded && !!isSignedIn,
-	})
+	const quests = useQuery(
+		getQuestsOptions({ query: { date: selectedDate ?? undefined } }),
+	)
 
 	const createQuest = useMutation({
 		...postQuestsMutation(),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: getQuestsQueryKey() })
-		},
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: getQuestsQueryKey() }),
 	})
 
 	const updateQuest = useMutation({
 		...patchQuestsByIdMutation(),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: getQuestsQueryKey() })
-		},
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: getQuestsQueryKey() }),
 	})
 
 	function submitQuest(title: string, type: Quest["type"]) {
