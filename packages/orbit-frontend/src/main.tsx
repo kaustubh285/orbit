@@ -27,7 +27,16 @@ const theme = createTheme({
 
 
 function AppRouter() {
-	const { isLoaded, isSignedIn, userId } = useAuth()
+	const { isLoaded, isSignedIn, userId, getToken } = useAuth()
+
+	useEffect(() => {
+		const interceptorId = client.interceptors.request.use(async (request) => {
+			const token = await getToken()
+			if (token) request.headers.set("Authorization", `Bearer ${token}`)
+			return request
+		})
+		return () => client.interceptors.request.eject(interceptorId)
+	}, [getToken])
 
 	useEffect(() => {
 		router.invalidate()

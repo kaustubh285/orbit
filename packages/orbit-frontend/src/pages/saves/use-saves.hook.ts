@@ -1,15 +1,10 @@
-import { useAuth } from "@clerk/react"
 import { getSavesOptions, getSavesQueryKey, postSavesMutation } from "@orbit/client"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 export function useSaves() {
 	const queryClient = useQueryClient()
-	const { userId } = useAuth()
-	const saves = useQuery(
-		getSavesOptions({
-			headers: { "x-user-id": userId ?? "" },
-		}),
-	)
+
+	const saves = useQuery(getSavesOptions())
 
 	const createSave = useMutation({
 		...postSavesMutation(),
@@ -21,7 +16,6 @@ export function useSaves() {
 	function addSave(url: string) {
 		createSave.mutate({
 			body: { sourceUrl: url },
-			headers: { "x-user-id": userId ?? "" },
 		} as Parameters<typeof createSave.mutate>[0])
 	}
 

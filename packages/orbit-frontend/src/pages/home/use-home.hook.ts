@@ -1,17 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { getQuestsOptions, getQuestsQueryKey, patchQuestsByIdMutation, postQuestsMutation } from "@orbit/client"
 import type { Quest } from "@/types"
-import { useAuth } from "@clerk/react"
 import { useQuestsStore } from "@/store/quests.store"
 
 export function useHome() {
 	const selectedDate = useQuestsStore((state) => state.selectedDate)
 	const queryClient = useQueryClient()
-	const { userId } = useAuth()
+
 	const quests = useQuery(
 		getQuestsOptions({
 			query: { date: selectedDate ?? undefined },
-			headers: { "x-user-id": userId ?? "" },
 		}),
 	)
 
@@ -34,7 +32,6 @@ export function useHome() {
 		if (!trimmed) return
 		createQuest.mutate({
 			body: { type, title: trimmed, dueAt: selectedDate ? new Date(`${selectedDate}T00:00:00.000Z`).toISOString() : null },
-			headers: { "x-user-id": userId ?? "" },
 		} as Parameters<typeof createQuest.mutate>[0])
 	}
 
@@ -46,7 +43,6 @@ export function useHome() {
 				status: newStatus,
 				completedAt: newStatus === "completed" ? new Date().toISOString() : null,
 			},
-			headers: { "x-user-id": userId ?? "" },
 		} as Parameters<typeof updateQuest.mutate>[0])
 	}
 
@@ -54,7 +50,6 @@ export function useHome() {
 		updateQuest.mutate({
 			path: { id },
 			body,
-			headers: { "x-user-id": userId ?? "" },
 		} as Parameters<typeof updateQuest.mutate>[0])
 	}
 
