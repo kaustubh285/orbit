@@ -4,6 +4,7 @@ import { useAuth } from "@clerk/react"
 import "./app.css"
 import { AppHeader } from "./components/app-header.component"
 import { AppFooter } from "./components/app-footer.component"
+import { CreateNewComponent } from "./components/create-new.component"
 
 export function App() {
 	const { isLoaded } = useAuth()
@@ -27,6 +28,7 @@ export function App() {
 				<Outlet />
 			</AppShell.Main>
 			<AppFooter />
+			<CreateNewComponent />
 		</AppShell>
 	)
 }
