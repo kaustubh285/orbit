@@ -35,10 +35,10 @@ export function CreateNewComponent() {
 
 	// quest-specific state
 	const [questType, setQuestType] = useState<Quest["type"]>('todo')
-	const [dueAt, setDueAt] = useState<Date | null>(new Date())
+	const [dueAt, setDueAt] = useState<string | null>(null)
 	const [body, setBody] = useState('')
-	const [startAt, setStartAt] = useState<Date | null>(null)
-	const [endAt, setEndAt] = useState<Date | null>(null)
+	const [startAt, setStartAt] = useState<string | null>(null)
+	const [endAt, setEndAt] = useState<string | null>(null)
 	const [location, setLocation] = useState('')
 
 	// save-specific state

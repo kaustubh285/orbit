@@ -7,10 +7,10 @@ import { useQuestsStore } from '@/store/quests.store'
 import type { Quest } from '@/types'
 
 export type QuestFields = {
-	dueAt: Date | null
+	dueAt: string | null
 	body: string
-	startAt: Date | null
-	endAt: Date | null
+	startAt: string | null
+	endAt: string | null
 	location: string
 }
 
@@ -41,16 +41,12 @@ export function useCreateNew() {
 		const body: Record<string, unknown> = { type, title }
 
 		if (type === 'todo') {
-			body.dueAt = fields.dueAt
-				? fields.dueAt.toISOString()
-				: selectedDate
-					? new Date(`${selectedDate}T00:00:00.000Z`).toISOString()
-					: null
+			body.dueAt = fields.dueAt ?? (selectedDate ? new Date(`${selectedDate}T00:00:00.000Z`).toISOString() : null)
 		} else if (type === 'note') {
 			body.body = fields.body.trim() || null
 		} else if (type === 'event') {
-			body.startAt = fields.startAt?.toISOString() ?? null
-			body.endAt = fields.endAt?.toISOString() ?? null
+			body.startAt = fields.startAt ?? null
+			body.endAt = fields.endAt ?? null
 			body.location = fields.location.trim() || null
 		}
 
