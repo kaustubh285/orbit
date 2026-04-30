@@ -15,7 +15,7 @@ export function AppFooter() {
 	const location = useLocation()
 
 	return (
-		<AppShell.Footer style={{ borderTop: "1px solid var(--mantine-color-dark-4)" }}>
+		<AppShell.Footer style={{ borderTop: "1px solid var(--mantine-color-dark-4)", paddingBottom: "env(safe-area-inset-bottom)" }}>
 			<Group h="100%" justify="space-around" align="center" px="sm" gap={0}>
 				{NAV_ITEMS.map(({ label, icon: Icon, to, accent, shade }) => {
 					const active = location.pathname === to

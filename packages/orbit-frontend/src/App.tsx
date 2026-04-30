@@ -21,7 +21,7 @@ export function App() {
 		<AppShell
 			padding={{ base: "sm", sm: "md" }}
 			header={{ height: 60 }}
-			footer={{ height: 64 }}
+			footer={{ height: "calc(64px + env(safe-area-inset-bottom))" }}
 		>
 			<AppHeader />
 			<AppShell.Main>
