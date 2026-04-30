@@ -2,6 +2,7 @@ import { and, desc, eq, gte, lt, or } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { db } from "../../db/db.js";
 import { questsTable } from "../../db/schemas/quests.schema.js";
+import { listItemsTable } from "../../db/schemas/lists.schema.js";
 import type { AppRouteHandler } from "@/lib/types.js";
 import type {
 	CreateRoute,
@@ -43,7 +44,7 @@ function toDate(val: string | null | undefined): Date | null | undefined {
 
 export const createQuest: AppRouteHandler<CreateRoute> = async (c) => {
 	const userId = c.var.userId;
-	const { dueAt, completedAt, startAt, endAt, lastCompletedAt, ...rest } = c.req.valid("json");
+	const { dueAt, completedAt, startAt, endAt, lastCompletedAt, listId, ...rest } = c.req.valid("json");
 
 	let resolvedLastCompletedAt = toDate(lastCompletedAt);
 
@@ -84,6 +85,12 @@ export const createQuest: AppRouteHandler<CreateRoute> = async (c) => {
 		})
 		.returning();
 
+	if (listId) {
+		await db.insert(listItemsTable)
+			.values({ listId, questId: quest.id, saveId: null })
+			.onConflictDoNothing();
+	}
+
 	return c.json(quest, HttpStatusCodes.CREATED);
 };
 
@@ -105,7 +112,7 @@ export const getOneQuest: AppRouteHandler<GetOneRoute> = async (c) => {
 export const updateQuest: AppRouteHandler<UpdateRoute> = async (c) => {
 	const userId = c.var.userId;
 	const { id } = c.req.valid("param");
-	const { dueAt, completedAt, startAt, endAt, lastCompletedAt, ...rest } = c.req.valid("json");
+	const { dueAt, completedAt, startAt, endAt, lastCompletedAt, listId, ...rest } = c.req.valid("json");
 
 	const resolvedCompletedAt = rest.status === "completed" && completedAt === undefined
 		? new Date()
@@ -127,6 +134,13 @@ export const updateQuest: AppRouteHandler<UpdateRoute> = async (c) => {
 	if (!updated) {
 		return c.json({ message: "Quest not found" }, HttpStatusCodes.NOT_FOUND);
 	}
+
+	if (listId) {
+		await db.insert(listItemsTable)
+			.values({ listId, questId: updated.id, saveId: null })
+			.onConflictDoNothing();
+	}
+
 	return c.json(updated, HttpStatusCodes.OK);
 };
 

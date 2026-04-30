@@ -8,7 +8,13 @@ import {
 	questPriorityEnum,
 } from "../../db/schemas/quests.schema.js";
 
-const dateTimeOrNull = z.string().datetime({ offset: true }).nullable();
+const coerceDatetime = z.preprocess((val) => {
+	if (typeof val === "string" && val.trim() !== "") {
+		const d = new Date(val);
+		if (!isNaN(d.getTime())) return d.toISOString();
+	}
+	return val;
+}, z.string().datetime({ offset: true }).nullable());
 
 export const selectQuestSchema = z.object({
 	id: z.string().uuid(),
@@ -18,12 +24,12 @@ export const selectQuestSchema = z.object({
 	priority: z.enum(questPriorityEnum.enumValues).nullable(),
 	title: z.string(),
 	body: z.string().nullable(),
-	dueAt: dateTimeOrNull,
-	completedAt: dateTimeOrNull,
-	startAt: dateTimeOrNull,
-	endAt: dateTimeOrNull,
+	dueAt: coerceDatetime,
+	completedAt: coerceDatetime,
+	startAt: coerceDatetime,
+	endAt: coerceDatetime,
 	location: z.string().nullable(),
-	lastCompletedAt: dateTimeOrNull,
+	lastCompletedAt: coerceDatetime,
 	createdAt: z.string().datetime({ offset: true }),
 	updatedAt: z.string().datetime({ offset: true }),
 });
@@ -34,12 +40,13 @@ export const insertQuestSchema = z.object({
 	priority: z.enum(questPriorityEnum.enumValues).nullable().optional(),
 	title: z.string().min(1).max(500),
 	body: z.string().nullable().optional(),
-	dueAt: dateTimeOrNull.optional(),
-	completedAt: dateTimeOrNull.optional(),
-	startAt: dateTimeOrNull.optional(),
-	endAt: dateTimeOrNull.optional(),
+	dueAt: coerceDatetime.optional(),
+	completedAt: coerceDatetime.optional(),
+	startAt: coerceDatetime.optional(),
+	endAt: coerceDatetime.optional(),
 	location: z.string().nullable().optional(),
-	lastCompletedAt: dateTimeOrNull.optional(),
+	lastCompletedAt: coerceDatetime.optional(),
+	listId: z.string().uuid().nullable().optional(),
 });
 
 export const patchQuestSchema = insertQuestSchema.partial();

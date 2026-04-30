@@ -1,5 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+	getListsOptions,
 	getQuestsQueryKey, getSavesQueryKey,
 	postQuestsMutation, postSavesMutation,
 } from '@orbit/client'
@@ -18,6 +19,8 @@ export function useCreateNew() {
 	const selectedDate = useQuestsStore((s) => s.selectedDate)
 	const queryClient = useQueryClient()
 
+	const lists = useQuery(getListsOptions())
+
 	const createQuest = useMutation({
 		...postQuestsMutation(),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: getQuestsQueryKey() }),
@@ -28,16 +31,17 @@ export function useCreateNew() {
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: getSavesQueryKey() }),
 	})
 
-	function onSaveSubmit(sourceUrl: string, note?: string) {
+	function onSaveSubmit(sourceUrl: string, note?: string, listId?: string) {
 		createSave.mutate({
 			body: {
 				sourceUrl,
 				...(note?.trim() ? { note: note.trim() } : {}),
+				...(listId ? { listId } : {}),
 			},
 		} as Parameters<typeof createSave.mutate>[0])
 	}
 
-	function onQuestSubmit(title: string, type: Quest["type"], fields: QuestFields) {
+	function onQuestSubmit(title: string, type: Quest["type"], fields: QuestFields, listId?: string) {
 		const body: Record<string, unknown> = { type, title }
 
 		if (type === 'todo') {
@@ -50,6 +54,8 @@ export function useCreateNew() {
 			body.location = fields.location.trim() || null
 		}
 
+		if (listId) body.listId = listId
+
 		createQuest.mutate({ body } as Parameters<typeof createQuest.mutate>[0])
 	}
 
@@ -59,18 +65,20 @@ export function useCreateNew() {
 		questType: Quest["type"],
 		fields: QuestFields,
 		saveNote: string,
+		listId?: string,
 	) {
 		const trimmed = title.trim()
 		if (!trimmed) return
 
 		if (mode === 'save') {
-			onSaveSubmit(trimmed, saveNote)
+			onSaveSubmit(trimmed, saveNote, listId)
 		} else {
-			onQuestSubmit(trimmed, questType, fields)
+			onQuestSubmit(trimmed, questType, fields, listId)
 		}
 	}
 
 	return {
+		lists: lists.data ?? [],
 		onSaveSubmit,
 		onQuestSubmit,
 		onHandleSubmit,

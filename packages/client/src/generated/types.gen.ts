@@ -74,6 +74,7 @@ export type PostQuestsData = {
         endAt?: string | null;
         location?: string | null;
         lastCompletedAt?: string | null;
+        listId?: string | null;
     };
     path?: never;
     query?: never;
@@ -208,6 +209,7 @@ export type PatchQuestsByIdData = {
         endAt?: string | null;
         location?: string | null;
         lastCompletedAt?: string | null;
+        listId?: string | null;
     };
     path: {
         id: string;
@@ -307,6 +309,7 @@ export type PostSavesData = {
         publishedAt?: string | null;
         note?: string | null;
         status?: 'active' | 'archived';
+        listId?: string | null;
     };
     path?: never;
     query?: never;
@@ -435,6 +438,7 @@ export type PatchSavesByIdData = {
         publishedAt?: string | null;
         note?: string | null;
         status?: 'active' | 'archived';
+        listId?: string | null;
     };
     path: {
         id: string;
@@ -484,6 +488,342 @@ export type PatchSavesByIdResponses = {
 };
 
 export type PatchSavesByIdResponse = PatchSavesByIdResponses[keyof PatchSavesByIdResponses];
+
+export type GetListsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/lists';
+};
+
+export type GetListsResponses = {
+    /**
+     * List of lists
+     */
+    200: Array<{
+        id: string;
+        userId: string;
+        name: string;
+        description: string | null;
+        color: string | null;
+        createdAt: string;
+        updatedAt: string;
+    }>;
+};
+
+export type GetListsResponse = GetListsResponses[keyof GetListsResponses];
+
+export type PostListsData = {
+    /**
+     * List to create
+     */
+    body: {
+        name: string;
+        description?: string | null;
+        color?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/lists';
+};
+
+export type PostListsErrors = {
+    /**
+     * Validation error
+     */
+    422: {
+        error: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type PostListsError = PostListsErrors[keyof PostListsErrors];
+
+export type PostListsResponses = {
+    /**
+     * Created list
+     */
+    201: {
+        id: string;
+        userId: string;
+        name: string;
+        description: string | null;
+        color: string | null;
+        createdAt: string;
+        updatedAt: string;
+    };
+};
+
+export type PostListsResponse = PostListsResponses[keyof PostListsResponses];
+
+export type DeleteListsByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/lists/{id}';
+};
+
+export type DeleteListsByIdErrors = {
+    /**
+     * List not found
+     */
+    404: {
+        message: string;
+    };
+};
+
+export type DeleteListsByIdError = DeleteListsByIdErrors[keyof DeleteListsByIdErrors];
+
+export type DeleteListsByIdResponses = {
+    /**
+     * List deleted
+     */
+    204: void;
+};
+
+export type DeleteListsByIdResponse = DeleteListsByIdResponses[keyof DeleteListsByIdResponses];
+
+export type GetListsByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/lists/{id}';
+};
+
+export type GetListsByIdErrors = {
+    /**
+     * List not found
+     */
+    404: {
+        message: string;
+    };
+};
+
+export type GetListsByIdError = GetListsByIdErrors[keyof GetListsByIdErrors];
+
+export type GetListsByIdResponses = {
+    /**
+     * A list with its items
+     */
+    200: {
+        id: string;
+        userId: string;
+        name: string;
+        description: string | null;
+        color: string | null;
+        createdAt: string;
+        updatedAt: string;
+        items: Array<{
+            id: string;
+            listId: string;
+            questId: string | null;
+            saveId: string | null;
+            createdAt: string;
+            quest: {
+                id: string;
+                userId: string;
+                type: 'todo' | 'note' | 'event' | 'daily';
+                status: 'active' | 'completed' | 'archived';
+                priority: 'urgent' | 'important' | 'quick_win' | 'deep_work' | 'someday' | 'waiting';
+                title: string;
+                body: string | null;
+                dueAt: string | null;
+                completedAt: string | null;
+                startAt: string | null;
+                endAt: string | null;
+                location: string | null;
+                lastCompletedAt: string | null;
+                createdAt: string;
+                updatedAt: string;
+            } | null;
+            save: {
+                id: string;
+                userId: string;
+                sourceUrl: string;
+                sourcePlatform: 'youtube' | 'reddit' | 'instagram' | 'web';
+                title: string | null;
+                description: string | null;
+                thumbnailUrl: string | null;
+                author: string | null;
+                publishedAt: string | null;
+                note: string | null;
+                status: 'active' | 'archived';
+                createdAt: string;
+                updatedAt: string;
+            } | null;
+        }>;
+    };
+};
+
+export type GetListsByIdResponse = GetListsByIdResponses[keyof GetListsByIdResponses];
+
+export type PatchListsByIdData = {
+    /**
+     * List fields to update
+     */
+    body: {
+        name?: string;
+        description?: string | null;
+        color?: string | null;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/lists/{id}';
+};
+
+export type PatchListsByIdErrors = {
+    /**
+     * List not found
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Validation error
+     */
+    422: {
+        error: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type PatchListsByIdError = PatchListsByIdErrors[keyof PatchListsByIdErrors];
+
+export type PatchListsByIdResponses = {
+    /**
+     * Updated list
+     */
+    200: {
+        id: string;
+        userId: string;
+        name: string;
+        description: string | null;
+        color: string | null;
+        createdAt: string;
+        updatedAt: string;
+    };
+};
+
+export type PatchListsByIdResponse = PatchListsByIdResponses[keyof PatchListsByIdResponses];
+
+export type PostListsByIdItemsData = {
+    /**
+     * Item to add
+     */
+    body: {
+        questId?: string;
+        saveId?: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/lists/{id}/items';
+};
+
+export type PostListsByIdItemsErrors = {
+    /**
+     * List not found
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Validation error
+     */
+    422: {
+        error: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type PostListsByIdItemsError = PostListsByIdItemsErrors[keyof PostListsByIdItemsErrors];
+
+export type PostListsByIdItemsResponses = {
+    /**
+     * Added list item
+     */
+    201: {
+        id: string;
+        listId: string;
+        questId: string | null;
+        saveId: string | null;
+        createdAt: string;
+        quest: {
+            id: string;
+            userId: string;
+            type: 'todo' | 'note' | 'event' | 'daily';
+            status: 'active' | 'completed' | 'archived';
+            priority: 'urgent' | 'important' | 'quick_win' | 'deep_work' | 'someday' | 'waiting';
+            title: string;
+            body: string | null;
+            dueAt: string | null;
+            completedAt: string | null;
+            startAt: string | null;
+            endAt: string | null;
+            location: string | null;
+            lastCompletedAt: string | null;
+            createdAt: string;
+            updatedAt: string;
+        } | null;
+        save: {
+            id: string;
+            userId: string;
+            sourceUrl: string;
+            sourcePlatform: 'youtube' | 'reddit' | 'instagram' | 'web';
+            title: string | null;
+            description: string | null;
+            thumbnailUrl: string | null;
+            author: string | null;
+            publishedAt: string | null;
+            note: string | null;
+            status: 'active' | 'archived';
+            createdAt: string;
+            updatedAt: string;
+        } | null;
+    };
+};
+
+export type PostListsByIdItemsResponse = PostListsByIdItemsResponses[keyof PostListsByIdItemsResponses];
+
+export type DeleteListsByIdItemsByItemIdData = {
+    body?: never;
+    path: {
+        id: string;
+        itemId: string;
+    };
+    query?: never;
+    url: '/lists/{id}/items/{itemId}';
+};
+
+export type DeleteListsByIdItemsByItemIdErrors = {
+    /**
+     * List item not found
+     */
+    404: {
+        message: string;
+    };
+};
+
+export type DeleteListsByIdItemsByItemIdError = DeleteListsByIdItemsByItemIdErrors[keyof DeleteListsByIdItemsByItemIdErrors];
+
+export type DeleteListsByIdItemsByItemIdResponses = {
+    /**
+     * Item removed from list
+     */
+    204: void;
+};
+
+export type DeleteListsByIdItemsByItemIdResponse = DeleteListsByIdItemsByItemIdResponses[keyof DeleteListsByIdItemsByItemIdResponses];
 
 export type ClientOptions = {
     baseUrl: 'http://localhost:9999' | (string & {});

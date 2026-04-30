@@ -1,11 +1,12 @@
 import ROUTES from "@/routes"
 import { AppShell, Group, Text, UnstyledButton } from "@mantine/core"
-import { IconBookmark, IconRocket, IconSettings } from "@tabler/icons-react"
+import { IconBookmark, IconList, IconRocket, IconSettings } from "@tabler/icons-react"
 import { useLocation, useNavigate } from "@tanstack/react-router"
 
 const NAV_ITEMS = [
 	{ label: "Quests", icon: IconRocket, to: ROUTES.HOME, accent: "ocean-blue", shade: 4 },
 	{ label: "Saves", icon: IconBookmark, to: ROUTES.SAVES, accent: "amber", shade: 5 },
+	{ label: "Lists", icon: IconList, to: ROUTES.LISTS, accent: "violet", shade: 5 },
 	{ label: "Settings", icon: IconSettings, to: ROUTES.SETTINGS, accent: "ocean-blue", shade: 4 },
 ]
 

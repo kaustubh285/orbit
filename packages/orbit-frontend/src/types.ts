@@ -13,6 +13,16 @@ export type Quest = {
 	lastCompletedAt: string | null
 }
 
+export type List = {
+	id: string
+	userId: string
+	name: string
+	description: string | null
+	color: string | null
+	createdAt: string
+	updatedAt: string
+}
+
 export type Save = {
 	id: string;
 	userId: string;

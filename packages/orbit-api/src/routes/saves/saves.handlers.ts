@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { db } from "../../db/db.js";
 import { savesTable } from "../../db/schemas/saves.schema.js";
+import { listItemsTable } from "../../db/schemas/lists.schema.js";
 import type { AppRouteHandler } from "@/lib/types.js";
 import { detectPlatform, scrapeUrl } from "./scraper/index.js";
 import type {
@@ -32,7 +33,7 @@ export const listSaves: AppRouteHandler<ListRoute> = async (c) => {
 
 export const createSave: AppRouteHandler<CreateRoute> = async (c) => {
 	const userId = c.var.userId;
-	const { publishedAt, ...rest } = c.req.valid("json");
+	const { publishedAt, listId, ...rest } = c.req.valid("json");
 
 	const [save] = await db
 		.insert(savesTable)
@@ -63,6 +64,12 @@ export const createSave: AppRouteHandler<CreateRoute> = async (c) => {
 			logger.warn({ err, saveId: save.id }, "background scrape failed");
 		});
 
+	if (listId) {
+		await db.insert(listItemsTable)
+			.values({ listId, saveId: save.id, questId: null })
+			.onConflictDoNothing();
+	}
+
 	return c.json(save, HttpStatusCodes.CREATED);
 };
 
@@ -84,7 +91,7 @@ export const getOneSave: AppRouteHandler<GetOneRoute> = async (c) => {
 export const updateSave: AppRouteHandler<UpdateRoute> = async (c) => {
 	const userId = c.var.userId;
 	const { id } = c.req.valid("param");
-	const { publishedAt, ...rest } = c.req.valid("json");
+	const { publishedAt, listId, ...rest } = c.req.valid("json");
 
 	const [updated] = await db
 		.update(savesTable)
@@ -95,6 +102,13 @@ export const updateSave: AppRouteHandler<UpdateRoute> = async (c) => {
 	if (!updated) {
 		return c.json({ message: "Save not found" }, HttpStatusCodes.NOT_FOUND);
 	}
+
+	if (listId) {
+		await db.insert(listItemsTable)
+			.values({ listId, saveId: updated.id, questId: null })
+			.onConflictDoNothing();
+	}
+
 	return c.json(updated, HttpStatusCodes.OK);
 };
 

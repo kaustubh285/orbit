@@ -30,6 +30,7 @@ export const insertSaveSchema = z.object({
 	publishedAt: z.string().datetime({ offset: true }).nullable().optional(),
 	note: z.string().nullable().optional(),
 	status: z.enum(saveStatusEnum.enumValues).optional(),
+	listId: z.string().uuid().nullable().optional(),
 });
 
 export const patchSaveSchema = insertSaveSchema.partial();

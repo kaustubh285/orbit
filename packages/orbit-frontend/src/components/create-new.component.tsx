@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {
 	ActionIcon, Button, Chip, Drawer, Group,
-	Stack, Text, Textarea, TextInput,
+	Select, Stack, Text, Textarea, TextInput,
 } from '@mantine/core'
 import { DateTimePicker } from '@mantine/dates'
 import { IconBookmark, IconChecklist, IconPlus } from '@tabler/icons-react'
@@ -44,9 +44,10 @@ export function CreateNewComponent() {
 	// save-specific state
 	const [saveNote, setSaveNote] = useState('')
 
+	const [listId, setListId] = useState<string | null>(null)
 	const [modeOverride, setModeOverride] = useState<'quest' | 'save' | null>(null)
 
-	const { onHandleSubmit, isPending } = useCreateNew()
+	const { lists, onHandleSubmit, isPending } = useCreateNew()
 
 	const mode = modeOverride ?? (looksLikeUrl(title) ? 'save' : 'quest')
 
@@ -59,6 +60,7 @@ export function CreateNewComponent() {
 		setEndAt(null)
 		setLocation('')
 		setSaveNote('')
+		setListId(null)
 		setModeOverride(null)
 	}
 
@@ -68,7 +70,7 @@ export function CreateNewComponent() {
 	}
 
 	function handleSubmit() {
-		onHandleSubmit(mode, title, questType, { dueAt, body, startAt, endAt, location }, saveNote)
+		onHandleSubmit(mode, title, questType, { dueAt, body, startAt, endAt, location }, saveNote, listId ?? undefined)
 		handleClose()
 	}
 
@@ -220,6 +222,15 @@ export function CreateNewComponent() {
 								/>
 							)}
 
+						{title && lists.length > 0 && (
+							<Select
+								placeholder="Add to a list (optional)"
+								value={listId}
+								onChange={setListId}
+								clearable
+								data={lists.map((l) => ({ value: l.id, label: l.name }))}
+							/>
+						)}
 					</Stack>
 					<Stack gap="xs">
 						<Button
