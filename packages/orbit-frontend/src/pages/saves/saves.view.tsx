@@ -82,6 +82,7 @@ function AddSaveCard({ onAdd, isAdding }: { onAdd: (url: string) => void; isAddi
 				<Button
 					fullWidth
 					radius={0}
+					color="amber"
 					loading={isAdding}
 					onClick={handleSave}
 				>

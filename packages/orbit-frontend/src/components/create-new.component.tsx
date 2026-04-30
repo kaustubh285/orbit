@@ -80,7 +80,7 @@ export function CreateNewComponent() {
 				size="xl"
 				radius="xl"
 				variant="filled"
-				style={{ position: 'fixed', bottom: 80, right: 24, zIndex: 200 }}
+				style={{ position: 'fixed', bottom: 'calc(64px + env(safe-area-inset-bottom) + 16px)', right: 24, zIndex: 200 }}
 				onClick={() => setOpened(true)}
 				aria-label="Create new"
 			>
