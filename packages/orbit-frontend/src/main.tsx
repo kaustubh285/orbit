@@ -1,4 +1,4 @@
-import { StrictMode } from "react"
+import { StrictMode, useEffect } from "react"
 import { createRoot } from "react-dom/client"
 import { RouterProvider } from "@tanstack/react-router"
 import { QueryClientProvider } from "@tanstack/react-query"
@@ -41,6 +41,14 @@ function AppRouter() {
 	// Update module-level getter during render — happens before any effects run,
 	// so React Query's initial fetch always has a token getter available.
 	_getToken = isSignedIn ? getToken : null
+
+	// Force the router to re-run beforeLoad guards when auth state settles.
+	// TanStack Router only runs beforeLoad on navigation events, not on context
+	// prop changes, so without this invalidation the initial route match (which
+	// happens before Clerk has loaded) never gets re-checked for auth.
+	useEffect(() => {
+		router.invalidate()
+	}, [isLoaded, isSignedIn])
 
 	return (
 		<RouterProvider
