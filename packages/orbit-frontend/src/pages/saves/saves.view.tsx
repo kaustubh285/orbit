@@ -6,19 +6,25 @@ import {
 	Button,
 	Card,
 	Group,
+	Select,
 	SimpleGrid,
 	Skeleton,
 	Stack,
 	Text,
+	TextInput,
 	Textarea,
 	Tooltip,
 } from "@mantine/core"
+import { useLocalStorage } from "@mantine/hooks"
 import {
 	IconBrandInstagram,
 	IconBrandReddit,
 	IconBrandYoutube,
 	IconExternalLink,
+	IconLayoutGrid,
+	IconLayoutList,
 	IconRefresh,
+	IconSearch,
 	IconWorld,
 } from "@tabler/icons-react"
 import dayjs from "dayjs"
@@ -28,6 +34,7 @@ import { useState } from "react"
 dayjs.extend(relativeTime)
 
 type Platform = Save["sourcePlatform"]
+type ViewMode = "grid" | "compact"
 
 const PLATFORM_META: Record<Platform, { label: string; color: string; Icon: React.ElementType }> = {
 	youtube: { label: "YouTube", color: "red", Icon: IconBrandYoutube },
@@ -36,8 +43,8 @@ const PLATFORM_META: Record<Platform, { label: string; color: string; Icon: Reac
 	web: { label: "Web", color: "cyan", Icon: IconWorld },
 }
 
-const FILTERS: { label: string; value: Platform | "all" }[] = [
-	{ label: "All", value: "all" },
+const PLATFORM_OPTIONS = [
+	{ label: "All platforms", value: "all" },
 	{ label: "YouTube", value: "youtube" },
 	{ label: "Reddit", value: "reddit" },
 	{ label: "Instagram", value: "instagram" },
@@ -45,6 +52,18 @@ const FILTERS: { label: string; value: Platform | "all" }[] = [
 ]
 
 const THUMB_RATIO = "5/2"
+
+function matchesSearch(save: Save, query: string): boolean {
+	if (!query) return true
+	const q = query.toLowerCase()
+	return (
+		(save.title?.toLowerCase().includes(q) ?? false) ||
+		(save.description?.toLowerCase().includes(q) ?? false) ||
+		(save.note?.toLowerCase().includes(q) ?? false) ||
+		PLATFORM_META[save.sourcePlatform].label.toLowerCase().includes(q) ||
+		save.sourcePlatform.toLowerCase().includes(q)
+	)
+}
 
 function AddSaveCard({ onAdd, isAdding }: { onAdd: (url: string) => void; isAdding: boolean }) {
 	const [url, setUrl] = useState("")
@@ -57,13 +76,12 @@ function AddSaveCard({ onAdd, isAdding }: { onAdd: (url: string) => void; isAddi
 	}
 
 	return (
-		<Card withBorder radius="md" padding={0} style={{ overflow: "hidden" }} >
+		<Card withBorder radius="md" padding={0} style={{ overflow: "hidden" }}>
 			<Box
 				style={{
 					aspectRatio: THUMB_RATIO,
 					display: "flex",
 					alignItems: "stretch",
-					// flex: 1,
 					background: "var(--mantine-color-gray-0)",
 					padding: 12,
 				}}
@@ -78,17 +96,56 @@ function AddSaveCard({ onAdd, isAdding }: { onAdd: (url: string) => void; isAddi
 					styles={{ input: { height: "100%", resize: "none" } }}
 				/>
 			</Box>
-			<Box flex={1} h="auto" p="xs" >
-				<Button
-					fullWidth
-					radius={0}
-					color="amber"
-					loading={isAdding}
-					onClick={handleSave}
-				>
+			<Box flex={1} h="auto" p="xs">
+				<Button fullWidth radius={0} color="amber" loading={isAdding} onClick={handleSave}>
 					Save
 				</Button>
 			</Box>
+		</Card>
+	)
+}
+
+function AddSaveCardCompact({ onAdd, isAdding }: { onAdd: (url: string) => void; isAdding: boolean }) {
+	const [url, setUrl] = useState("")
+
+	function handleSave() {
+		const trimmed = url.trim()
+		if (!trimmed) return
+		onAdd(trimmed)
+		setUrl("")
+	}
+
+	return (
+		<Card withBorder radius="md" padding={0} style={{ overflow: "hidden" }}>
+			<Group wrap="nowrap" gap={0} style={{ height: 80 }}>
+				<Box
+					style={{
+						width: "35%",
+						flexShrink: 0,
+						height: "100%",
+						background: "var(--mantine-color-gray-0)",
+						padding: 10,
+						display: "flex",
+						alignItems: "stretch",
+					}}
+				>
+					<Textarea
+						placeholder="Paste a URL..."
+						value={url}
+						onChange={(e) => setUrl(e.currentTarget.value)}
+						onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSave() } }}
+						variant="unstyled"
+						size="xs"
+						style={{ flex: 1 }}
+						styles={{ input: { height: "100%", resize: "none", fontSize: 11 } }}
+					/>
+				</Box>
+				<Box style={{ flex: 1, display: "flex", alignItems: "center", padding: "0 12px" }}>
+					<Button size="xs" color="amber" loading={isAdding} onClick={handleSave}>
+						Save
+					</Button>
+				</Box>
+			</Group>
 		</Card>
 	)
 }
@@ -201,6 +258,106 @@ function SaveCard({ save }: { save: Save }) {
 	)
 }
 
+function SaveCardCompact({ save }: { save: Save }) {
+	const meta = PLATFORM_META[save.sourcePlatform]
+	const PlatformIcon = meta.Icon
+
+	return (
+		<Card withBorder radius="md" padding={0} style={{ overflow: "hidden" }}>
+			<Group wrap="nowrap" gap={0} style={{ minHeight: 80 }}>
+				{save.thumbnailUrl ? (
+					<Box
+						style={{
+							width: "35%",
+							flexShrink: 0,
+							alignSelf: "stretch",
+							backgroundImage: `url(${save.thumbnailUrl})`,
+							backgroundSize: "cover",
+							backgroundPosition: "center",
+							position: "relative",
+							minHeight: 80,
+						}}
+					>
+						<Badge
+							size="xs"
+							color={meta.color}
+							variant="filled"
+							leftSection={<PlatformIcon size={10} />}
+							style={{ position: "absolute", top: 6, left: 6 }}
+						>
+							{meta.label}
+						</Badge>
+					</Box>
+				) : (
+					<Box
+						style={{
+							width: "35%",
+							flexShrink: 0,
+							alignSelf: "stretch",
+							background: `var(--mantine-color-${meta.color}-1)`,
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							position: "relative",
+							minHeight: 80,
+						}}
+					>
+						<PlatformIcon size={24} color={`var(--mantine-color-${meta.color}-5)`} />
+						<Badge
+							size="xs"
+							color={meta.color}
+							variant="filled"
+							leftSection={<PlatformIcon size={10} />}
+							style={{ position: "absolute", top: 6, left: 6 }}
+						>
+							{meta.label}
+						</Badge>
+					</Box>
+				)}
+
+				<Stack gap={4} p="sm" style={{ flex: 1, minWidth: 0 }}>
+					<Group justify="space-between" align="flex-start" wrap="nowrap">
+						<Text fw={600} size="sm" lineClamp={1} style={{ flex: 1 }}>
+							{save.title ?? save.sourceUrl}
+						</Text>
+						<Tooltip label="Open link">
+							<ActionIcon
+								component="a"
+								href={save.sourceUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								variant="subtle"
+								color="gray"
+								size="sm"
+								style={{ flexShrink: 0 }}
+							>
+								<IconExternalLink size={14} />
+							</ActionIcon>
+						</Tooltip>
+					</Group>
+
+					{save.description && (
+						<Text size="xs" c="dimmed" lineClamp={1}>
+							{save.description}
+						</Text>
+					)}
+
+					{save.note && (
+						<Text size="xs" fs="italic" c="yellow.7" lineClamp={1}>
+							{save.note}
+						</Text>
+					)}
+
+					<Text size="xs" c="dimmed">
+						{save.author && `${save.author} · `}
+						{dayjs(save.createdAt).fromNow()}
+					</Text>
+				</Stack>
+			</Group>
+		</Card>
+	)
+}
+
 function SaveCardSkeleton() {
 	return (
 		<Card withBorder radius="md" padding={0} style={{ overflow: "hidden" }}>
@@ -211,6 +368,21 @@ function SaveCardSkeleton() {
 				<Skeleton height={10} />
 				<Skeleton height={10} width="60%" />
 			</Stack>
+		</Card>
+	)
+}
+
+function SaveCardSkeletonCompact() {
+	return (
+		<Card withBorder radius="md" padding={0} style={{ overflow: "hidden" }}>
+			<Group wrap="nowrap" gap={0} style={{ height: 80 }}>
+				<Skeleton width="35%" height={80} radius={0} />
+				<Stack gap={6} p="sm" style={{ flex: 1 }}>
+					<Skeleton height={14} width="70%" />
+					<Skeleton height={10} width="50%" />
+					<Skeleton height={10} width="30%" />
+				</Stack>
+			</Group>
 		</Card>
 	)
 }
@@ -229,48 +401,87 @@ export default function SavesView({
 	onRefetch: () => void
 }) {
 	const [platform, setPlatform] = useState<Platform | "all">("all")
+	const [search, setSearch] = useState("")
+	const [viewMode, setViewMode] = useLocalStorage<ViewMode>({
+		key: "saves-view-mode",
+		defaultValue: "grid",
+	})
 
-	const filtered = platform === "all"
-		? saves
-		: saves.filter((s) => s.sourcePlatform === platform)
+	const filtered = saves.filter((s) => {
+		const platformMatch = platform === "all" || s.sourcePlatform === platform
+		return platformMatch && matchesSearch(s, search)
+	})
+
+	const isCompact = viewMode === "compact"
 
 	return (
-		<Stack>
-			<Group justify="space-between">
-				<Group gap="xs">
-					{FILTERS.map((f) => {
-						const active = platform === f.value
-						return (
-							<Badge
-								key={f.value}
-								variant={active ? "filled" : "light"}
-								color={active ? "amber" : "gray"}
-								onClick={() => setPlatform(f.value)}
-								style={{ cursor: "pointer" }}
-								size="sm"
-							>
-								{f.label}
-							</Badge>
-						)
-					})}
+		<Stack gap="md">
+			<Group wrap="nowrap" gap="sm">
+				<TextInput
+					placeholder="Search title, description, notes, platform..."
+					leftSection={<IconSearch size={14} />}
+					value={search}
+					onChange={(e) => setSearch(e.currentTarget.value)}
+					style={{ flex: 1 }}
+					size="sm"
+				/>
+				<Select
+					data={PLATFORM_OPTIONS}
+					value={platform}
+					onChange={(v) => setPlatform((v ?? "all") as Platform | "all")}
+					size="sm"
+					w={160}
+					allowDeselect={false}
+					checkIconPosition="right"
+				/>
+				<Group gap={4}>
+					<Tooltip label="Grid view">
+						<ActionIcon
+							variant={!isCompact ? "filled" : "subtle"}
+							color={!isCompact ? "amber" : "gray"}
+							onClick={() => setViewMode("grid")}
+							size="sm"
+						>
+							<IconLayoutGrid size={15} />
+						</ActionIcon>
+					</Tooltip>
+					<Tooltip label="Compact view">
+						<ActionIcon
+							variant={isCompact ? "filled" : "subtle"}
+							color={isCompact ? "amber" : "gray"}
+							onClick={() => setViewMode("compact")}
+							size="sm"
+						>
+							<IconLayoutList size={15} />
+						</ActionIcon>
+					</Tooltip>
+					<Tooltip label="Refresh">
+						<ActionIcon variant="subtle" color="gray" onClick={onRefetch} loading={isLoading} size="sm">
+							<IconRefresh size={15} />
+						</ActionIcon>
+					</Tooltip>
 				</Group>
-				<Tooltip label="Refresh">
-					<ActionIcon variant="subtle" color="gray" onClick={onRefetch} loading={isLoading}>
-						<IconRefresh size={16} />
-					</ActionIcon>
-				</Tooltip>
 			</Group>
 
-			<SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-				<AddSaveCard onAdd={onAdd} isAdding={isAdding} />
-				{isLoading
-					? [1, 2, 3, 4, 5].map((i) => <SaveCardSkeleton key={i} />)
-					: filtered.map((save) => <SaveCard key={save.id} save={save} />)}
-			</SimpleGrid>
+			{isCompact ? (
+				<Stack gap="sm">
+					<AddSaveCardCompact onAdd={onAdd} isAdding={isAdding} />
+					{isLoading
+						? [1, 2, 3, 4, 5].map((i) => <SaveCardSkeletonCompact key={i} />)
+						: filtered.map((save) => <SaveCardCompact key={save.id} save={save} />)}
+				</Stack>
+			) : (
+				<SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
+					<AddSaveCard onAdd={onAdd} isAdding={isAdding} />
+					{isLoading
+						? [1, 2, 3, 4, 5].map((i) => <SaveCardSkeleton key={i} />)
+						: filtered.map((save) => <SaveCard key={save.id} save={save} />)}
+				</SimpleGrid>
+			)}
 
 			{!isLoading && filtered.length === 0 && (
 				<Text c="dimmed" ta="center" size="sm" mt="xl">
-					No saves yet
+					{search || platform !== "all" ? "No saves match your filters" : "No saves yet"}
 				</Text>
 			)}
 		</Stack>

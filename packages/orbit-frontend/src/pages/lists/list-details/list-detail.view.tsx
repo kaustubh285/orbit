@@ -1,9 +1,9 @@
 import type { GetListsByIdResponse } from '@orbit/client'
 import {
 	ActionIcon,
-	Anchor,
 	Badge,
 	Box,
+	Card,
 	Group,
 	Skeleton,
 	Stack,
@@ -14,18 +14,35 @@ import {
 import { Link } from '@tanstack/react-router'
 import {
 	IconArrowLeft,
+	IconBrandInstagram,
+	IconBrandReddit,
+	IconBrandYoutube,
 	IconEdit,
 	IconExternalLink,
 	IconSearch,
 	IconTrash,
+	IconWorld,
 } from '@tabler/icons-react'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import type { List } from '@/types'
 import { listAccentColor } from '../lists.utils'
 import { ListFormDrawer } from '../list-form-drawer.component'
 import { useState } from 'react'
 
+dayjs.extend(relativeTime)
+
 type ListWithItems = Extract<GetListsByIdResponse, { items: unknown[] }>
 type ListItem = ListWithItems['items'][number]
+
+type Platform = 'youtube' | 'reddit' | 'instagram' | 'web'
+
+const PLATFORM_META: Record<Platform, { label: string; color: string; Icon: React.ElementType }> = {
+	youtube: { label: 'YouTube', color: 'red', Icon: IconBrandYoutube },
+	reddit: { label: 'Reddit', color: 'orange', Icon: IconBrandReddit },
+	instagram: { label: 'Instagram', color: 'grape', Icon: IconBrandInstagram },
+	web: { label: 'Web', color: 'cyan', Icon: IconWorld },
+}
 
 const QUEST_TYPE_LABELS: Record<string, string> = {
 	todo: 'To-do',
@@ -34,11 +51,111 @@ const QUEST_TYPE_LABELS: Record<string, string> = {
 	daily: 'Daily',
 }
 
-const PLATFORM_LABELS: Record<string, string> = {
-	youtube: 'YouTube',
-	reddit: 'Reddit',
-	instagram: 'Instagram',
-	web: 'Web',
+function SaveItemCard({ item, onRemove }: { item: ListItem; onRemove: () => void }) {
+	const save = item.save!
+	const meta = PLATFORM_META[save.sourcePlatform as Platform]
+	const PlatformIcon = meta.Icon
+
+	return (
+		<Card withBorder radius="md" padding={0} style={{ overflow: 'hidden' }}>
+			<Group wrap="nowrap" gap={0} style={{ minHeight: 80 }}>
+				{save.thumbnailUrl ? (
+					<Box
+						style={{
+							width: '35%',
+							flexShrink: 0,
+							alignSelf: 'stretch',
+							backgroundImage: `url(${save.thumbnailUrl})`,
+							backgroundSize: 'cover',
+							backgroundPosition: 'center',
+							position: 'relative',
+							minHeight: 80,
+						}}
+					>
+						<Badge
+							size="xs"
+							color={meta.color}
+							variant="filled"
+							leftSection={<PlatformIcon size={10} />}
+							style={{ position: 'absolute', top: 6, left: 6 }}
+						>
+							{meta.label}
+						</Badge>
+					</Box>
+				) : (
+					<Box
+						style={{
+							width: '35%',
+							flexShrink: 0,
+							alignSelf: 'stretch',
+							background: `var(--mantine-color-${meta.color}-1)`,
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							position: 'relative',
+							minHeight: 80,
+						}}
+					>
+						<PlatformIcon size={24} color={`var(--mantine-color-${meta.color}-5)`} />
+						<Badge
+							size="xs"
+							color={meta.color}
+							variant="filled"
+							leftSection={<PlatformIcon size={10} />}
+							style={{ position: 'absolute', top: 6, left: 6 }}
+						>
+							{meta.label}
+						</Badge>
+					</Box>
+				)}
+
+				<Stack gap={4} p="sm" style={{ flex: 1, minWidth: 0 }}>
+					<Group justify="space-between" align="flex-start" wrap="nowrap">
+						<Text fw={600} size="sm" lineClamp={1} style={{ flex: 1 }}>
+							{save.title ?? save.sourceUrl}
+						</Text>
+						<Group gap={4} wrap="nowrap" style={{ flexShrink: 0 }}>
+							<Tooltip label="Open link" withArrow>
+								<ActionIcon
+									component="a"
+									href={save.sourceUrl}
+									target="_blank"
+									rel="noopener noreferrer"
+									variant="subtle"
+									color="gray"
+									size="sm"
+								>
+									<IconExternalLink size={13} />
+								</ActionIcon>
+							</Tooltip>
+							<Tooltip label="Remove from list" withArrow>
+								<ActionIcon variant="subtle" color="gray" size="sm" onClick={onRemove}>
+									<IconTrash size={13} />
+								</ActionIcon>
+							</Tooltip>
+						</Group>
+					</Group>
+
+					{save.description && (
+						<Text size="xs" c="dimmed" lineClamp={1}>
+							{save.description}
+						</Text>
+					)}
+
+					{save.note && (
+						<Text size="xs" fs="italic" c="yellow.7" lineClamp={1}>
+							{save.note}
+						</Text>
+					)}
+
+					<Text size="xs" c="dimmed">
+						{save.author && `${save.author} · `}
+						{dayjs(save.createdAt).fromNow()}
+					</Text>
+				</Stack>
+			</Group>
+		</Card>
+	)
 }
 
 function QuestItem({ item, onRemove }: { item: ListItem; onRemove: () => void }) {
@@ -74,43 +191,12 @@ function QuestItem({ item, onRemove }: { item: ListItem; onRemove: () => void })
 	)
 }
 
-function SaveItem({ item, onRemove }: { item: ListItem; onRemove: () => void }) {
-	const save = item.save!
+function SectionHeader({ label, count }: { label: string; count: number }) {
 	return (
-		<Group
-			wrap="nowrap"
-			justify="space-between"
-			style={{
-				padding: '8px 12px',
-				borderRadius: 6,
-				background: 'var(--mantine-color-dark-6)',
-				border: '1px solid var(--mantine-color-dark-4)',
-			}}
-		>
-			<Group gap="xs" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
-				<Badge size="xs" variant="light" color="grape">
-					{PLATFORM_LABELS[save.sourcePlatform] ?? save.sourcePlatform}
-				</Badge>
-				<Text size="sm" truncate style={{ flex: 1 }}>
-					{save.title ?? save.sourceUrl}
-				</Text>
-				<Anchor href={save.sourceUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-					<IconExternalLink size={13} color="var(--mantine-color-dimmed)" />
-				</Anchor>
-			</Group>
-			<Tooltip label="Remove from list" withArrow>
-				<ActionIcon variant="subtle" color="gray" size="sm" onClick={onRemove}>
-					<IconTrash size={13} />
-				</ActionIcon>
-			</Tooltip>
-		</Group>
+		<Text size="xs" c="dimmed" fw={600} tt="uppercase" style={{ letterSpacing: '0.05em' }}>
+			{label} ({count})
+		</Text>
 	)
-}
-
-function ItemRow({ item, onRemove }: { item: ListItem; onRemove: () => void }) {
-	if (item.quest) return <QuestItem item={item} onRemove={onRemove} />
-	if (item.save) return <SaveItem item={item} onRemove={onRemove} />
-	return null
 }
 
 export function ListDetailView({
@@ -130,17 +216,24 @@ export function ListDetailView({
 	const [search, setSearch] = useState('')
 	const accent = listAccentColor(list?.color ?? null)
 
-	const filteredItems = search.trim() && list
-		? list.items.filter((item) => {
+	const allItems = list?.items ?? []
+
+	const filteredItems = search.trim()
+		? allItems.filter((item) => {
 			const q = search.toLowerCase()
 			if (item.quest) return item.quest.title.toLowerCase().includes(q)
 			if (item.save) return (
 				(item.save.title ?? '').toLowerCase().includes(q) ||
-				item.save.sourceUrl.toLowerCase().includes(q)
+				item.save.sourceUrl.toLowerCase().includes(q) ||
+				(item.save.description ?? '').toLowerCase().includes(q) ||
+				(item.save.note ?? '').toLowerCase().includes(q)
 			)
 			return false
 		})
-		: list?.items ?? []
+		: allItems
+
+	const saveItems = filteredItems.filter((i) => i.save)
+	const questItems = filteredItems.filter((i) => i.quest)
 
 	function handleEditSubmit(name: string, description?: string, color?: string) {
 		onUpdate(name, description, color)
@@ -166,12 +259,7 @@ export function ListDetailView({
 					<Skeleton height={14} width="60%" />
 				</Stack>
 			) : list ? (
-				<Box
-					style={{
-						borderLeft: `4px solid ${accent}`,
-						paddingLeft: 12,
-					}}
-				>
+				<Box style={{ borderLeft: `4px solid ${accent}`, paddingLeft: 12 }}>
 					<Group gap="xs" align="flex-start" wrap="nowrap">
 						<Stack gap={2} style={{ flex: 1 }}>
 							<Text fw={700} size="lg">{list.name}</Text>
@@ -191,30 +279,40 @@ export function ListDetailView({
 			)}
 
 			{list && (
-				<Stack gap="xs">
-					<Group justify="space-between" align="center">
-						<Text size="xs" c="dimmed" fw={500} tt="uppercase">
-							Items ({list.items.length})
-						</Text>
-					</Group>
-					{list.items.length > 0 && (
+				<Stack gap="md">
+					{allItems.length > 0 && (
 						<TextInput
 							placeholder="Search items…"
 							leftSection={<IconSearch size={14} />}
-							size="xs"
+							size="sm"
 							value={search}
 							onChange={(e) => setSearch(e.currentTarget.value)}
 						/>
 					)}
-					{list.items.length === 0 ? (
+
+					{allItems.length === 0 ? (
 						<Text size="sm" c="dimmed">No items in this list yet.</Text>
 					) : filteredItems.length === 0 ? (
 						<Text size="sm" c="dimmed">No items match "{search}"</Text>
 					) : (
-						<Stack gap={6}>
-							{filteredItems.map((item) => (
-								<ItemRow key={item.id} item={item} onRemove={() => onRemoveItem(item.id)} />
-							))}
+						<Stack gap="xl">
+							{saveItems.length > 0 && (
+								<Stack gap="sm">
+									<SectionHeader label="Saves" count={saveItems.length} />
+									{saveItems.map((item) => (
+										<SaveItemCard key={item.id} item={item} onRemove={() => onRemoveItem(item.id)} />
+									))}
+								</Stack>
+							)}
+
+							{questItems.length > 0 && (
+								<Stack gap="sm">
+									<SectionHeader label="Quests" count={questItems.length} />
+									{questItems.map((item) => (
+										<QuestItem key={item.id} item={item} onRemove={() => onRemoveItem(item.id)} />
+									))}
+								</Stack>
+							)}
 						</Stack>
 					)}
 				</Stack>

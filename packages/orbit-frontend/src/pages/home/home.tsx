@@ -4,6 +4,9 @@ import { QuestModalComponent } from "@/components/quest-modal.component"
 import { useQuestsStore } from "@/store/quests.store"
 import { Stack } from "@mantine/core"
 import { useHome } from "./use-home.hook"
+import { useAuth } from "@clerk/react"
+import { useNavigate } from "@tanstack/react-router"
+import ROUTES from "@/routes"
 
 export function HomePage() {
 	const modalQuest = useQuestsStore((state) => state.modalQuest)
