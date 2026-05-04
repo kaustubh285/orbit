@@ -1,9 +1,10 @@
-import { Button } from "@mantine/core"
+import { Button, Flex } from "@mantine/core"
 import { useMediaQuery, useElementSize } from "@mantine/hooks"
 import { MiniCalendar } from "@mantine/dates"
 import dayjs from "dayjs"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useQuestsStore } from "@/store/quests.store"
+import { CachedItems } from "./app-structure/cached-items.component"
 
 const todayStr = dayjs().format("YYYY-MM-DD")
 
@@ -56,7 +57,7 @@ export default function CalendarScroll() {
 					size="md"
 					getDayProps={(date) => ({
 						...(date === todayStr ? { "data-today": true } : {}),
-						"data-weekday": dayjs(date).format("dd"),
+						"data-weekday": dayjs(date).format("ddd"),
 					})}
 					styles={{
 						root: { width: "100%" },
@@ -64,7 +65,8 @@ export default function CalendarScroll() {
 					}}
 				/>
 			</div>
-			<div style={{ display: "flex", justifyContent: "flex-end", paddingRight: 4 }}>
+			<Flex pl={8} gap={8} justify="space-between" align="center">
+				<CachedItems />
 				<Button
 					size="compact-xs"
 					variant={isToday ? "subtle" : "light"}
@@ -74,7 +76,7 @@ export default function CalendarScroll() {
 				>
 					Today
 				</Button>
-			</div>
+			</Flex>
 		</div>
 	)
 }

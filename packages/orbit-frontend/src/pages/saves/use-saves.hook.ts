@@ -1,8 +1,10 @@
 import { getSavesOptions, getSavesQueryKey, postSavesMutation } from "@orbit/client"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useOrbitAppStore } from "@/store/orbit-app.store"
 
 export function useSaves() {
 	const queryClient = useQueryClient()
+	const { addPendingSubmission, removePendingSubmission } = useOrbitAppStore((s) => s.actions)
 
 	const saves = useQuery(getSavesOptions())
 
@@ -12,9 +14,13 @@ export function useSaves() {
 	})
 
 	function addSave(url: string) {
-		createSave.mutate({
-			body: { sourceUrl: url },
-		} as Parameters<typeof createSave.mutate>[0])
+		const id = crypto.randomUUID()
+		const payload = { sourceUrl: url }
+		addPendingSubmission({ id, createdAt: new Date().toISOString(), apiCallKey: "postSave", payload })
+		createSave.mutate(
+			{ body: payload } as Parameters<typeof createSave.mutate>[0],
+			{ onSuccess: () => removePendingSubmission(id) },
+		)
 	}
 
 	return {

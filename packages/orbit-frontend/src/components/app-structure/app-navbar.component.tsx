@@ -2,6 +2,7 @@ import { AppShell, Burger, Group, Text } from "@mantine/core";
 import { IconFileDatabase, IconHome, IconNotebook, IconSettings } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 
+// NOT USED CURRENTLY, MAYBE IN THE FUTURE FOR A DESKTOP SIDEBAR NAVIGATION
 export function AppNavbar({ mobileOpened, toggleMobile, ScrollArea }: {
 	mobileOpened: boolean,
 	toggleMobile: () => void,

@@ -1,5 +1,5 @@
 import CalendarScroll from "@/components/calendar-scroll.component"
-import ListQuestsComponent from "@/components/list-quests.component"
+import ListQuestsComponent from "@/components/quests/list-quests.component"
 import { QuestModalComponent } from "@/components/quest-modal.component"
 import { useQuestsStore } from "@/store/quests.store"
 import { Stack } from "@mantine/core"

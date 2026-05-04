@@ -2,10 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { getQuestsOptions, getQuestsQueryKey, patchQuestsByIdMutation, postQuestsMutation } from "@orbit/client"
 import type { Quest } from "@/types"
 import { useQuestsStore } from "@/store/quests.store"
+import { useOrbitAppStore } from "@/store/orbit-app.store"
 
 export function useHome() {
 	const selectedDate = useQuestsStore((state) => state.selectedDate)
 	const queryClient = useQueryClient()
+	const { addPendingSubmission, removePendingSubmission } = useOrbitAppStore((s) => s.actions)
 
 	const quests = useQuery(
 		getQuestsOptions({ query: { date: selectedDate ?? undefined } }),
@@ -24,9 +26,13 @@ export function useHome() {
 	function submitQuest(title: string, type: Quest["type"]) {
 		const trimmed = title.trim()
 		if (!trimmed) return
-		createQuest.mutate({
-			body: { type, title: trimmed, dueAt: selectedDate ? new Date(`${selectedDate}T00:00:00.000Z`).toISOString() : null },
-		} as Parameters<typeof createQuest.mutate>[0])
+		const id = crypto.randomUUID()
+		const payload = { type, title: trimmed, dueAt: selectedDate ? new Date(`${selectedDate}T00:00:00.000Z`).toISOString() : null }
+		addPendingSubmission({ id, createdAt: new Date().toISOString(), apiCallKey: "postQuest", payload })
+		createQuest.mutate(
+			{ body: payload } as Parameters<typeof createQuest.mutate>[0],
+			{ onSuccess: () => removePendingSubmission(id) },
+		)
 	}
 
 	function toggleQuest(quest: Quest) {

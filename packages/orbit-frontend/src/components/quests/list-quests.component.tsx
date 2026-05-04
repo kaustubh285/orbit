@@ -1,6 +1,7 @@
 import { PRIORITY_COLOR, TYPE_COLOR, TYPE_ICON } from "@/CONSTANTS"
+import { useOrbitAppStore } from "@/store/orbit-app.store"
 import type { Quest } from "@/types"
-import { ActionIcon, Badge, Skeleton, Stack, Text, TextInput } from "@mantine/core"
+import { ActionIcon, Badge, Skeleton, Stack, Text, Textarea, TextInput } from "@mantine/core"
 import { IconCheck, IconCircleDot, IconDots } from "@tabler/icons-react"
 import { useState } from "react"
 
@@ -47,6 +48,18 @@ function QuestRow({
 	const isCompleted = quest.status === "completed"
 	const isToggleable = quest.type === "todo" || quest.type === "daily"
 	const showLastDone = (quest.type === "todo" || quest.type === "event") && quest.lastCompletedAt
+	const { privacyMode } = useOrbitAppStore()
+
+	const getQuestTitle = () => {
+		if (privacyMode) {
+			// const redactedChar = "█"
+			const redactedChar = "*"
+			const visibleChars = quest.title.substring(0, Math.min(quest.title.length, 3))
+			const hiddenChars = quest.title.substring(3).replace(/\S/g, redactedChar)
+			return visibleChars + hiddenChars
+		}
+		return quest.title
+	}
 	return (
 		<div
 			style={{
@@ -64,12 +77,12 @@ function QuestRow({
 				onClick={isToggleable ? () => onToggle(quest) : undefined}
 			/>
 			<Text
-				size="lg"
+				size="md"
 				td={isCompleted ? "line-through" : undefined}
 				c={isCompleted ? "dimmed" : undefined}
 				style={{ flex: 1 }}
 			>
-				{quest.title}
+				{getQuestTitle()}
 			</Text>
 			{showLastDone && (
 				<Badge
@@ -126,7 +139,19 @@ function NewQuestRow({ onSubmit }: { onSubmit: (title: string, type: Quest["type
 			}}
 		>
 			<TypeIcon type={type} onClick={() => setType(cycleType(type))} />
-			<TextInput
+			<Textarea
+				variant="unstyled"
+				placeholder="New quest..."
+				value={title}
+				onChange={(e) => setTitle(e.currentTarget.value)}
+				onKeyDown={(e) => { if (e.key === "Enter") submit() }}
+				onBlur={submit}
+				size="md"
+				py={8}
+				style={{ flex: 1 }}
+				styles={{ input: { padding: 0, fontSize: "var(--mantine-font-size-md)" } }}
+			/>
+			{/*<TextInput
 				// ref={inputRef}
 				variant="unstyled"
 				placeholder="New quest..."
@@ -137,7 +162,7 @@ function NewQuestRow({ onSubmit }: { onSubmit: (title: string, type: Quest["type
 				size="md"
 				style={{ flex: 1 }}
 				styles={{ input: { padding: 0, fontSize: "var(--mantine-font-size-md)" } }}
-			/>
+			/>*/}
 		</div>
 	)
 }

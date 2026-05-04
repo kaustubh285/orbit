@@ -5,6 +5,7 @@ import {
 	postQuestsMutation, postSavesMutation,
 } from '@orbit/client'
 import { useQuestsStore } from '@/store/quests.store'
+import { useOrbitAppStore } from '@/store/orbit-app.store'
 import type { Quest } from '@/types'
 
 export type QuestFields = {
@@ -18,6 +19,7 @@ export type QuestFields = {
 export function useCreateNew() {
 	const selectedDate = useQuestsStore((s) => s.selectedDate)
 	const queryClient = useQueryClient()
+	const { addPendingSubmission, removePendingSubmission } = useOrbitAppStore((s) => s.actions)
 
 	const lists = useQuery(getListsOptions())
 
@@ -32,31 +34,40 @@ export function useCreateNew() {
 	})
 
 	function onSaveSubmit(sourceUrl: string, note?: string, listId?: string) {
-		createSave.mutate({
-			body: {
-				sourceUrl,
-				...(note?.trim() ? { note: note.trim() } : {}),
-				...(listId ? { listId } : {}),
-			},
-		} as Parameters<typeof createSave.mutate>[0])
+		const id = crypto.randomUUID()
+		const payload = {
+			sourceUrl,
+			...(note?.trim() ? { note: note.trim() } : {}),
+			...(listId ? { listId } : {}),
+		}
+		addPendingSubmission({ id, createdAt: new Date().toISOString(), apiCallKey: "postSave", payload })
+		createSave.mutate(
+			{ body: payload } as Parameters<typeof createSave.mutate>[0],
+			{ onSuccess: () => removePendingSubmission(id) },
+		)
 	}
 
 	function onQuestSubmit(title: string, type: Quest["type"], fields: QuestFields, listId?: string) {
-		const body: Record<string, unknown> = { type, title }
+		const payload: Record<string, unknown> = { type, title }
 
 		if (type === 'todo') {
-			body.dueAt = fields.dueAt ?? (selectedDate ? new Date(`${selectedDate}T00:00:00.000Z`).toISOString() : null)
+			payload.dueAt = fields.dueAt ?? (selectedDate ? new Date(`${selectedDate}T00:00:00.000Z`).toISOString() : null)
 		} else if (type === 'note') {
-			body.body = fields.body.trim() || null
+			payload.body = fields.body.trim() || null
 		} else if (type === 'event') {
-			body.startAt = fields.startAt ?? null
-			body.endAt = fields.endAt ?? null
-			body.location = fields.location.trim() || null
+			payload.startAt = fields.startAt ?? null
+			payload.endAt = fields.endAt ?? null
+			payload.location = fields.location.trim() || null
 		}
 
-		if (listId) body.listId = listId
+		if (listId) payload.listId = listId
 
-		createQuest.mutate({ body } as Parameters<typeof createQuest.mutate>[0])
+		const id = crypto.randomUUID()
+		addPendingSubmission({ id, createdAt: new Date().toISOString(), apiCallKey: "postQuest", payload: payload as any })
+		createQuest.mutate(
+			{ body: payload } as Parameters<typeof createQuest.mutate>[0],
+			{ onSuccess: () => removePendingSubmission(id) },
+		)
 	}
 
 	function onHandleSubmit(
