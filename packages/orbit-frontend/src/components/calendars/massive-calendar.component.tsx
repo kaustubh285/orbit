@@ -22,7 +22,7 @@ export function MassiveCalendar({ opened, onClose }: { opened: boolean; onClose:
 		(counts ?? []).map((entry) => [entry.date, entry])
 	)
 
-	function handleDayClick(date: Date) {
+	function handleDayClick(date: Date | string) {
 		setSelectedDate(dayjs(date).format("YYYY-MM-DD"))
 		onClose()
 	}
