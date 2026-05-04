@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { getQuestsOptions, getQuestsQueryKey, patchQuestsByIdMutation, postQuestsMutation } from "@orbit/client"
+import { getQuestsCountOptions, getQuestsOptions, getQuestsQueryKey, patchQuestsByIdMutation, postQuestsMutation } from "@orbit/client"
 import type { Quest } from "@/types"
 import { useQuestsStore } from "@/store/quests.store"
 import { useOrbitAppStore } from "@/store/orbit-app.store"
@@ -69,4 +69,8 @@ export function useHome() {
 	const isFromCache = quests.isError && !!questsCache[selectedDate]
 
 	return { quests, questsData, isFromCache, submitQuest, toggleQuest, editQuest }
+}
+
+export function useQuestCounts(start: string, end: string) {
+	return useQuery(getQuestsCountOptions({ query: { start, end } }))
 }

@@ -18,6 +18,35 @@ export type GetResponses = {
 
 export type GetResponse = GetResponses[keyof GetResponses];
 
+export type GetQuestsCountData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Start date in YYYY-MM-DD format
+         */
+        start: string;
+        /**
+         * End date in YYYY-MM-DD format
+         */
+        end: string;
+    };
+    url: '/quests/count';
+};
+
+export type GetQuestsCountResponses = {
+    /**
+     * Quest counts per day
+     */
+    200: Array<{
+        date: string;
+        count: number;
+        types: Array<'todo' | 'note' | 'event' | 'daily'>;
+    }>;
+};
+
+export type GetQuestsCountResponse = GetQuestsCountResponses[keyof GetQuestsCountResponses];
+
 export type GetQuestsData = {
     body?: never;
     path?: never;

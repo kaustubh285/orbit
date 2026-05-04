@@ -47,6 +47,7 @@ export function CachedItems() {
 	const [opened, { open, close }] = useDisclosure(false)
 	const cached = useOrbitAppStore((s) => s.pendingSubmissions)
 	const { removePendingSubmission, clearPendingSubmissions } = useOrbitAppStore((s) => s.actions)
+	const { sync } = useSyncPending()
 
 	if (!cached.length) return null
 
@@ -67,7 +68,7 @@ export function CachedItems() {
 						<PendingItem key={item.id} item={item} onRemove={removePendingSubmission} />
 					))}
 					<Group justify="space-between">
-						<Button variant="filled" size="xs" onClick={() => useSyncPending()}>
+						<Button variant="filled" size="xs" onClick={sync}>
 							Sync Now
 						</Button>
 						<Button

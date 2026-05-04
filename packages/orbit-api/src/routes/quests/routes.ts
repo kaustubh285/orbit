@@ -55,6 +55,27 @@ const idParamsSchema = z.object({ id: z.string().uuid() });
 const notFoundSchema = z.object({ message: z.string() });
 const validationErrorSchema = z.object({ error: z.object({}).passthrough() });
 
+const dateRangeQuerySchema = z.object({
+	start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).openapi({ description: "Start date in YYYY-MM-DD format" }),
+	end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).openapi({ description: "End date in YYYY-MM-DD format" }),
+})
+
+export const questCountSchema = z.array(z.object({
+	date: z.string(),
+	count: z.number(),
+	types: z.array(z.enum(questTypeEnum.enumValues)),
+}))
+
+export const count = createRoute({
+	path: "/quests/count",
+	method: "get",
+	tags: ["Quests"],
+	request: { query: dateRangeQuerySchema },
+	responses: {
+		[HttpStatusCodes.OK]: jsonContent(questCountSchema, "Quest counts per day"),
+	},
+})
+
 const listQuerySchema = z.object({
 	type: z.enum(questTypeEnum.enumValues).optional(),
 	status: z.enum(questStatusEnum.enumValues).optional(),
@@ -122,6 +143,7 @@ export const remove = createRoute({
 	},
 });
 
+export type CountRoute = typeof count;
 export type ListRoute = typeof list;
 export type CreateRoute = typeof create;
 export type GetOneRoute = typeof getOne;

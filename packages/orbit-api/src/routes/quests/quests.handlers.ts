@@ -1,16 +1,55 @@
-import { and, desc, eq, gte, lt, or } from "drizzle-orm";
+import { and, desc, eq, gte, lt, or, ne } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { db } from "../../db/db.js";
 import { questsTable } from "../../db/schemas/quests.schema.js";
 import { listItemsTable } from "../../db/schemas/lists.schema.js";
 import type { AppRouteHandler } from "@/lib/types.js";
 import type {
+	CountRoute,
 	CreateRoute,
 	GetOneRoute,
 	ListRoute,
 	RemoveRoute,
 	UpdateRoute,
 } from "./routes.js";
+
+export const countQuests: AppRouteHandler<CountRoute> = async (c) => {
+	const userId = c.var.userId;
+	const { start, end } = c.req.valid("query");
+
+	const rangeStart = new Date(`${start}T00:00:00.000Z`);
+	const rangeEnd = new Date(`${end}T23:59:59.999Z`);
+
+	const quests = await db
+		.select({ type: questsTable.type, dueAt: questsTable.dueAt, startAt: questsTable.startAt })
+		.from(questsTable)
+		.where(
+			and(
+				eq(questsTable.userId, userId),
+				ne(questsTable.status, "archived"),
+				or(
+					and(gte(questsTable.dueAt, rangeStart), lt(questsTable.dueAt, rangeEnd)),
+					and(gte(questsTable.startAt, rangeStart), lt(questsTable.startAt, rangeEnd)),
+				)!,
+			),
+		);
+
+	// Group by date string
+	const byDate = new Map<string, Set<typeof quests[0]["type"]>>();
+	for (const quest of quests) {
+		const dateStr = (quest.dueAt ?? quest.startAt)!.toISOString().split("T")[0];
+		if (!byDate.has(dateStr)) byDate.set(dateStr, new Set());
+		byDate.get(dateStr)!.add(quest.type);
+	}
+
+	const result = Array.from(byDate.entries()).map(([date, types]) => ({
+		date,
+		count: types.size,
+		types: Array.from(types),
+	}));
+
+	return c.json(result, HttpStatusCodes.OK);
+};
 
 export const listQuests: AppRouteHandler<ListRoute> = async (c) => {
 	const userId = c.var.userId;

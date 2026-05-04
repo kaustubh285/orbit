@@ -8,6 +8,7 @@ const router = createAppRouter();
 router.use("*", resolveUser);
 
 router
+	.openapi(routes.count, handlers.countQuests)
 	.openapi(routes.list, handlers.listQuests)
 	.openapi(routes.create, handlers.createQuest)
 	.openapi(routes.getOne, handlers.getOneQuest)

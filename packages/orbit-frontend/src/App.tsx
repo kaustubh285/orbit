@@ -6,12 +6,34 @@ import { AppHeader } from "./components/app-structure/app-header.component"
 import { AppFooter } from "./components/app-structure/app-footer.component"
 import { CreateNewComponent } from "./components/create-new-floater/create-new.component"
 import { useSyncPending } from "./hooks/use-sync-pending.hook"
+import { useOrbitAppStore } from "./store/orbit-app.store"
+import { useEffect, useState } from "react"
 
 export function App() {
 	const { isLoaded, isSignedIn } = useAuth()
+	const lastSignedIn = useOrbitAppStore((s) => s.lastSignedIn)
+	const setLastSignedIn = useOrbitAppStore((s) => s.actions.setLastSignedIn)
+	const [offlineFallback, setOfflineFallback] = useState(false)
 	// useSyncPending()
 
-	if (!isLoaded) {
+	// Keep lastSignedIn in sync with Clerk's auth state
+	useEffect(() => {
+		if (isLoaded) setLastSignedIn(!!isSignedIn)
+	}, [isLoaded, isSignedIn])
+
+	// If Clerk hasn't loaded after 2s and we're offline, use the cached sign-in state
+	useEffect(() => {
+		if (isLoaded) return
+		const timer = setTimeout(() => {
+			if (!navigator.onLine) setOfflineFallback(true)
+		}, 2000)
+		return () => clearTimeout(timer)
+	}, [isLoaded])
+
+	const effectivelyLoaded = isLoaded || offlineFallback
+	const effectivelySignedIn = isSignedIn || (offlineFallback && lastSignedIn)
+
+	if (!effectivelyLoaded) {
 		return (
 			<Center h="100dvh">
 				<Loader />
@@ -19,7 +41,7 @@ export function App() {
 		)
 	}
 
-	if (!isSignedIn) {
+	if (!effectivelySignedIn) {
 		return <Outlet />
 	}
 

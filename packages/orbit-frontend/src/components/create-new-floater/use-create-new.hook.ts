@@ -81,6 +81,14 @@ export function useCreateNew() {
 		const trimmed = title.trim()
 		if (!trimmed) return
 
+		if (!listId) {
+			// get listid from url if url is "/lists/:id"
+			const match = window.location.pathname.match(/^\/lists\/([^/]+)/)
+			if (match) {
+				listId = match[1]
+			}
+
+		}
 		if (mode === 'save') {
 			onSaveSubmit(trimmed, saveNote, listId)
 		} else {
