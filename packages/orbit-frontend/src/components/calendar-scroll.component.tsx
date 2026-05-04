@@ -54,10 +54,13 @@ export default function CalendarScroll() {
 					onDateChange={setViewDate}
 					numberOfDays={numberOfDays}
 					size="md"
-					getDayProps={(date) => (date === todayStr ? { "data-today": true } : {})}
+					getDayProps={(date) => ({
+						...(date === todayStr ? { "data-today": true } : {}),
+						"data-weekday": dayjs(date).format("dd"),
+					})}
 					styles={{
 						root: { width: "100%" },
-						day: { width: cellSize, minWidth: "unset" },
+						day: { width: cellSize, minWidth: "unset", height: "unset", paddingTop: 2, paddingBottom: 2 },
 					}}
 				/>
 			</div>
