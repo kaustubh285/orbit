@@ -3,15 +3,28 @@ import { getQuestsOptions, getQuestsQueryKey, patchQuestsByIdMutation, postQuest
 import type { Quest } from "@/types"
 import { useQuestsStore } from "@/store/quests.store"
 import { useOrbitAppStore } from "@/store/orbit-app.store"
+import { useEffect } from "react"
 
 export function useHome() {
 	const selectedDate = useQuestsStore((state) => state.selectedDate)
+	const questsCache = useQuestsStore((state) => state.questsCache)
+	const { setCachedQuests } = useQuestsStore((state) => state.actions)
 	const queryClient = useQueryClient()
 	const { addPendingSubmission, removePendingSubmission } = useOrbitAppStore((s) => s.actions)
 
 	const quests = useQuery(
 		getQuestsOptions({ query: { date: selectedDate ?? undefined } }),
 	)
+
+	useEffect(() => {
+		if (quests.isSuccess && quests.data) {
+			setCachedQuests(selectedDate, quests.data)
+		}
+	}, [quests.isSuccess, quests.data, selectedDate])
+
+	const questsData = quests.isError
+		? (questsCache[selectedDate] ?? [])
+		: (quests.data ?? [])
 
 	const createQuest = useMutation({
 		...postQuestsMutation(),
@@ -53,5 +66,7 @@ export function useHome() {
 		} as Parameters<typeof updateQuest.mutate>[0])
 	}
 
-	return { quests, submitQuest, toggleQuest, editQuest }
+	const isFromCache = quests.isError && !!questsCache[selectedDate]
+
+	return { quests, questsData, isFromCache, submitQuest, toggleQuest, editQuest }
 }
