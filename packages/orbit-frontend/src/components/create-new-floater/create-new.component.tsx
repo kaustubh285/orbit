@@ -1,30 +1,34 @@
 import { useState } from 'react'
 import {
 	ActionIcon, Button, Chip, Drawer, Group,
-	Select, Stack, Text, Textarea, TextInput,
+	SegmentedControl, Select, Stack, Text, Textarea, TextInput,
 } from '@mantine/core'
 import { DateTimePicker } from '@mantine/dates'
 import { IconBookmark, IconChecklist, IconPlus } from '@tabler/icons-react'
 import { TYPE_COLOR, TYPE_ICON } from '@/CONSTANTS'
 import type { Quest } from '@/types'
 import { useCreateNew } from './use-create-new.hook'
+import { useNavigate } from '@tanstack/react-router'
+import ROUTES from '@/routes'
+import dayjs from 'dayjs'
 
 const QUEST_TYPES: Quest["type"][] = ['todo', 'note', 'event', 'daily']
+
+const REMEMBRAL_EMOJIS = ['🍞', '🚀', '✈️', '🎵', '🏃', '📚', '🎉', '❤️', '🍕', '⚽', '🎬', '🌟']
 
 function looksLikeUrl(value: string): boolean {
 	const v = value.trim()
 	if (!v) return false
 	if (/^https?:\/\//i.test(v)) return true
 	if (/^www\./i.test(v)) return true
-	// bare domain with no spaces: "github.com/...", "youtube.com/..."
 	if (!v.includes(' ') && /^[^\s.]+\.[a-z]{2,}/i.test(v)) return true
 	return false
 }
 
-function getDrawerSize(title: string, mode: 'quest' | 'save', questType: Quest["type"]): string {
+function getDrawerSize(title: string, mode: 'quest' | 'save', questType: Quest["type"], isRemembral: boolean): string {
 	if (!title) return '35%'
 	if (mode === 'save') return 'sm'
-	if (questType === 'event') return 'lg'
+	if (questType === 'event') return isRemembral ? 'md' : 'lg'
 	if (questType === 'note') return 'md'
 	return 'sm'
 }
@@ -41,6 +45,10 @@ export function CreateNewComponent() {
 	const [endAt, setEndAt] = useState<string | null>(null)
 	const [location, setLocation] = useState('')
 
+	// remembral-specific state
+	const [isRemembral, setIsRemembral] = useState(false)
+	const [emoji, setEmoji] = useState<string | null>(null)
+
 	// save-specific state
 	const [saveNote, setSaveNote] = useState('')
 
@@ -48,6 +56,7 @@ export function CreateNewComponent() {
 	const [modeOverride, setModeOverride] = useState<'quest' | 'save' | null>(null)
 
 	const { lists, onHandleSubmit, isPending } = useCreateNew()
+	const navigate = useNavigate()
 
 	const mode = modeOverride ?? (looksLikeUrl(title) ? 'save' : 'quest')
 
@@ -59,6 +68,8 @@ export function CreateNewComponent() {
 		setStartAt(null)
 		setEndAt(null)
 		setLocation('')
+		setIsRemembral(false)
+		setEmoji(null)
 		setSaveNote('')
 		setListId(null)
 		setModeOverride(null)
@@ -69,9 +80,12 @@ export function CreateNewComponent() {
 		reset()
 	}
 
-	function handleSubmit() {
-		onHandleSubmit(mode, title, questType, { dueAt, body, startAt, endAt, location }, saveNote, listId ?? undefined)
+	async function handleSubmit() {
+		const result = await onHandleSubmit(mode, title, questType, { dueAt, body, startAt, endAt, location, isRemembral, emoji }, saveNote, listId ?? undefined)
 		handleClose()
+		if (result && questType === 'note') {
+			navigate({ to: ROUTES.NOTE_DETAIL, params: { noteId: result.id } })
+		}
 	}
 
 	return (
@@ -89,7 +103,7 @@ export function CreateNewComponent() {
 
 			<Drawer
 				position="bottom"
-				size={getDrawerSize(title, mode, questType)}
+				size={getDrawerSize(title, mode, questType, isRemembral)}
 				opened={opened}
 				onClose={handleClose}
 				title="Create new"
@@ -190,22 +204,90 @@ export function CreateNewComponent() {
 
 									{questType === 'event' && (
 										<Stack gap="xs">
-											<DateTimePicker
-												placeholder="Starts at"
-												value={startAt}
-												onChange={setStartAt}
+											<SegmentedControl
+												value={isRemembral ? 'happened' : 'future'}
+												onChange={(v) => {
+													const remembral = v === 'happened'
+													setIsRemembral(remembral)
+													if (remembral) {
+														setStartAt(dayjs().startOf('day').toISOString())
+														setEndAt(null)
+													} else {
+														setStartAt(null)
+														setEmoji(null)
+													}
+												}}
+												data={[
+													{ label: 'Needs to happen', value: 'future' },
+													{ label: 'Already happened', value: 'happened' },
+												]}
+												size="xs"
+												fullWidth
 											/>
-											<DateTimePicker
-												placeholder="Ends at (optional)"
-												value={endAt}
-												onChange={setEndAt}
-												clearable
-											/>
-											<TextInput
-												placeholder="Location (optional)"
-												value={location}
-												onChange={(e) => setLocation(e.currentTarget.value)}
-											/>
+
+											{!isRemembral && (
+												<>
+													<DateTimePicker
+														placeholder="Starts at"
+														value={startAt}
+														onChange={setStartAt}
+													/>
+													<DateTimePicker
+														placeholder="Ends at (optional)"
+														value={endAt}
+														onChange={setEndAt}
+														clearable
+													/>
+													<TextInput
+														placeholder="Location (optional)"
+														value={location}
+														onChange={(e) => setLocation(e.currentTarget.value)}
+													/>
+												</>
+											)}
+
+											{isRemembral && (
+												<>
+													<Group gap="xs">
+														{[
+															{ label: 'Today', iso: dayjs().startOf('day').toISOString() },
+															{ label: 'Yesterday', iso: dayjs().subtract(1, 'day').startOf('day').toISOString() },
+															{ label: 'Last week', iso: dayjs().subtract(7, 'day').startOf('day').toISOString() },
+														].map(({ label, iso }) => (
+															<Chip
+																key={label}
+																checked={startAt === iso}
+																onChange={() => setStartAt(iso)}
+																size="sm"
+																variant="light"
+															>
+																{label}
+															</Chip>
+														))}
+													</Group>
+													<DateTimePicker
+														placeholder="Or pick a date…"
+														value={startAt}
+														onChange={setStartAt}
+														maxDate={new Date()}
+													/>
+													<Text size="xs" c="dimmed">Add an emoji (optional)</Text>
+													<Group gap={6}>
+														{REMEMBRAL_EMOJIS.map((e) => (
+															<ActionIcon
+																key={e}
+																variant={emoji === e ? 'filled' : 'subtle'}
+																size="lg"
+																radius="xl"
+																onClick={() => setEmoji(emoji === e ? null : e)}
+																style={{ fontSize: 18 }}
+															>
+																{e}
+															</ActionIcon>
+														))}
+													</Group>
+												</>
+											)}
 										</Stack>
 									)}
 								</>
@@ -239,7 +321,7 @@ export function CreateNewComponent() {
 							disabled={!title.trim() || isPending}
 							loading={isPending}
 						>
-							{mode === 'save' ? 'Save' : 'Add quest'}
+							{mode === 'save' ? 'Save' : isRemembral ? 'Add remembral' : 'Add quest'}
 						</Button>
 						<Button fullWidth variant="outline" color="red" onClick={handleClose}>
 							Cancel

@@ -4,6 +4,7 @@ import {
 	text,
 	uuid,
 	timestamp,
+	boolean,
 	index,
 } from "drizzle-orm/pg-core";
 import { id, createdAt, updatedAt } from "../schema.helper";
@@ -61,6 +62,10 @@ export const questsTable = pgTable(
 
 		// daily-specific
 		lastCompletedAt: timestamp("last_completed_at", { withTimezone: true }),
+
+		// remembral-specific
+		isRemembral: boolean("is_remembral").notNull().default(false),
+		emoji: text("emoji"),
 	},
 	(table) => ({
 		userStatusIdx: index("quests_user_status_idx").on(table.userId, table.status),

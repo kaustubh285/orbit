@@ -47,6 +47,46 @@ export type GetQuestsCountResponses = {
 
 export type GetQuestsCountResponse = GetQuestsCountResponses[keyof GetQuestsCountResponses];
 
+export type GetQuestsTimelineData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Fetch remembrals before this ISO datetime
+         */
+        before?: string;
+        limit?: number;
+    };
+    url: '/quests/timeline';
+};
+
+export type GetQuestsTimelineResponses = {
+    /**
+     * Paginated remembral timeline
+     */
+    200: Array<{
+        id: string;
+        userId: string;
+        type: 'todo' | 'note' | 'event' | 'daily';
+        status: 'active' | 'completed' | 'archived';
+        priority: 'urgent' | 'important' | 'quick_win' | 'deep_work' | 'someday' | 'waiting';
+        title: string;
+        body: string | null;
+        dueAt: string | null;
+        completedAt: string | null;
+        startAt: string | null;
+        endAt: string | null;
+        location: string | null;
+        lastCompletedAt: string | null;
+        isRemembral: boolean;
+        emoji: string | null;
+        createdAt: string;
+        updatedAt: string;
+    }>;
+};
+
+export type GetQuestsTimelineResponse = GetQuestsTimelineResponses[keyof GetQuestsTimelineResponses];
+
 export type GetQuestsData = {
     body?: never;
     path?: never;
@@ -80,6 +120,8 @@ export type GetQuestsResponses = {
         endAt: string | null;
         location: string | null;
         lastCompletedAt: string | null;
+        isRemembral: boolean;
+        emoji: string | null;
         createdAt: string;
         updatedAt: string;
     }>;
@@ -103,6 +145,8 @@ export type PostQuestsData = {
         endAt?: string | null;
         location?: string | null;
         lastCompletedAt?: string | null;
+        isRemembral?: boolean;
+        emoji?: string | null;
         listId?: string | null;
     };
     path?: never;
@@ -141,6 +185,8 @@ export type PostQuestsResponses = {
         endAt: string | null;
         location: string | null;
         lastCompletedAt: string | null;
+        isRemembral: boolean;
+        emoji: string | null;
         createdAt: string;
         updatedAt: string;
     };
@@ -215,6 +261,8 @@ export type GetQuestsByIdResponses = {
         endAt: string | null;
         location: string | null;
         lastCompletedAt: string | null;
+        isRemembral: boolean;
+        emoji: string | null;
         createdAt: string;
         updatedAt: string;
     };
@@ -238,6 +286,8 @@ export type PatchQuestsByIdData = {
         endAt?: string | null;
         location?: string | null;
         lastCompletedAt?: string | null;
+        isRemembral?: boolean;
+        emoji?: string | null;
         listId?: string | null;
     };
     path: {
@@ -284,6 +334,8 @@ export type PatchQuestsByIdResponses = {
         endAt: string | null;
         location: string | null;
         lastCompletedAt: string | null;
+        isRemembral: boolean;
+        emoji: string | null;
         createdAt: string;
         updatedAt: string;
     };
@@ -667,6 +719,8 @@ export type GetListsByIdResponses = {
                 endAt: string | null;
                 location: string | null;
                 lastCompletedAt: string | null;
+                isRemembral: boolean;
+                emoji: string | null;
                 createdAt: string;
                 updatedAt: string;
             } | null;
@@ -801,6 +855,8 @@ export type PostListsByIdItemsResponses = {
             endAt: string | null;
             location: string | null;
             lastCompletedAt: string | null;
+            isRemembral: boolean;
+            emoji: string | null;
             createdAt: string;
             updatedAt: string;
         } | null;

@@ -112,6 +112,160 @@
         }
       }
     },
+    "/quests/timeline": {
+      "get": {
+        "tags": [
+          "Quests"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Fetch remembrals before this ISO datetime"
+            },
+            "required": false,
+            "name": "before",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated remembral timeline",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "userId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "todo",
+                          "note",
+                          "event",
+                          "daily"
+                        ]
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "active",
+                          "completed",
+                          "archived"
+                        ]
+                      },
+                      "priority": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                          "urgent",
+                          "important",
+                          "quick_win",
+                          "deep_work",
+                          "someday",
+                          "waiting"
+                        ]
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "body": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "dueAt": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "date-time"
+                      },
+                      "completedAt": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "date-time"
+                      },
+                      "startAt": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "date-time"
+                      },
+                      "endAt": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "date-time"
+                      },
+                      "location": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "lastCompletedAt": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "date-time"
+                      },
+                      "isRemembral": {
+                        "type": "boolean"
+                      },
+                      "emoji": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "userId",
+                      "type",
+                      "status",
+                      "priority",
+                      "title",
+                      "body",
+                      "dueAt",
+                      "completedAt",
+                      "startAt",
+                      "endAt",
+                      "location",
+                      "lastCompletedAt",
+                      "isRemembral",
+                      "emoji",
+                      "createdAt",
+                      "updatedAt"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/quests": {
       "get": {
         "tags": [
@@ -255,6 +409,13 @@
                         "nullable": true,
                         "format": "date-time"
                       },
+                      "isRemembral": {
+                        "type": "boolean"
+                      },
+                      "emoji": {
+                        "type": "string",
+                        "nullable": true
+                      },
                       "createdAt": {
                         "type": "string",
                         "format": "date-time"
@@ -278,6 +439,8 @@
                       "endAt",
                       "location",
                       "lastCompletedAt",
+                      "isRemembral",
+                      "emoji",
                       "createdAt",
                       "updatedAt"
                     ]
@@ -366,6 +529,13 @@
                     "type": "string",
                     "nullable": true,
                     "format": "date-time"
+                  },
+                  "isRemembral": {
+                    "type": "boolean"
+                  },
+                  "emoji": {
+                    "type": "string",
+                    "nullable": true
                   },
                   "listId": {
                     "type": "string",
@@ -462,6 +632,13 @@
                       "nullable": true,
                       "format": "date-time"
                     },
+                    "isRemembral": {
+                      "type": "boolean"
+                    },
+                    "emoji": {
+                      "type": "string",
+                      "nullable": true
+                    },
                     "createdAt": {
                       "type": "string",
                       "format": "date-time"
@@ -485,6 +662,8 @@
                     "endAt",
                     "location",
                     "lastCompletedAt",
+                    "isRemembral",
+                    "emoji",
                     "createdAt",
                     "updatedAt"
                   ]
@@ -611,6 +790,13 @@
                       "nullable": true,
                       "format": "date-time"
                     },
+                    "isRemembral": {
+                      "type": "boolean"
+                    },
+                    "emoji": {
+                      "type": "string",
+                      "nullable": true
+                    },
                     "createdAt": {
                       "type": "string",
                       "format": "date-time"
@@ -634,6 +820,8 @@
                     "endAt",
                     "location",
                     "lastCompletedAt",
+                    "isRemembral",
+                    "emoji",
                     "createdAt",
                     "updatedAt"
                   ]
@@ -751,6 +939,13 @@
                     "nullable": true,
                     "format": "date-time"
                   },
+                  "isRemembral": {
+                    "type": "boolean"
+                  },
+                  "emoji": {
+                    "type": "string",
+                    "nullable": true
+                  },
                   "listId": {
                     "type": "string",
                     "nullable": true,
@@ -842,6 +1037,13 @@
                       "nullable": true,
                       "format": "date-time"
                     },
+                    "isRemembral": {
+                      "type": "boolean"
+                    },
+                    "emoji": {
+                      "type": "string",
+                      "nullable": true
+                    },
                     "createdAt": {
                       "type": "string",
                       "format": "date-time"
@@ -865,6 +1067,8 @@
                     "endAt",
                     "location",
                     "lastCompletedAt",
+                    "isRemembral",
+                    "emoji",
                     "createdAt",
                     "updatedAt"
                   ]
@@ -1948,6 +2152,13 @@
                                 "nullable": true,
                                 "format": "date-time"
                               },
+                              "isRemembral": {
+                                "type": "boolean"
+                              },
+                              "emoji": {
+                                "type": "string",
+                                "nullable": true
+                              },
                               "createdAt": {
                                 "type": "string",
                                 "format": "date-time"
@@ -1971,6 +2182,8 @@
                               "endAt",
                               "location",
                               "lastCompletedAt",
+                              "isRemembral",
+                              "emoji",
                               "createdAt",
                               "updatedAt"
                             ]
@@ -2417,6 +2630,13 @@
                           "nullable": true,
                           "format": "date-time"
                         },
+                        "isRemembral": {
+                          "type": "boolean"
+                        },
+                        "emoji": {
+                          "type": "string",
+                          "nullable": true
+                        },
                         "createdAt": {
                           "type": "string",
                           "format": "date-time"
@@ -2440,6 +2660,8 @@
                         "endAt",
                         "location",
                         "lastCompletedAt",
+                        "isRemembral",
+                        "emoji",
                         "createdAt",
                         "updatedAt"
                       ]

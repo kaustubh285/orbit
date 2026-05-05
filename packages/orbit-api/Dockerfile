@@ -7,4 +7,4 @@ RUN bun install --frozen-lockfile
 COPY src ./src
 
 EXPOSE 3000
-CMD ["bun", "src/index.ts"]
+CMD ["sh", "-c", "bun src/db/migrate.ts && bun src/index.ts"]

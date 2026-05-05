@@ -14,6 +14,8 @@ export type QuestFields = {
 	startAt: string | null
 	endAt: string | null
 	location: string
+	isRemembral: boolean
+	emoji: string | null
 }
 
 export function useCreateNew() {
@@ -47,7 +49,7 @@ export function useCreateNew() {
 		)
 	}
 
-	function onQuestSubmit(title: string, type: Quest["type"], fields: QuestFields, listId?: string) {
+	async function onQuestSubmit(title: string, type: Quest["type"], fields: QuestFields, listId?: string) {
 		const payload: Record<string, unknown> = { type, title }
 
 		if (type === 'todo') {
@@ -58,19 +60,22 @@ export function useCreateNew() {
 			payload.startAt = fields.startAt ?? null
 			payload.endAt = fields.endAt ?? null
 			payload.location = fields.location.trim() || null
+			payload.isRemembral = fields.isRemembral
+			payload.emoji = fields.emoji
 		}
 
 		if (listId) payload.listId = listId
 
-		const id = crypto.randomUUID()
-		addPendingSubmission({ id, createdAt: new Date().toISOString(), apiCallKey: "postQuest", payload: payload as any })
-		createQuest.mutate(
+		const pendingId = crypto.randomUUID()
+		addPendingSubmission({ id: pendingId, createdAt: new Date().toISOString(), apiCallKey: "postQuest", payload: payload as any })
+		const quest = await createQuest.mutateAsync(
 			{ body: payload } as Parameters<typeof createQuest.mutate>[0],
-			{ onSuccess: () => removePendingSubmission(id) },
 		)
+		removePendingSubmission(pendingId)
+		return quest
 	}
 
-	function onHandleSubmit(
+	async function onHandleSubmit(
 		mode: 'quest' | 'save',
 		title: string,
 		questType: Quest["type"],
@@ -82,17 +87,15 @@ export function useCreateNew() {
 		if (!trimmed) return
 
 		if (!listId) {
-			// get listid from url if url is "/lists/:id"
 			const match = window.location.pathname.match(/^\/lists\/([^/]+)/)
-			if (match) {
-				listId = match[1]
-			}
-
+			if (match) listId = match[1]
 		}
+
 		if (mode === 'save') {
 			onSaveSubmit(trimmed, saveNote, listId)
+			return null
 		} else {
-			onQuestSubmit(trimmed, questType, fields, listId)
+			return onQuestSubmit(trimmed, questType, fields, listId)
 		}
 	}
 

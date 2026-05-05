@@ -30,6 +30,8 @@ export const selectQuestSchema = z.object({
 	endAt: coerceDatetime,
 	location: z.string().nullable(),
 	lastCompletedAt: coerceDatetime,
+	isRemembral: z.boolean(),
+	emoji: z.string().nullable(),
 	createdAt: z.string().datetime({ offset: true }),
 	updatedAt: z.string().datetime({ offset: true }),
 });
@@ -46,6 +48,8 @@ export const insertQuestSchema = z.object({
 	endAt: coerceDatetime.optional(),
 	location: z.string().nullable().optional(),
 	lastCompletedAt: coerceDatetime.optional(),
+	isRemembral: z.boolean().optional(),
+	emoji: z.string().nullable().optional(),
 	listId: z.string().uuid().nullable().optional(),
 });
 
@@ -143,7 +147,23 @@ export const remove = createRoute({
 	},
 });
 
+const timelineQuerySchema = z.object({
+	before: z.string().datetime({ offset: true }).optional().openapi({ description: "Fetch remembrals before this ISO datetime" }),
+	limit: z.coerce.number().int().min(1).max(50).default(20),
+});
+
+export const timeline = createRoute({
+	path: "/quests/timeline",
+	method: "get",
+	tags: ["Quests"],
+	request: { query: timelineQuerySchema },
+	responses: {
+		[HttpStatusCodes.OK]: jsonContent(z.array(selectQuestSchema), "Paginated remembral timeline"),
+	},
+});
+
 export type CountRoute = typeof count;
+export type TimelineRoute = typeof timeline;
 export type ListRoute = typeof list;
 export type CreateRoute = typeof create;
 export type GetOneRoute = typeof getOne;

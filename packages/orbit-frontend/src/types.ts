@@ -11,6 +11,8 @@ export type Quest = {
 	endAt: string | null
 	location: string | null
 	lastCompletedAt: string | null
+	isRemembral: boolean
+	emoji: string | null
 }
 
 export type List = {

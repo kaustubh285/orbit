@@ -9,6 +9,7 @@ router.use("*", resolveUser);
 
 router
 	.openapi(routes.count, handlers.countQuests)
+	.openapi(routes.timeline, handlers.timelineQuests)
 	.openapi(routes.list, handlers.listQuests)
 	.openapi(routes.create, handlers.createQuest)
 	.openapi(routes.getOne, handlers.getOneQuest)

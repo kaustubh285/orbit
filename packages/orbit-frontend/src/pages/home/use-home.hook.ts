@@ -22,9 +22,10 @@ export function useHome() {
 		}
 	}, [quests.isSuccess, quests.data, selectedDate])
 
-	const questsData = quests.isError
+	const questsData = (quests.isError
 		? (questsCache[selectedDate] ?? [])
 		: (quests.data ?? [])
+	).filter((q) => q.type !== "note")
 
 	const createQuest = useMutation({
 		...postQuestsMutation(),

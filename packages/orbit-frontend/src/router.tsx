@@ -14,6 +14,9 @@ import SavesPage from "./pages/saves/saves.page"
 import { ListsPage } from "./pages/lists/lists.page"
 import { ListDetailPage } from "./pages/lists/list-details/list-detail.page"
 import LoginPage from "./pages/auth/login.page"
+import { NotesPage } from "./pages/notes/notes.page"
+import { NoteDetailPage } from "./pages/notes/note-detail.page"
+import { TimelinePage } from "./pages/timeline/timeline.page"
 
 type AuthContext = {
 	isLoaded: boolean
@@ -70,6 +73,27 @@ const listDetailRoute = createRoute({
 	component: ListDetailPage,
 })
 
+const notesRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: ROUTES.NOTES,
+	beforeLoad: requireAuth,
+	component: NotesPage,
+})
+
+const noteDetailRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: ROUTES.NOTE_DETAIL,
+	beforeLoad: requireAuth,
+	component: NoteDetailPage,
+})
+
+const timelineRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: ROUTES.TIMELINE,
+	beforeLoad: requireAuth,
+	component: TimelinePage,
+})
+
 const loginRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: ROUTES.LOGIN,
@@ -82,6 +106,9 @@ const routeTree = rootRoute.addChildren([
 	savesRoute,
 	listsRoute,
 	listDetailRoute,
+	notesRoute,
+	noteDetailRoute,
+	timelineRoute,
 	loginRoute,
 ])
 

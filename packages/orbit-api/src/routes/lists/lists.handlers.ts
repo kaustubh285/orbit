@@ -107,6 +107,27 @@ export const addListItem: AppRouteHandler<AddItemRoute> = async (c) => {
 		return c.json({ message: "List not found" }, HttpStatusCodes.NOT_FOUND);
 	}
 
+	// Verify the quest/save being linked belongs to this user (prevents IDOR)
+	if (questId) {
+		const [quest] = await db
+			.select({ id: questsTable.id })
+			.from(questsTable)
+			.where(and(eq(questsTable.id, questId), eq(questsTable.userId, userId)));
+		if (!quest) {
+			return c.json({ message: "Quest not found" }, HttpStatusCodes.NOT_FOUND);
+		}
+	}
+
+	if (saveId) {
+		const [save] = await db
+			.select({ id: savesTable.id })
+			.from(savesTable)
+			.where(and(eq(savesTable.id, saveId), eq(savesTable.userId, userId)));
+		if (!save) {
+			return c.json({ message: "Save not found" }, HttpStatusCodes.NOT_FOUND);
+		}
+	}
+
 	const [item] = await db
 		.insert(listItemsTable)
 		.values({ listId: id, questId: questId ?? null, saveId: saveId ?? null })

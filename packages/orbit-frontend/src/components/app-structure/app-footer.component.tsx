@@ -1,13 +1,14 @@
 import ROUTES from "@/routes"
 import { AppShell, Group, Text, UnstyledButton } from "@mantine/core"
-import { IconBookmark, IconList, IconRocket, IconSettings } from "@tabler/icons-react"
+import { IconBookmark, IconFileText, IconList, IconRocket, IconTimeline } from "@tabler/icons-react"
 import { useLocation, useNavigate } from "@tanstack/react-router"
 
 const NAV_ITEMS = [
 	{ label: "Quests", icon: IconRocket, to: ROUTES.HOME, accent: "ocean-blue", shade: 4 },
+	{ label: "Notes", icon: IconFileText, to: ROUTES.NOTES, accent: "gray", shade: 4 },
 	{ label: "Saves", icon: IconBookmark, to: ROUTES.SAVES, accent: "amber", shade: 5 },
 	{ label: "Lists", icon: IconList, to: ROUTES.LISTS, accent: "violet", shade: 5 },
-	{ label: "Settings", icon: IconSettings, to: ROUTES.SETTINGS, accent: "ocean-blue", shade: 4 },
+	{ label: "Timeline", icon: IconTimeline, to: ROUTES.TIMELINE, accent: "pink", shade: 4 },
 ]
 
 export function AppFooter() {
@@ -18,7 +19,9 @@ export function AppFooter() {
 		<AppShell.Footer style={{ borderTop: "1px solid var(--mantine-color-dark-4)", paddingBottom: "env(safe-area-inset-bottom)" }}>
 			<Group h="100%" justify="space-around" align="center" px="sm" gap={0}>
 				{NAV_ITEMS.map(({ label, icon: Icon, to, accent, shade }) => {
-					const active = location.pathname === to
+					const active = to === ROUTES.HOME
+						? location.pathname === to
+						: location.pathname.startsWith(to)
 					return (
 						<UnstyledButton
 							key={to}

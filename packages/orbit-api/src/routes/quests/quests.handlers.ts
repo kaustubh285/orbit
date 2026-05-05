@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lt, or, ne } from "drizzle-orm";
+import { and, desc, eq, gte, lt, lte, or, ne } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { db } from "../../db/db.js";
 import { questsTable } from "../../db/schemas/quests.schema.js";
@@ -6,6 +6,7 @@ import { listItemsTable } from "../../db/schemas/lists.schema.js";
 import type { AppRouteHandler } from "@/lib/types.js";
 import type {
 	CountRoute,
+	TimelineRoute,
 	CreateRoute,
 	GetOneRoute,
 	ListRoute,
@@ -51,6 +52,30 @@ export const countQuests: AppRouteHandler<CountRoute> = async (c) => {
 	return c.json(result, HttpStatusCodes.OK);
 };
 
+export const timelineQuests: AppRouteHandler<TimelineRoute> = async (c) => {
+	const userId = c.var.userId;
+	const { before, limit } = c.req.valid("query");
+
+	const conditions = [
+		eq(questsTable.userId, userId),
+		eq(questsTable.isRemembral, true),
+		ne(questsTable.status, "archived"),
+	];
+
+	if (before) {
+		conditions.push(lte(questsTable.startAt, new Date(before)));
+	}
+
+	const quests = await db
+		.select()
+		.from(questsTable)
+		.where(and(...conditions))
+		.orderBy(desc(questsTable.startAt))
+		.limit(limit);
+
+	return c.json(quests, HttpStatusCodes.OK);
+};
+
 export const listQuests: AppRouteHandler<ListRoute> = async (c) => {
 	const userId = c.var.userId;
 	const { type, status, priority, date } = c.req.valid("query");
@@ -83,7 +108,7 @@ function toDate(val: string | null | undefined): Date | null | undefined {
 
 export const createQuest: AppRouteHandler<CreateRoute> = async (c) => {
 	const userId = c.var.userId;
-	const { dueAt, completedAt, startAt, endAt, lastCompletedAt, listId, ...rest } = c.req.valid("json");
+	const { dueAt, completedAt, startAt, endAt, lastCompletedAt, listId, isRemembral, emoji, ...rest } = c.req.valid("json");
 
 	let resolvedLastCompletedAt = toDate(lastCompletedAt);
 
@@ -121,6 +146,8 @@ export const createQuest: AppRouteHandler<CreateRoute> = async (c) => {
 			startAt: toDate(startAt),
 			endAt: toDate(endAt),
 			lastCompletedAt: resolvedLastCompletedAt,
+			isRemembral: isRemembral ?? false,
+			emoji: emoji ?? null,
 		})
 		.returning();
 
@@ -151,7 +178,7 @@ export const getOneQuest: AppRouteHandler<GetOneRoute> = async (c) => {
 export const updateQuest: AppRouteHandler<UpdateRoute> = async (c) => {
 	const userId = c.var.userId;
 	const { id } = c.req.valid("param");
-	const { dueAt, completedAt, startAt, endAt, lastCompletedAt, listId, ...rest } = c.req.valid("json");
+	const { dueAt, completedAt, startAt, endAt, lastCompletedAt, listId, isRemembral, emoji, ...rest } = c.req.valid("json");
 
 	const resolvedCompletedAt = rest.status === "completed" && completedAt === undefined
 		? new Date()
@@ -166,6 +193,8 @@ export const updateQuest: AppRouteHandler<UpdateRoute> = async (c) => {
 			startAt: toDate(startAt),
 			endAt: toDate(endAt),
 			lastCompletedAt: toDate(lastCompletedAt),
+			...(isRemembral !== undefined ? { isRemembral } : {}),
+			...(emoji !== undefined ? { emoji } : {}),
 		})
 		.where(and(eq(questsTable.id, id), eq(questsTable.userId, userId)))
 		.returning();
