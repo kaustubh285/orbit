@@ -1,20 +1,36 @@
 import { useState } from 'react'
 import {
 	ActionIcon, Button, Chip, Drawer, Group,
-	SegmentedControl, Select, Stack, Text, Textarea, TextInput,
+	Select, Stack, Text, Textarea, TextInput,
 } from '@mantine/core'
 import { DateTimePicker } from '@mantine/dates'
-import { IconBookmark, IconChecklist, IconPlus } from '@tabler/icons-react'
-import { TYPE_COLOR, TYPE_ICON } from '@/CONSTANTS'
-import type { Quest } from '@/types'
-import { useCreateNew } from './use-create-new.hook'
+import {
+	IconBookmark, IconCalendarEvent, IconFileText,
+	IconPlus, IconRefresh, IconSparkles, IconSquareCheck,
+} from '@tabler/icons-react'
 import { useNavigate } from '@tanstack/react-router'
-import ROUTES from '@/routes'
 import dayjs from 'dayjs'
+import { useCreateNew, type UiType, type QuestFields } from './use-create-new.hook'
+import ROUTES from '@/routes'
 
-const QUEST_TYPES: Quest["type"][] = ['todo', 'note', 'event', 'daily']
+// ─── Constants ───────────────────────────────────────────────────────────────
 
 const REMEMBRAL_EMOJIS = ['🍞', '🚀', '✈️', '🎵', '🏃', '📚', '🎉', '❤️', '🍕', '⚽', '🎬', '🌟']
+
+const QUICK_DATES = [
+	{ label: 'Today', iso: () => dayjs().startOf('day').toISOString() },
+	{ label: 'Yesterday', iso: () => dayjs().subtract(1, 'day').startOf('day').toISOString() },
+	{ label: 'Last week', iso: () => dayjs().subtract(7, 'day').startOf('day').toISOString() },
+]
+
+const TYPE_OPTIONS: { type: UiType; label: string; Icon: React.ElementType; color: string }[] = [
+	{ type: 'todo', label: 'Todo', Icon: IconSquareCheck, color: 'blue' },
+	{ type: 'note', label: 'Note', Icon: IconFileText, color: 'gray' },
+	{ type: 'event', label: 'Event', Icon: IconCalendarEvent, color: 'pink' },
+	{ type: 'memory', label: 'Memory', Icon: IconSparkles, color: 'violet' },
+	{ type: 'daily', label: 'Daily', Icon: IconRefresh, color: 'teal' },
+	{ type: 'save', label: 'Bookmark', Icon: IconBookmark, color: 'yellow' },
+]
 
 function looksLikeUrl(value: string): boolean {
 	const v = value.trim()
@@ -25,54 +41,142 @@ function looksLikeUrl(value: string): boolean {
 	return false
 }
 
-function getDrawerSize(title: string, mode: 'quest' | 'save', questType: Quest["type"], isRemembral: boolean): string {
-	if (!title) return '35%'
-	if (mode === 'save') return 'sm'
-	if (questType === 'event') return isRemembral ? 'md' : 'lg'
-	if (questType === 'note') return 'md'
+function drawerSize(uiType: UiType, hasTitle: boolean): string {
+	if (!hasTitle) return '35%'
+	if (uiType === 'event' || uiType === 'memory') return 'md'
 	return 'sm'
+}
+
+// ─── Field sub-components ────────────────────────────────────────────────────
+
+function TodoFields({ value, onChange }: { value: string | null; onChange: (v: string | null) => void }) {
+	return (
+		<DateTimePicker
+			placeholder="Due date (optional)"
+			value={value}
+			onChange={onChange}
+			clearable
+		/>
+	)
+}
+
+function EventFields({ fields, onChange }: {
+	fields: Pick<QuestFields, 'startAt' | 'endAt' | 'location'>
+	onChange: (patch: Partial<QuestFields>) => void
+}) {
+	return (
+		<Stack gap="xs">
+			<DateTimePicker
+				placeholder="Starts at"
+				value={fields.startAt}
+				onChange={(v) => onChange({ startAt: v })}
+			/>
+			<DateTimePicker
+				placeholder="Ends at (optional)"
+				value={fields.endAt}
+				onChange={(v) => onChange({ endAt: v })}
+				clearable
+			/>
+			<TextInput
+				placeholder="Location (optional)"
+				value={fields.location}
+				onChange={(e) => onChange({ location: e.currentTarget.value })}
+			/>
+		</Stack>
+	)
+}
+
+function MemoryFields({ fields, onChange }: {
+	fields: Pick<QuestFields, 'startAt' | 'emoji'>
+	onChange: (patch: Partial<QuestFields>) => void
+}) {
+	return (
+		<Stack gap="xs">
+			<Group gap="xs">
+				{QUICK_DATES.map(({ label, iso }) => {
+					const isoVal = iso()
+					return (
+						<Chip
+							key={label}
+							checked={fields.startAt === isoVal}
+							onChange={() => onChange({ startAt: fields.startAt === isoVal ? null : isoVal })}
+							size="sm"
+							variant="light"
+							color="violet"
+						>
+							{label}
+						</Chip>
+					)
+				})}
+			</Group>
+			<DateTimePicker
+				placeholder="Or pick a date…"
+				value={fields.startAt}
+				onChange={(v) => onChange({ startAt: v })}
+				maxDate={new Date()}
+			/>
+			<Text size="xs" c="dimmed">Emoji (optional)</Text>
+			<Group gap={6}>
+				{REMEMBRAL_EMOJIS.map((e) => (
+					<ActionIcon
+						key={e}
+						variant={fields.emoji === e ? 'filled' : 'subtle'}
+						size="lg"
+						radius="xl"
+						onClick={() => onChange({ emoji: fields.emoji === e ? null : e })}
+						style={{ fontSize: 18 }}
+					>
+						{e}
+					</ActionIcon>
+				))}
+			</Group>
+		</Stack>
+	)
+}
+
+function SaveFields({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+	return (
+		<Textarea
+			placeholder="Why are you saving this? (optional)"
+			value={value}
+			onChange={(e) => onChange(e.currentTarget.value)}
+			autosize
+			minRows={2}
+			maxRows={4}
+		/>
+	)
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
+const EMPTY_FIELDS: QuestFields = {
+	dueAt: null, startAt: null, endAt: null, location: '', emoji: null,
 }
 
 export function CreateNewComponent() {
 	const [opened, setOpened] = useState(false)
 	const [title, setTitle] = useState('')
-
-	// quest-specific state
-	const [questType, setQuestType] = useState<Quest["type"]>('todo')
-	const [dueAt, setDueAt] = useState<string | null>(null)
-	const [body, setBody] = useState('')
-	const [startAt, setStartAt] = useState<string | null>(null)
-	const [endAt, setEndAt] = useState<string | null>(null)
-	const [location, setLocation] = useState('')
-
-	// remembral-specific state
-	const [isRemembral, setIsRemembral] = useState(false)
-	const [emoji, setEmoji] = useState<string | null>(null)
-
-	// save-specific state
+	const [uiTypeOverride, setUiTypeOverride] = useState<UiType | null>(null)
+	const [fields, setFields] = useState<QuestFields>(EMPTY_FIELDS)
 	const [saveNote, setSaveNote] = useState('')
-
 	const [listId, setListId] = useState<string | null>(null)
-	const [modeOverride, setModeOverride] = useState<'quest' | 'save' | null>(null)
 
-	const { lists, onHandleSubmit, isPending } = useCreateNew()
+	const { lists, onSubmit, isPending } = useCreateNew()
 	const navigate = useNavigate()
 
-	const mode = modeOverride ?? (looksLikeUrl(title) ? 'save' : 'quest')
+	// Auto-detect save mode from URL; user can override with a chip tap
+	const effectiveType: UiType = uiTypeOverride ?? (looksLikeUrl(title) ? 'save' : 'todo')
+
+	function patchFields(patch: Partial<QuestFields>) {
+		setFields((prev) => ({ ...prev, ...patch }))
+	}
 
 	function reset() {
 		setTitle('')
-		setQuestType('todo')
-		setDueAt(null)
-		setBody('')
-		setStartAt(null)
-		setEndAt(null)
-		setLocation('')
-		setIsRemembral(false)
-		setEmoji(null)
+		setUiTypeOverride(null)
+		setFields(EMPTY_FIELDS)
 		setSaveNote('')
 		setListId(null)
-		setModeOverride(null)
 	}
 
 	function handleClose() {
@@ -80,13 +184,26 @@ export function CreateNewComponent() {
 		reset()
 	}
 
+	function handleTypeChange(t: UiType) {
+		setUiTypeOverride(t)
+		// Reset date fields when switching away from memory to avoid stale state
+		if (t !== 'memory') patchFields({ startAt: null, emoji: null })
+		if (t !== 'todo') patchFields({ dueAt: null })
+		if (t !== 'event') patchFields({ endAt: null, location: '' })
+	}
+
 	async function handleSubmit() {
-		const result = await onHandleSubmit(mode, title, questType, { dueAt, body, startAt, endAt, location, isRemembral, emoji }, saveNote, listId ?? undefined)
+		const result = await onSubmit(effectiveType, title, fields, saveNote, listId ?? undefined)
 		handleClose()
-		if (result && questType === 'note') {
+		if (result?.id && effectiveType === 'note') {
 			navigate({ to: ROUTES.NOTE_DETAIL, params: { noteId: result.id } })
 		}
 	}
+
+	const submitLabel = effectiveType === 'save' ? 'Save bookmark'
+		: effectiveType === 'memory' ? 'Add memory'
+			: effectiveType === 'note' ? 'Create note'
+				: 'Add quest'
 
 	return (
 		<>
@@ -103,10 +220,10 @@ export function CreateNewComponent() {
 
 			<Drawer
 				position="bottom"
-				size={getDrawerSize(title, mode, questType, isRemembral)}
+				size={drawerSize(effectiveType, !!title)}
 				opened={opened}
 				onClose={handleClose}
-				title="Create new"
+				title="New"
 				styles={{
 					content: { display: 'flex', flexDirection: 'column' },
 					body: { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'auto' },
@@ -114,195 +231,36 @@ export function CreateNewComponent() {
 			>
 				<Stack gap="md" justify="space-between" h="100%">
 					<Stack gap="md">
-							{title && mode === 'save' && (
-								<Group justify="space-between">
-									<Group gap="xs">
-										<IconBookmark size={14} />
-										<Text size="sm" c="dimmed">Saving as bookmark</Text>
-									</Group>
-									<Chip
-										variant="filled"
-										color="gray"
-										size="xs"
-										onClick={() => setModeOverride('quest')}
-									>
-										<Group gap={4} wrap="nowrap">
-											<IconChecklist size={12} />
-											Quest instead
-										</Group>
-									</Chip>
+						<TextInput
+							placeholder="Type something or paste a URL…"
+							value={title}
+							onChange={(e) => setTitle(e.currentTarget.value)}
+							autoFocus
+							onKeyDown={(e) => {
+								if (e.key === 'Enter' && effectiveType !== 'note') handleSubmit()
+							}}
+						/>
+
+						{title && (
+							<Chip.Group value={effectiveType} onChange={(v) => handleTypeChange(v as UiType)}>
+								<Group gap="xs">
+									{TYPE_OPTIONS.map(({ type, label, Icon, color }) => (
+										<Chip key={type} value={type} color={color} size="sm" variant="light">
+											<Group gap={4} wrap="nowrap">
+												<Icon size={12} />
+												{label}
+											</Group>
+										</Chip>
+									))}
 								</Group>
-							)}
+							</Chip.Group>
+						)}
 
-							<TextInput
-								placeholder="Type a quest or paste a URL…"
-								value={title}
-								onChange={(e) => setTitle(e.currentTarget.value)}
-								autoFocus
-								onKeyDown={(e) => {
-									if (e.key === 'Enter' && questType !== 'note') handleSubmit()
-								}}
-							/>
-
-							{title && mode === 'quest' && (
-								<>
-									<Chip.Group
-										value={questType}
-										onChange={(v) => setQuestType(v as Quest["type"])}
-									>
-										<Group gap="xs">
-											{QUEST_TYPES.map((t) => {
-												const Icon = TYPE_ICON[t]
-												return (
-													<Chip
-														key={t}
-														value={t}
-														color={TYPE_COLOR[t]}
-														size="sm"
-														variant="light"
-													>
-														<Group gap={4} wrap="nowrap">
-															<Icon size={12} />
-															{t}
-														</Group>
-													</Chip>
-												)
-											})}
-											<Chip
-												onClick={() => setModeOverride('save')}
-												color="yellow"
-												size="sm"
-												variant="light"
-											>
-												<Group gap={4} wrap="nowrap">
-													<IconBookmark size={12} />
-													Save instead
-												</Group>
-											</Chip>
-										</Group>
-									</Chip.Group>
-
-									{questType === 'todo' && (
-										<DateTimePicker
-											placeholder="Due date (optional)"
-											value={dueAt}
-											onChange={setDueAt}
-											clearable
-										/>
-									)}
-
-									{questType === 'note' && (
-										<Textarea
-											placeholder="Note…"
-											value={body}
-											onChange={(e) => setBody(e.currentTarget.value)}
-											autosize
-											minRows={3}
-											maxRows={8}
-										/>
-									)}
-
-									{questType === 'event' && (
-										<Stack gap="xs">
-											<SegmentedControl
-												value={isRemembral ? 'happened' : 'future'}
-												onChange={(v) => {
-													const remembral = v === 'happened'
-													setIsRemembral(remembral)
-													if (remembral) {
-														setStartAt(dayjs().startOf('day').toISOString())
-														setEndAt(null)
-													} else {
-														setStartAt(null)
-														setEmoji(null)
-													}
-												}}
-												data={[
-													{ label: 'Needs to happen', value: 'future' },
-													{ label: 'Already happened', value: 'happened' },
-												]}
-												size="xs"
-												fullWidth
-											/>
-
-											{!isRemembral && (
-												<>
-													<DateTimePicker
-														placeholder="Starts at"
-														value={startAt}
-														onChange={setStartAt}
-													/>
-													<DateTimePicker
-														placeholder="Ends at (optional)"
-														value={endAt}
-														onChange={setEndAt}
-														clearable
-													/>
-													<TextInput
-														placeholder="Location (optional)"
-														value={location}
-														onChange={(e) => setLocation(e.currentTarget.value)}
-													/>
-												</>
-											)}
-
-											{isRemembral && (
-												<>
-													<Group gap="xs">
-														{[
-															{ label: 'Today', iso: dayjs().startOf('day').toISOString() },
-															{ label: 'Yesterday', iso: dayjs().subtract(1, 'day').startOf('day').toISOString() },
-															{ label: 'Last week', iso: dayjs().subtract(7, 'day').startOf('day').toISOString() },
-														].map(({ label, iso }) => (
-															<Chip
-																key={label}
-																checked={startAt === iso}
-																onChange={() => setStartAt(iso)}
-																size="sm"
-																variant="light"
-															>
-																{label}
-															</Chip>
-														))}
-													</Group>
-													<DateTimePicker
-														placeholder="Or pick a date…"
-														value={startAt}
-														onChange={setStartAt}
-														maxDate={new Date()}
-													/>
-													<Text size="xs" c="dimmed">Add an emoji (optional)</Text>
-													<Group gap={6}>
-														{REMEMBRAL_EMOJIS.map((e) => (
-															<ActionIcon
-																key={e}
-																variant={emoji === e ? 'filled' : 'subtle'}
-																size="lg"
-																radius="xl"
-																onClick={() => setEmoji(emoji === e ? null : e)}
-																style={{ fontSize: 18 }}
-															>
-																{e}
-															</ActionIcon>
-														))}
-													</Group>
-												</>
-											)}
-										</Stack>
-									)}
-								</>
-							)}
-
-							{title && mode === 'save' && (
-								<Textarea
-									placeholder="Why are you saving this? (optional)"
-									value={saveNote}
-									onChange={(e) => setSaveNote(e.currentTarget.value)}
-									autosize
-									minRows={2}
-									maxRows={4}
-								/>
-							)}
+						{title && effectiveType === 'todo' && <TodoFields value={fields.dueAt} onChange={(v) => patchFields({ dueAt: v })} />}
+						{title && effectiveType === 'event' && <EventFields fields={fields} onChange={patchFields} />}
+						{title && effectiveType === 'memory' && <MemoryFields fields={fields} onChange={patchFields} />}
+						{title && effectiveType === 'save' && <SaveFields value={saveNote} onChange={setSaveNote} />}
+						{title && effectiveType === 'note' && <Text size="xs" c="dimmed">Opens in the note editor after creating.</Text>}
 
 						{title && lists.length > 0 && (
 							<Select
@@ -314,16 +272,12 @@ export function CreateNewComponent() {
 							/>
 						)}
 					</Stack>
+
 					<Stack gap="xs">
-						<Button
-							fullWidth
-							onClick={handleSubmit}
-							disabled={!title.trim() || isPending}
-							loading={isPending}
-						>
-							{mode === 'save' ? 'Save' : isRemembral ? 'Add remembral' : 'Add quest'}
+						<Button fullWidth onClick={handleSubmit} disabled={!title.trim() || isPending} loading={isPending}>
+							{submitLabel}
 						</Button>
-						<Button fullWidth variant="outline" color="red" onClick={handleClose}>
+						<Button fullWidth variant="subtle" color="gray" onClick={handleClose}>
 							Cancel
 						</Button>
 					</Stack>

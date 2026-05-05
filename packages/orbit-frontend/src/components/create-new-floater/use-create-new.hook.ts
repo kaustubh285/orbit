@@ -6,15 +6,15 @@ import {
 } from '@orbit/client'
 import { useQuestsStore } from '@/store/quests.store'
 import { useOrbitAppStore } from '@/store/orbit-app.store'
-import type { Quest } from '@/types'
+
+// UiType is what the user sees. 'memory' maps to type:'event' + isRemembral:true on the backend.
+export type UiType = 'todo' | 'note' | 'event' | 'memory' | 'daily' | 'save'
 
 export type QuestFields = {
 	dueAt: string | null
-	body: string
 	startAt: string | null
 	endAt: string | null
 	location: string
-	isRemembral: boolean
 	emoji: string | null
 }
 
@@ -35,75 +35,66 @@ export function useCreateNew() {
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: getSavesQueryKey() }),
 	})
 
-	function onSaveSubmit(sourceUrl: string, note?: string, listId?: string) {
-		const id = crypto.randomUUID()
+	function submitSave(sourceUrl: string, note?: string, listId?: string) {
+		const pendingId = crypto.randomUUID()
 		const payload = {
 			sourceUrl,
 			...(note?.trim() ? { note: note.trim() } : {}),
 			...(listId ? { listId } : {}),
 		}
-		addPendingSubmission({ id, createdAt: new Date().toISOString(), apiCallKey: "postSave", payload })
+		addPendingSubmission({ id: pendingId, createdAt: new Date().toISOString(), apiCallKey: 'postSave', payload })
 		createSave.mutate(
 			{ body: payload } as Parameters<typeof createSave.mutate>[0],
-			{ onSuccess: () => removePendingSubmission(id) },
+			{ onSuccess: () => removePendingSubmission(pendingId) },
 		)
 	}
 
-	async function onQuestSubmit(title: string, type: Quest["type"], fields: QuestFields, listId?: string) {
-		const payload: Record<string, unknown> = { type, title }
+	async function submitQuest(uiType: Exclude<UiType, 'save'>, title: string, fields: QuestFields, listId?: string) {
+		const questType = uiType === 'memory' ? 'event' : uiType
+		const payload: Record<string, unknown> = { type: questType, title }
 
-		if (type === 'todo') {
+		if (uiType === 'todo') {
 			payload.dueAt = fields.dueAt ?? (selectedDate ? new Date(`${selectedDate}T00:00:00.000Z`).toISOString() : null)
-		} else if (type === 'note') {
-			payload.body = fields.body.trim() || null
-		} else if (type === 'event') {
-			payload.startAt = fields.startAt ?? null
-			payload.endAt = fields.endAt ?? null
+		} else if (uiType === 'event') {
+			payload.startAt = fields.startAt
+			payload.endAt = fields.endAt
 			payload.location = fields.location.trim() || null
-			payload.isRemembral = fields.isRemembral
+		} else if (uiType === 'memory') {
+			payload.startAt = fields.startAt
+			payload.isRemembral = true
 			payload.emoji = fields.emoji
 		}
 
 		if (listId) payload.listId = listId
 
 		const pendingId = crypto.randomUUID()
-		addPendingSubmission({ id: pendingId, createdAt: new Date().toISOString(), apiCallKey: "postQuest", payload: payload as any })
-		const quest = await createQuest.mutateAsync(
-			{ body: payload } as Parameters<typeof createQuest.mutate>[0],
-		)
+		addPendingSubmission({ id: pendingId, createdAt: new Date().toISOString(), apiCallKey: 'postQuest', payload: payload as any })
+		const quest = await createQuest.mutateAsync({ body: payload } as Parameters<typeof createQuest.mutate>[0])
 		removePendingSubmission(pendingId)
 		return quest
 	}
 
-	async function onHandleSubmit(
-		mode: 'quest' | 'save',
-		title: string,
-		questType: Quest["type"],
-		fields: QuestFields,
-		saveNote: string,
-		listId?: string,
-	) {
+	async function onSubmit(uiType: UiType, title: string, fields: QuestFields, saveNote: string, listId?: string) {
 		const trimmed = title.trim()
-		if (!trimmed) return
+		if (!trimmed) return null
 
+		// Auto-inherit list from current URL (e.g. /lists/:id)
 		if (!listId) {
 			const match = window.location.pathname.match(/^\/lists\/([^/]+)/)
 			if (match) listId = match[1]
 		}
 
-		if (mode === 'save') {
-			onSaveSubmit(trimmed, saveNote, listId)
+		if (uiType === 'save') {
+			submitSave(trimmed, saveNote, listId)
 			return null
-		} else {
-			return onQuestSubmit(trimmed, questType, fields, listId)
 		}
+
+		return submitQuest(uiType, trimmed, fields, listId)
 	}
 
 	return {
 		lists: lists.data ?? [],
-		onSaveSubmit,
-		onQuestSubmit,
-		onHandleSubmit,
+		onSubmit,
 		isPending: createQuest.isPending || createSave.isPending,
 	}
 }
