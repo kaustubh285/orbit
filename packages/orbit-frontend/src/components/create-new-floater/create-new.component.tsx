@@ -41,11 +41,6 @@ function looksLikeUrl(value: string): boolean {
 	return false
 }
 
-function drawerSize(uiType: UiType, hasTitle: boolean): string {
-	if (!hasTitle) return '35%'
-	if (uiType === 'event' || uiType === 'memory') return 'md'
-	return 'sm'
-}
 
 // ─── Field sub-components ────────────────────────────────────────────────────
 
@@ -220,7 +215,7 @@ export function CreateNewComponent() {
 
 			<Drawer
 				position="bottom"
-				size={drawerSize(effectiveType, !!title)}
+				size="85%"
 				opened={opened}
 				onClose={handleClose}
 				title="New"
