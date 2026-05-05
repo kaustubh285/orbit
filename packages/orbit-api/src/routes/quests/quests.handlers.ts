@@ -79,8 +79,6 @@ export const timelineQuests: AppRouteHandler<TimelineRoute> = async (c) => {
 export const listQuests: AppRouteHandler<ListRoute> = async (c) => {
 	const userId = c.var.userId;
 	const { type, status, priority, date } = c.req.valid("query");
-	c.var.logger.info("{ type, status, priority, date }")
-	c.var.logger.info(JSON.stringify({ type, status, priority, date, message: "dataishere" }))
 	const conditions = [eq(questsTable.userId, userId)];
 	if (type) conditions.push(eq(questsTable.type, type));
 	if (status) conditions.push(eq(questsTable.status, status));
@@ -130,11 +128,6 @@ export const createQuest: AppRouteHandler<CreateRoute> = async (c) => {
 	if (previousQuest) {
 		resolvedLastCompletedAt = previousQuest.completedAt ?? previousQuest.lastCompletedAt ?? previousQuest.updatedAt;
 	}
-
-	console.log(previousQuest)
-
-
-	console.log({ resolvedLastCompletedAt, lastCompletedAt, message: "resolvedLastCompletedAt" })
 
 	const [quest] = await db
 		.insert(questsTable)
