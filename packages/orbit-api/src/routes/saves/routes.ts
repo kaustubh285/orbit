@@ -15,6 +15,7 @@ export const selectSaveSchema = z.object({
 	author: z.string().nullable(),
 	publishedAt: z.string().datetime({ offset: true }).nullable(),
 	note: z.string().nullable(),
+	tags: z.array(z.string()),
 	status: z.enum(saveStatusEnum.enumValues),
 	createdAt: z.string().datetime({ offset: true }),
 	updatedAt: z.string().datetime({ offset: true }),
@@ -42,6 +43,7 @@ const validationErrorSchema = z.object({ error: z.object({}).passthrough() });
 const listQuerySchema = z.object({
 	platform: z.enum(savePlatformEnum.enumValues).optional(),
 	status: z.enum(saveStatusEnum.enumValues).optional(),
+	tag: z.string().optional(),
 });
 
 export const list = createRoute({

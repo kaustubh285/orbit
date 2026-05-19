@@ -31,7 +31,8 @@ export function ListCard({
 					params={{ id: list.id }}
 					style={{ flex: 1, minWidth: 0, textDecoration: 'none', color: 'inherit' }}
 				>
-					<Stack gap={4}>
+					<Stack gap={6}>
+						<Text style={{ fontSize: 28, lineHeight: 1 }}>{list.icon}</Text>
 						<Text fw={600} size="sm" truncate>{list.name}</Text>
 						{list.description && (
 							<Text size="xs" c="dimmed" lineClamp={2}>{list.description}</Text>

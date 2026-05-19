@@ -1,0 +1,1 @@
+ALTER TABLE "saves" ADD COLUMN "tags" text[] DEFAULT '{}' NOT NULL;

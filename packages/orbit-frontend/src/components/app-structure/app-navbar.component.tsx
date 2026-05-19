@@ -1,44 +1,43 @@
-import { AppShell, Burger, Group, Text } from "@mantine/core";
-import { IconFileDatabase, IconHome, IconNotebook, IconSettings } from "@tabler/icons-react";
-import { Link } from "@tanstack/react-router";
+import ROUTES from "@/routes"
+import { AppShell, NavLink, Stack, Text } from "@mantine/core"
+import { IconBookmark, IconFileText, IconList, IconRocket, IconTimeline } from "@tabler/icons-react"
+import { useLocation, useNavigate } from "@tanstack/react-router"
 
-// NOT USED CURRENTLY, MAYBE IN THE FUTURE FOR A DESKTOP SIDEBAR NAVIGATION
-export function AppNavbar({ mobileOpened, toggleMobile, ScrollArea }: {
-	mobileOpened: boolean,
-	toggleMobile: () => void,
-	ScrollArea: any,
-}) {
-	const navLinks = [
-		{ label: "Home", path: "/", icon: IconHome },
-		{ label: "Quests", path: "/", icon: IconNotebook },
-		{ label: "Saves", path: "/saves", icon: IconFileDatabase },
-		{ label: "Settings", path: "/settings", icon: IconSettings },
-	]
+const NAV_ITEMS = [
+	{ label: "Quests", icon: IconRocket, to: ROUTES.HOME, accent: "ocean-blue", shade: 4 },
+	{ label: "Notes", icon: IconFileText, to: ROUTES.NOTES, accent: "gray", shade: 4 },
+	{ label: "Saves", icon: IconBookmark, to: ROUTES.SAVES, accent: "amber", shade: 5 },
+	{ label: "Lists", icon: IconList, to: ROUTES.LISTS, accent: "violet", shade: 5 },
+	{ label: "Timeline", icon: IconTimeline, to: ROUTES.TIMELINE, accent: "pink", shade: 4 },
+]
+
+export function AppNavbar() {
+	const navigate = useNavigate()
+	const location = useLocation()
+
 	return (
-		<AppShell.Navbar>
-			<AppShell.Section p="md">
-				<Group justify="space-between">
-					<div>Orbit</div>
-					<Burger
-						opened={mobileOpened}
-						onClick={toggleMobile}
-						hiddenFrom="sm"
-						size="sm"
-					/>
-				</Group>
-			</AppShell.Section>
-			<AppShell.Section grow component={ScrollArea} p="md">
-				{/*Nav links*/}
-				{navLinks.map((link) => (
-					<Link to={link.path} key={link.path} style={{ textDecoration: "none", color: "inherit" }} onClick={toggleMobile}>
-						<Group align="center" mb="xs">
-							<link.icon size={18} />
-							<Text fz={18}>{link.label}</Text>
-						</Group>
-					</Link>
-				))}
-			</AppShell.Section>
-			<AppShell.Section p="md">Nav footer</AppShell.Section>
+		<AppShell.Navbar p="xs">
+			<Stack gap={4} mt="sm">
+				<Text size="xs" c="dimmed" fw={600} px="xs" mb={4} tt="uppercase" style={{ letterSpacing: "0.08em" }}>
+					Orbit
+				</Text>
+				{NAV_ITEMS.map(({ label, icon: Icon, to, accent, shade }) => {
+					const active = to === ROUTES.HOME
+						? location.pathname === to
+						: location.pathname.startsWith(to)
+					return (
+						<NavLink
+							key={to}
+							label={label}
+							leftSection={<Icon size={18} stroke={active ? 2.5 : 1.5} />}
+							active={active}
+							color={`${accent}.${shade}`}
+							onClick={() => navigate({ to })}
+							styles={{ root: { borderRadius: 8 } }}
+						/>
+					)
+				})}
+			</Stack>
 		</AppShell.Navbar>
 	)
 }

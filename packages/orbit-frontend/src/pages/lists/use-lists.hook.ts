@@ -17,16 +17,16 @@ export function useLists() {
 	const updateList = useMutation({ ...patchListsByIdMutation(), onSuccess: invalidate })
 	const deleteList = useMutation({ ...deleteListsByIdMutation(), onSuccess: invalidate })
 
-	function onCreate(name: string, description?: string, color?: string) {
+	function onCreate(name: string, description?: string, color?: string, icon?: string) {
 		createList.mutate({
-			body: { name, description: description || null, color: color || null },
+			body: { name, description: description || null, color: color || null, icon },
 		} as Parameters<typeof createList.mutate>[0])
 	}
 
-	function onUpdate(id: string, name: string, description?: string, color?: string) {
+	function onUpdate(id: string, name: string, description?: string, color?: string, icon?: string) {
 		updateList.mutate({
 			path: { id },
-			body: { name, description: description || null, color: color || null },
+			body: { name, description: description || null, color: color || null, icon },
 		} as Parameters<typeof updateList.mutate>[0])
 	}
 

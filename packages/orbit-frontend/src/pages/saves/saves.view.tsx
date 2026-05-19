@@ -5,7 +5,9 @@ import {
 	Box,
 	Button,
 	Card,
+	Chip,
 	Group,
+	ScrollArea,
 	Select,
 	SimpleGrid,
 	Skeleton,
@@ -61,8 +63,19 @@ function matchesSearch(save: Save, query: string): boolean {
 		(save.description?.toLowerCase().includes(q) ?? false) ||
 		(save.note?.toLowerCase().includes(q) ?? false) ||
 		PLATFORM_META[save.sourcePlatform].label.toLowerCase().includes(q) ||
-		save.sourcePlatform.toLowerCase().includes(q)
+		save.sourcePlatform.toLowerCase().includes(q) ||
+		save.tags.some((t) => t.toLowerCase().includes(q))
 	)
+}
+
+function collectAllTags(saves: Save[]): string[] {
+	const counts = new Map<string, number>()
+	for (const s of saves) {
+		for (const t of s.tags) counts.set(t, (counts.get(t) ?? 0) + 1)
+	}
+	return [...counts.entries()]
+		.sort((a, b) => b[1] - a[1])
+		.map(([tag]) => tag)
 }
 
 function AddSaveCard({ onAdd, isAdding }: { onAdd: (url: string) => void; isAdding: boolean }) {
@@ -250,6 +263,16 @@ function SaveCard({ save }: { save: Save }) {
 					</Box>
 				)}
 
+				{save.tags.length > 0 && (
+					<Group gap={4} wrap="wrap">
+						{save.tags.slice(0, 6).map((tag) => (
+							<Badge key={tag} size="xs" variant="light" color="gray" radius="sm">
+								{tag}
+							</Badge>
+						))}
+					</Group>
+				)}
+
 				<Text size="xs" c="dimmed" mt={2}>
 					Saved {dayjs(save.createdAt).fromNow()}
 				</Text>
@@ -348,6 +371,16 @@ function SaveCardCompact({ save }: { save: Save }) {
 						</Text>
 					)}
 
+					{save.tags.length > 0 && (
+						<Group gap={4}>
+							{save.tags.slice(0, 4).map((tag) => (
+								<Badge key={tag} size="xs" variant="light" color="gray" radius="sm">
+									{tag}
+								</Badge>
+							))}
+						</Group>
+					)}
+
 					<Text size="xs" c="dimmed">
 						{save.author && `${save.author} · `}
 						{dayjs(save.createdAt).fromNow()}
@@ -402,14 +435,18 @@ export default function SavesView({
 }) {
 	const [platform, setPlatform] = useState<Platform | "all">("all")
 	const [search, setSearch] = useState("")
+	const [activeTag, setActiveTag] = useState<string | null>(null)
 	const [viewMode, setViewMode] = useLocalStorage<ViewMode>({
 		key: "saves-view-mode",
 		defaultValue: "grid",
 	})
 
+	const allTags = collectAllTags(saves)
+
 	const filtered = saves.filter((s) => {
 		const platformMatch = platform === "all" || s.sourcePlatform === platform
-		return platformMatch && matchesSearch(s, search)
+		const tagMatch = !activeTag || s.tags.includes(activeTag)
+		return platformMatch && tagMatch && matchesSearch(s, search)
 	})
 
 	const isCompact = viewMode === "compact"
@@ -463,6 +500,20 @@ export default function SavesView({
 				</Group>
 			</Group>
 
+			{allTags.length > 0 && (
+				<ScrollArea scrollbarSize={4}>
+					<Chip.Group value={activeTag ?? ""} onChange={(v) => setActiveTag(v || null)}>
+						<Group gap={6} wrap="nowrap" pb={4}>
+							{allTags.map((tag) => (
+								<Chip key={tag} size="xs" value={tag} variant="light" radius="sm">
+									{tag}
+								</Chip>
+							))}
+						</Group>
+					</Chip.Group>
+				</ScrollArea>
+			)}
+
 			{isCompact ? (
 				<Stack gap="sm">
 					<AddSaveCardCompact onAdd={onAdd} isAdding={isAdding} />
@@ -481,7 +532,7 @@ export default function SavesView({
 
 			{!isLoading && filtered.length === 0 && (
 				<Text c="dimmed" ta="center" size="sm" mt="xl">
-					{search || platform !== "all" ? "No saves match your filters" : "No saves yet"}
+					{search || platform !== "all" || activeTag ? "No saves match your filters" : "No saves yet"}
 				</Text>
 			)}
 		</Stack>

@@ -1,9 +1,11 @@
 import { AppShell, Center, Loader } from "@mantine/core"
+import { useMediaQuery } from "@mantine/hooks"
 import { Outlet } from "@tanstack/react-router"
 import { useAuth } from "@clerk/react"
 import "./app.css"
 import { AppHeader } from "./components/app-structure/app-header.component"
 import { AppFooter } from "./components/app-structure/app-footer.component"
+import { AppNavbar } from "./components/app-structure/app-navbar.component"
 import { CreateNewComponent } from "./components/create-new-floater/create-new.component"
 import { useSyncPending } from "./hooks/use-sync-pending.hook"
 import { useOrbitAppStore } from "./store/orbit-app.store"
@@ -30,6 +32,9 @@ export function App() {
 		return () => clearTimeout(timer)
 	}, [isLoaded])
 
+	// getInitialValueInEffect: false reads synchronously so there's no flash on first render
+	const isDesktop = useMediaQuery("(min-width: 48em)", false, { getInitialValueInEffect: false })
+
 	const effectivelyLoaded = isLoaded || offlineFallback
 	const effectivelySignedIn = isSignedIn || (offlineFallback && lastSignedIn)
 
@@ -49,9 +54,11 @@ export function App() {
 		<AppShell
 			padding={{ base: "sm", sm: "md" }}
 			header={{ height: 60 }}
-			footer={{ height: "calc(64px + env(safe-area-inset-bottom))" }}
+			navbar={{ width: 200, breakpoint: "sm", collapsed: { mobile: true } }}
+			footer={{ height: "calc(64px + env(safe-area-inset-bottom))", collapsed: isDesktop }}
 		>
 			<AppHeader />
+			<AppNavbar />
 			<AppShell.Main>
 				<Outlet />
 			</AppShell.Main>

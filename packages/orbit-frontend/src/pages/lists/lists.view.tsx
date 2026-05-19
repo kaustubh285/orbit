@@ -16,8 +16,8 @@ export function ListsView({
 }: {
 	lists: List[]
 	isLoading: boolean
-	onCreate: (name: string, description?: string, color?: string) => void
-	onUpdate: (id: string, name: string, description?: string, color?: string) => void
+	onCreate: (name: string, description?: string, color?: string, icon?: string) => void
+	onUpdate: (id: string, name: string, description?: string, color?: string, icon?: string) => void
 	onDelete: (id: string) => void
 	isCreating: boolean
 }) {
@@ -33,9 +33,9 @@ export function ListsView({
 		})
 		: lists
 
-	function handleEditSubmit(name: string, description?: string, color?: string) {
+	function handleEditSubmit(name: string, description?: string, color?: string, icon?: string) {
 		if (!editTarget) return
-		onUpdate(editTarget.id, name, description, color)
+		onUpdate(editTarget.id, name, description, color, icon)
 		setEditTarget(null)
 	}
 

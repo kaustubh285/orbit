@@ -1186,6 +1186,14 @@
             "required": false,
             "name": "status",
             "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "tag",
+            "in": "query"
           }
         ],
         "responses": {
@@ -1244,6 +1252,12 @@
                         "type": "string",
                         "nullable": true
                       },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
                       "status": {
                         "type": "string",
                         "enum": [
@@ -1271,6 +1285,7 @@
                       "author",
                       "publishedAt",
                       "note",
+                      "tags",
                       "status",
                       "createdAt",
                       "updatedAt"
@@ -1406,6 +1421,12 @@
                       "type": "string",
                       "nullable": true
                     },
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "status": {
                       "type": "string",
                       "enum": [
@@ -1433,6 +1454,7 @@
                     "author",
                     "publishedAt",
                     "note",
+                    "tags",
                     "status",
                     "createdAt",
                     "updatedAt"
@@ -1533,6 +1555,12 @@
                       "type": "string",
                       "nullable": true
                     },
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "status": {
                       "type": "string",
                       "enum": [
@@ -1560,6 +1588,7 @@
                     "author",
                     "publishedAt",
                     "note",
+                    "tags",
                     "status",
                     "createdAt",
                     "updatedAt"
@@ -1720,6 +1749,12 @@
                       "type": "string",
                       "nullable": true
                     },
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
                     "status": {
                       "type": "string",
                       "enum": [
@@ -1747,6 +1782,7 @@
                     "author",
                     "publishedAt",
                     "note",
+                    "tags",
                     "status",
                     "createdAt",
                     "updatedAt"
@@ -1868,6 +1904,9 @@
                         "type": "string",
                         "nullable": true
                       },
+                      "icon": {
+                        "type": "string"
+                      },
                       "createdAt": {
                         "type": "string",
                         "format": "date-time"
@@ -1883,6 +1922,7 @@
                       "name",
                       "description",
                       "color",
+                      "icon",
                       "createdAt",
                       "updatedAt"
                     ]
@@ -1917,6 +1957,9 @@
                   "color": {
                     "type": "string",
                     "nullable": true
+                  },
+                  "icon": {
+                    "type": "string"
                   }
                 },
                 "required": [
@@ -1953,6 +1996,9 @@
                       "type": "string",
                       "nullable": true
                     },
+                    "icon": {
+                      "type": "string"
+                    },
                     "createdAt": {
                       "type": "string",
                       "format": "date-time"
@@ -1968,6 +2014,7 @@
                     "name",
                     "description",
                     "color",
+                    "icon",
                     "createdAt",
                     "updatedAt"
                   ]
@@ -2039,6 +2086,9 @@
                     "color": {
                       "type": "string",
                       "nullable": true
+                    },
+                    "icon": {
+                      "type": "string"
                     },
                     "createdAt": {
                       "type": "string",
@@ -2238,6 +2288,12 @@
                                 "type": "string",
                                 "nullable": true
                               },
+                              "tags": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
                               "status": {
                                 "type": "string",
                                 "enum": [
@@ -2265,6 +2321,7 @@
                               "author",
                               "publishedAt",
                               "note",
+                              "tags",
                               "status",
                               "createdAt",
                               "updatedAt"
@@ -2289,6 +2346,7 @@
                     "name",
                     "description",
                     "color",
+                    "icon",
                     "createdAt",
                     "updatedAt",
                     "items"
@@ -2352,6 +2410,9 @@
                   "color": {
                     "type": "string",
                     "nullable": true
+                  },
+                  "icon": {
+                    "type": "string"
                   }
                 }
               }
@@ -2385,6 +2446,9 @@
                       "type": "string",
                       "nullable": true
                     },
+                    "icon": {
+                      "type": "string"
+                    },
                     "createdAt": {
                       "type": "string",
                       "format": "date-time"
@@ -2400,6 +2464,7 @@
                     "name",
                     "description",
                     "color",
+                    "icon",
                     "createdAt",
                     "updatedAt"
                   ]
@@ -2716,6 +2781,12 @@
                           "type": "string",
                           "nullable": true
                         },
+                        "tags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
                         "status": {
                           "type": "string",
                           "enum": [
@@ -2743,6 +2814,7 @@
                         "author",
                         "publishedAt",
                         "note",
+                        "tags",
                         "status",
                         "createdAt",
                         "updatedAt"

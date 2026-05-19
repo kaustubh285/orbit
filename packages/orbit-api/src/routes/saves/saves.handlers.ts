@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { db } from "../../db/db.js";
 import { savesTable } from "../../db/schemas/saves.schema.js";
@@ -21,11 +21,12 @@ function toDate(val: string | null | undefined): Date | null | undefined {
 
 export const listSaves: AppRouteHandler<ListRoute> = async (c) => {
 	const userId = c.var.userId;
-	const { platform, status } = c.req.valid("query");
+	const { platform, status, tag } = c.req.valid("query");
 
 	const conditions = [eq(savesTable.userId, userId)];
 	if (platform) conditions.push(eq(savesTable.sourcePlatform, platform));
 	if (status) conditions.push(eq(savesTable.status, status));
+	if (tag) conditions.push(sql`${tag} = ANY(${savesTable.tags})`);
 
 	const saves = await db.select().from(savesTable).where(and(...conditions));
 	return c.json(saves, HttpStatusCodes.OK);
@@ -57,6 +58,7 @@ export const createSave: AppRouteHandler<CreateRoute> = async (c) => {
 					thumbnailUrl: scraped.thumbnailUrl ?? save.thumbnailUrl,
 					author: scraped.author ?? save.author,
 					publishedAt: scraped.publishedAt ?? save.publishedAt,
+					tags: scraped.tags,
 				})
 				.where(eq(savesTable.id, save.id)),
 		)

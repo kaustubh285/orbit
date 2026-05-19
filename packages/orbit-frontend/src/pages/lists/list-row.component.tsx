@@ -31,12 +31,15 @@ export function ListRow({
 				params={{ id: list.id }}
 				style={{ flex: 1, minWidth: 0, textDecoration: 'none', color: 'inherit' }}
 			>
-				<Stack gap={2}>
-					<Text size="sm" fw={500} truncate>{list.name}</Text>
-					{list.description && (
-						<Text size="xs" c="dimmed" truncate>{list.description}</Text>
-					)}
-				</Stack>
+				<Group gap="sm" wrap="nowrap">
+					<Text style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>{list.icon}</Text>
+					<Stack gap={2} style={{ minWidth: 0 }}>
+						<Text size="sm" fw={500} truncate>{list.name}</Text>
+						{list.description && (
+							<Text size="xs" c="dimmed" truncate>{list.description}</Text>
+						)}
+					</Stack>
+				</Group>
 			</Link>
 			<ListMenu list={list} onEdit={onEdit} onDelete={onDelete} />
 		</Group>

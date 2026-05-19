@@ -1,7 +1,8 @@
 import ROUTES from "@/routes"
-import { AppShell, Group, Text, UnstyledButton } from "@mantine/core"
-import { IconBookmark, IconFileText, IconList, IconRocket, IconTimeline } from "@tabler/icons-react"
+import { AppShell, Group, Menu, Text, UnstyledButton } from "@mantine/core"
+import { IconBookmark, IconFileText, IconList, IconMenu2, IconPlus, IconRocket, IconTimeline } from "@tabler/icons-react"
 import { useLocation, useNavigate } from "@tanstack/react-router"
+import { useOrbitAppStore } from "@/store/orbit-app.store"
 
 const NAV_ITEMS = [
 	{ label: "Quests", icon: IconRocket, to: ROUTES.HOME, accent: "ocean-blue", shade: 4 },
@@ -14,54 +15,80 @@ const NAV_ITEMS = [
 export function AppFooter() {
 	const navigate = useNavigate()
 	const location = useLocation()
+	const setCreateNewOpen = useOrbitAppStore((s) => s.actions.setCreateNewOpen)
+
+	const activeItem = NAV_ITEMS.find(({ to }) =>
+		to === ROUTES.HOME ? location.pathname === to : location.pathname.startsWith(to)
+	)
 
 	return (
 		<AppShell.Footer style={{ borderTop: "1px solid var(--mantine-color-dark-4)", paddingBottom: "env(safe-area-inset-bottom)" }}>
-			<Group h="100%" justify="space-around" align="center" px="sm" gap={0}>
-				{NAV_ITEMS.map(({ label, icon: Icon, to, accent, shade }) => {
-					const active = to === ROUTES.HOME
-						? location.pathname === to
-						: location.pathname.startsWith(to)
-					return (
+			<Group h="100%" justify="space-between" align="center" px="md">
+				<Group gap={4}>
+					{activeItem && (
+						<>
+							<activeItem.icon
+								size={20}
+								stroke={2}
+								color={`var(--mantine-color-${activeItem.accent}-${activeItem.shade})`}
+							/>
+							<Text size="sm" fw={600} c={`${activeItem.accent}.${activeItem.shade}`}>
+								{activeItem.label}
+							</Text>
+						</>
+					)}
+				</Group>
+
+				<Menu position="top-end" withArrow shadow="md" width={180}>
+					<Menu.Target>
 						<UnstyledButton
-							key={to}
-							onClick={() => navigate({ to })}
-							style={{ flex: 1 }}
+							style={{
+								display: "flex",
+								alignItems: "center",
+								gap: 6,
+								padding: "8px 12px",
+								borderRadius: 10,
+								background: "var(--mantine-color-dark-6)",
+							}}
 						>
-							<div
-								style={{
-									display: "flex",
-									flexDirection: "column",
-									alignItems: "center",
-									gap: 4,
-									padding: "7px 8px",
-									margin: "4px 6px",
-									borderRadius: 12,
-									background: active ? "var(--mantine-color-dark-6)" : "transparent",
-									transition: "background 0.12s ease",
-								}}
-							>
-								<Icon
-									size={22}
-									stroke={active ? 2.5 : 1.5}
-									color={
-										active
-											? `var(--mantine-color-${accent}-${shade})`
-											: "var(--mantine-color-dimmed)"
+							<IconMenu2 size={20} color="var(--mantine-color-dimmed)" />
+						</UnstyledButton>
+					</Menu.Target>
+
+					<Menu.Dropdown>
+						<Menu.Item
+							leftSection={<IconPlus size={16} />}
+							onClick={() => setCreateNewOpen(true)}
+							fw={600}
+							color="blue"
+						>
+							New
+						</Menu.Item>
+						<Menu.Divider />
+						{NAV_ITEMS.map(({ label, icon: Icon, to, accent, shade }) => {
+							const active = to === ROUTES.HOME
+								? location.pathname === to
+								: location.pathname.startsWith(to)
+							return (
+								<Menu.Item
+									key={to}
+									leftSection={
+										<Icon
+											size={16}
+											stroke={active ? 2.5 : 1.5}
+											color={active ? `var(--mantine-color-${accent}-${shade})` : undefined}
+										/>
 									}
-								/>
-								<Text
-									size="xs"
-									lh={1}
-									fw={active ? 700 : 400}
-									c={active ? `${accent}.${shade}` : "dimmed"}
+									onClick={() => navigate({ to })}
+									style={{ fontWeight: active ? 600 : 400 }}
+									color={active ? `${accent}.${shade}` : undefined}
 								>
 									{label}
-								</Text>
-							</div>
-						</UnstyledButton>
-					)
-				})}
+								</Menu.Item>
+							)
+						})}
+					</Menu.Dropdown>
+				</Menu>
 			</Group>
 		</AppShell.Footer>
 	)

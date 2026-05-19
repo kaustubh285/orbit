@@ -26,10 +26,12 @@ export type PendingSubmission =
 type OrbitApp = {
 	privacyMode: boolean
 	lastSignedIn: boolean
+	createNewOpen: boolean
 	pendingSubmissions: PendingSubmission[]
 	actions: {
 		togglePrivacyMode: () => void
 		setLastSignedIn: (value: boolean) => void
+		setCreateNewOpen: (value: boolean) => void
 		addPendingSubmission: (submission: PendingSubmission) => void
 		removePendingSubmission: (id: string) => void
 		clearPendingSubmissions: () => void
@@ -41,10 +43,12 @@ export const useOrbitAppStore = create<OrbitApp>()(
 		(set) => ({
 			privacyMode: true,
 			lastSignedIn: false,
+			createNewOpen: false,
 			pendingSubmissions: [],
 			actions: {
 				togglePrivacyMode: () => set((state) => ({ privacyMode: !state.privacyMode })),
 				setLastSignedIn: (value) => set({ lastSignedIn: value }),
+				setCreateNewOpen: (value) => set({ createNewOpen: value }),
 				addPendingSubmission: (submission) =>
 					set((state) => ({ pendingSubmissions: [...state.pendingSubmissions, submission] })),
 				removePendingSubmission: (id) =>

@@ -46,6 +46,8 @@ export const savesTable = pgTable(
 		// user annotation — the "why I cared" note captured at save time
 		note: text("note"),
 
+		tags: text("tags").array().notNull().default([]),
+
 		status: saveStatusEnum("status").notNull().default("active"),
 	},
 	(table) => ({

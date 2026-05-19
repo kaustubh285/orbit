@@ -349,6 +349,7 @@ export type GetSavesData = {
     query?: {
         platform?: 'youtube' | 'reddit' | 'instagram' | 'web';
         status?: 'active' | 'archived';
+        tag?: string;
     };
     url: '/saves';
 };
@@ -368,6 +369,7 @@ export type GetSavesResponses = {
         author: string | null;
         publishedAt: string | null;
         note: string | null;
+        tags: Array<string>;
         status: 'active' | 'archived';
         createdAt: string;
         updatedAt: string;
@@ -425,6 +427,7 @@ export type PostSavesResponses = {
         author: string | null;
         publishedAt: string | null;
         note: string | null;
+        tags: Array<string>;
         status: 'active' | 'archived';
         createdAt: string;
         updatedAt: string;
@@ -497,6 +500,7 @@ export type GetSavesByIdResponses = {
         author: string | null;
         publishedAt: string | null;
         note: string | null;
+        tags: Array<string>;
         status: 'active' | 'archived';
         createdAt: string;
         updatedAt: string;
@@ -562,6 +566,7 @@ export type PatchSavesByIdResponses = {
         author: string | null;
         publishedAt: string | null;
         note: string | null;
+        tags: Array<string>;
         status: 'active' | 'archived';
         createdAt: string;
         updatedAt: string;
@@ -587,6 +592,7 @@ export type GetListsResponses = {
         name: string;
         description: string | null;
         color: string | null;
+        icon: string;
         createdAt: string;
         updatedAt: string;
     }>;
@@ -602,6 +608,7 @@ export type PostListsData = {
         name: string;
         description?: string | null;
         color?: string | null;
+        icon?: string;
     };
     path?: never;
     query?: never;
@@ -631,6 +638,7 @@ export type PostListsResponses = {
         name: string;
         description: string | null;
         color: string | null;
+        icon: string;
         createdAt: string;
         updatedAt: string;
     };
@@ -697,6 +705,7 @@ export type GetListsByIdResponses = {
         name: string;
         description: string | null;
         color: string | null;
+        icon: string;
         createdAt: string;
         updatedAt: string;
         items: Array<{
@@ -735,6 +744,7 @@ export type GetListsByIdResponses = {
                 author: string | null;
                 publishedAt: string | null;
                 note: string | null;
+                tags: Array<string>;
                 status: 'active' | 'archived';
                 createdAt: string;
                 updatedAt: string;
@@ -753,6 +763,7 @@ export type PatchListsByIdData = {
         name?: string;
         description?: string | null;
         color?: string | null;
+        icon?: string;
     };
     path: {
         id: string;
@@ -790,6 +801,7 @@ export type PatchListsByIdResponses = {
         name: string;
         description: string | null;
         color: string | null;
+        icon: string;
         createdAt: string;
         updatedAt: string;
     };
@@ -871,6 +883,7 @@ export type PostListsByIdItemsResponses = {
             author: string | null;
             publishedAt: string | null;
             note: string | null;
+            tags: Array<string>;
             status: 'active' | 'archived';
             createdAt: string;
             updatedAt: string;

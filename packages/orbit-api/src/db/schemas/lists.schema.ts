@@ -24,6 +24,7 @@ export const listsTable = pgTable("lists", {
 	name: text("name").notNull(),
 	description: text("description"),
 	color: text("color"), // hex or token, for UI distinction
+	icon: text("icon").notNull().default("📋"),
 });
 
 // Cross-domain junction: a row links a list to EITHER a quest OR a save.

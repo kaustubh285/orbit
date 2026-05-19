@@ -1,7 +1,20 @@
 import type { List } from '@/types'
-import { Button, ColorSwatch, Drawer, Group, Stack, Text, Textarea, TextInput } from '@mantine/core'
+import { ActionIcon, Button, ColorInput, Drawer, Group, Stack, Text, Textarea, TextInput } from '@mantine/core'
 import { useState } from 'react'
-import { PRESET_COLORS } from './lists.utils'
+
+// Hex equivalents of Mantine default theme shade-6 for each preset color
+const COLOR_SWATCHES = [
+	'#fa5252', '#fd7e14', '#fab005', '#40c057', '#12b886',
+	'#228be6', '#4c6ef5', '#7950f2', '#be4bdb', '#e64980',
+]
+
+const ICON_OPTIONS = [
+	'📋', '📁', '📂', '🗂️', '📌', '📍', '🔖', '⭐', '❤️', '🎯',
+	'🚀', '💡', '🛒', '🎬', '📚', '🎵', '💪', '🏠', '✈️', '🌱',
+	'💼', '🎮', '🍕', '📷', '🧠', '🔥', '💰', '🎁', '🌍', '⚡',
+]
+
+export const DEFAULT_LIST_ICON = '📋'
 
 export function ListFormDrawer({
 	opened,
@@ -12,13 +25,14 @@ export function ListFormDrawer({
 }: {
 	opened: boolean
 	onClose: () => void
-	onSubmit: (name: string, description?: string, color?: string) => void
+	onSubmit: (name: string, description?: string, color?: string, icon?: string) => void
 	isPending: boolean
-	initial?: Pick<List, 'name' | 'description' | 'color'>
+	initial?: Pick<List, 'name' | 'description' | 'color' | 'icon'>
 }) {
 	const [name, setName] = useState(initial?.name ?? '')
 	const [description, setDescription] = useState(initial?.description ?? '')
-	const [color, setColor] = useState<string | null>(initial?.color ?? null)
+	const [color, setColor] = useState(initial?.color ?? '')
+	const [icon, setIcon] = useState(initial?.icon ?? DEFAULT_LIST_ICON)
 
 	const isEdit = !!initial
 
@@ -28,14 +42,14 @@ export function ListFormDrawer({
 
 	function handleSubmit() {
 		if (!name.trim()) return
-		onSubmit(name.trim(), description.trim() || undefined, color ?? undefined)
+		onSubmit(name.trim(), description.trim() || undefined, color || undefined, icon)
 		handleClose()
 	}
 
 	return (
 		<Drawer
 			position="bottom"
-			size="md"
+			size="lg"
 			opened={opened}
 			onClose={handleClose}
 			title={isEdit ? 'Edit list' : 'New list'}
@@ -45,13 +59,44 @@ export function ListFormDrawer({
 			}}
 		>
 			<Stack gap="md" h="100%">
-				<TextInput
-					placeholder="List name…"
-					value={name}
-					onChange={(e) => setName(e.currentTarget.value)}
-					autoFocus
-					onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit() }}
-				/>
+				<Group gap="sm" align="flex-start">
+					<Text
+						style={{
+							fontSize: 40,
+							lineHeight: 1,
+							cursor: 'default',
+							userSelect: 'none',
+						}}
+					>
+						{icon}
+					</Text>
+					<TextInput
+						placeholder="List name…"
+						value={name}
+						onChange={(e) => setName(e.currentTarget.value)}
+						autoFocus
+						onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit() }}
+						style={{ flex: 1 }}
+					/>
+				</Group>
+
+				<Stack gap="xs">
+					<Text size="xs" c="dimmed">Icon</Text>
+					<Group gap={6} wrap="wrap">
+						{ICON_OPTIONS.map((e) => (
+							<ActionIcon
+								key={e}
+								variant={icon === e ? 'filled' : 'subtle'}
+								size="lg"
+								radius="md"
+								onClick={() => setIcon(e)}
+								style={{ fontSize: 18 }}
+							>
+								{e}
+							</ActionIcon>
+						))}
+					</Group>
+				</Stack>
 
 				<Textarea
 					placeholder="Description (optional)"
@@ -62,24 +107,16 @@ export function ListFormDrawer({
 					maxRows={4}
 				/>
 
-				<Stack gap="xs">
-					<Text size="xs" c="dimmed">Colour</Text>
-					<Group gap="xs">
-						{PRESET_COLORS.map((c) => (
-							<ColorSwatch
-								key={c}
-								color={`var(--mantine-color-${c}-6)`}
-								size={24}
-								style={{
-									cursor: 'pointer',
-									outline: color === c ? '2px solid white' : 'none',
-									outlineOffset: 2,
-								}}
-								onClick={() => setColor(color === c ? null : c)}
-							/>
-						))}
-					</Group>
-				</Stack>
+				<ColorInput
+					label="Colour"
+					placeholder="Pick or enter a colour"
+					value={color}
+					onChange={setColor}
+					format="hex"
+					swatches={COLOR_SWATCHES}
+					swatchesPerRow={10}
+					closeOnColorSwatchClick
+				/>
 
 				<Stack gap="xs" mt="auto">
 					<Button

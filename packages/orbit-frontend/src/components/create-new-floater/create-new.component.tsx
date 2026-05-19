@@ -6,12 +6,13 @@ import {
 import { DateTimePicker } from '@mantine/dates'
 import {
 	IconBookmark, IconCalendarEvent, IconFileText,
-	IconPlus, IconRefresh, IconSparkles, IconSquareCheck,
+	IconRefresh, IconSparkles, IconSquareCheck,
 } from '@tabler/icons-react'
 import { useNavigate } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import { useCreateNew, type UiType, type QuestFields } from './use-create-new.hook'
 import ROUTES from '@/routes'
+import { useOrbitAppStore } from '@/store/orbit-app.store'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -149,7 +150,8 @@ const EMPTY_FIELDS: QuestFields = {
 }
 
 export function CreateNewComponent() {
-	const [opened, setOpened] = useState(false)
+	const opened = useOrbitAppStore((s) => s.createNewOpen)
+	const setOpened = useOrbitAppStore((s) => s.actions.setCreateNewOpen)
 	const [title, setTitle] = useState('')
 	const [uiTypeOverride, setUiTypeOverride] = useState<UiType | null>(null)
 	const [fields, setFields] = useState<QuestFields>(EMPTY_FIELDS)
@@ -202,17 +204,6 @@ export function CreateNewComponent() {
 
 	return (
 		<>
-			<ActionIcon
-				size="xl"
-				radius="xl"
-				variant="filled"
-				style={{ position: 'fixed', bottom: 'calc(64px + env(safe-area-inset-bottom) + 16px)', right: 24, zIndex: 200 }}
-				onClick={() => setOpened(true)}
-				aria-label="Create new"
-			>
-				<IconPlus size={20} />
-			</ActionIcon>
-
 			<Drawer
 				position="bottom"
 				size="85%"

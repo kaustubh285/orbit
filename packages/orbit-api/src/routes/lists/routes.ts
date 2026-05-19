@@ -11,6 +11,7 @@ export const selectListSchema = z.object({
 	name: z.string(),
 	description: z.string().nullable(),
 	color: z.string().nullable(),
+	icon: z.string(),
 	createdAt: z.string().datetime({ offset: true }),
 	updatedAt: z.string().datetime({ offset: true }),
 });
@@ -33,6 +34,7 @@ export const insertListSchema = z.object({
 	name: z.string().min(1).max(255),
 	description: z.string().nullable().optional(),
 	color: z.string().nullable().optional(),
+	icon: z.string().optional(),
 });
 
 export const patchListSchema = insertListSchema.partial();

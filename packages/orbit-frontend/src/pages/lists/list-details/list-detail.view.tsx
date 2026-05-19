@@ -208,7 +208,7 @@ export function ListDetailView({
 }: {
 	list: ListWithItems | undefined
 	isLoading: boolean
-	onUpdate: (name: string, description?: string, color?: string) => void
+	onUpdate: (name: string, description?: string, color?: string, icon?: string) => void
 	onRemoveItem: (itemId: string) => void
 	isUpdating: boolean
 }) {
@@ -235,13 +235,13 @@ export function ListDetailView({
 	const saveItems = filteredItems.filter((i) => i.save)
 	const questItems = filteredItems.filter((i) => i.quest)
 
-	function handleEditSubmit(name: string, description?: string, color?: string) {
-		onUpdate(name, description, color)
+	function handleEditSubmit(name: string, description?: string, color?: string, icon?: string) {
+		onUpdate(name, description, color, icon)
 		setEditOpen(false)
 	}
 
 	const editInitial: List | undefined = list
-		? { id: list.id, userId: list.userId, name: list.name, description: list.description, color: list.color, createdAt: list.createdAt, updatedAt: list.updatedAt }
+		? { id: list.id, userId: list.userId, name: list.name, description: list.description, color: list.color, icon: list.icon, createdAt: list.createdAt, updatedAt: list.updatedAt }
 		: undefined
 
 	return (
@@ -261,6 +261,7 @@ export function ListDetailView({
 			) : list ? (
 				<Box style={{ borderLeft: `4px solid ${accent}`, paddingLeft: 12 }}>
 					<Group gap="xs" align="flex-start" wrap="nowrap">
+						<Text style={{ fontSize: 36, lineHeight: 1, flexShrink: 0 }}>{list.icon}</Text>
 						<Stack gap={2} style={{ flex: 1 }}>
 							<Text fw={700} size="lg">{list.name}</Text>
 							{list.description && (

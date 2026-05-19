@@ -21,6 +21,7 @@ export type List = {
 	name: string
 	description: string | null
 	color: string | null
+	icon: string
 	createdAt: string
 	updatedAt: string
 }
@@ -36,6 +37,7 @@ export type Save = {
 	author: string | null;
 	publishedAt: string | null;
 	note: string | null;
+	tags: string[];
 	status: "active" | "archived";
 	createdAt: string;
 	updatedAt: string;

@@ -17,10 +17,10 @@ export function useListDetail(id: string) {
 	const addItem = useMutation({ ...postListsByIdItemsMutation(), onSuccess: invalidate })
 	const removeItem = useMutation({ ...deleteListsByIdItemsByItemIdMutation(), onSuccess: invalidate })
 
-	function onUpdate(name: string, description?: string, color?: string) {
+	function onUpdate(name: string, description?: string, color?: string, icon?: string) {
 		updateList.mutate({
 			path: { id },
-			body: { name, description: description ?? null, color: color ?? null },
+			body: { name, description: description ?? null, color: color ?? null, icon },
 		} as Parameters<typeof updateList.mutate>[0])
 	}
 
