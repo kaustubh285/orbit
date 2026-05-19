@@ -13,6 +13,7 @@ import dayjs from 'dayjs'
 import { useCreateNew, type UiType, type QuestFields } from './use-create-new.hook'
 import ROUTES from '@/routes'
 import { useOrbitAppStore } from '@/store/orbit-app.store'
+import { useMediaQuery } from '@mantine/hooks'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -160,6 +161,7 @@ export function CreateNewComponent() {
 
 	const { lists, onSubmit, isPending } = useCreateNew()
 	const navigate = useNavigate()
+	const isDesktop = useMediaQuery("(min-width: 48em)", false, { getInitialValueInEffect: false })
 
 	// Auto-detect save mode from URL; user can override with a chip tap
 	const effectiveType: UiType = uiTypeOverride ?? (looksLikeUrl(title) ? 'save' : 'todo')
@@ -205,8 +207,8 @@ export function CreateNewComponent() {
 	return (
 		<>
 			<Drawer
-				position="bottom"
-				size="85%"
+				position={isDesktop ? "right" : "bottom"}
+				size={isDesktop ? "md" : "85%"}
 				opened={opened}
 				onClose={handleClose}
 				title="New"

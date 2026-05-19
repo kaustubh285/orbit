@@ -1,5 +1,6 @@
 const ROUTES = {
 	HOME: "/",
+	QUESTS: "/quests",
 	SETTINGS: "/settings",
 	SAVES: "/saves",
 	LISTS: "/lists",

@@ -13,7 +13,7 @@ export function AppHeader() {
 	return (
 		<AppShell.Header>
 			<Flex h="100%" px="md" justify="space-between" align="center">
-				<Text fw={700} size="lg">Orbit</Text>
+				<Text onClick={() => navigate({ to: "/" })} fw={700} size="lg">Orbit</Text>
 				<Group>
 					<ActionIcon variant="subtle" onClick={actions.togglePrivacyMode} aria-label="Toggle privacy mode">
 						{privacyMode ? <IconEyeClosed size={18} /> : <IconEye size={18} />}

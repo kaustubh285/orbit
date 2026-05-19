@@ -8,6 +8,7 @@ import {
 import type { QueryClient } from "@tanstack/react-query"
 import { App } from "./App"
 import ROUTES from "./routes"
+import { HomeDashboard } from "./pages/home/home-dashboard"
 import { HomePage } from "./pages/home/home"
 import { SettingsPage } from "./pages/settings"
 import SavesPage from "./pages/saves/saves.page"
@@ -41,6 +42,13 @@ function requireAuth({ context, location }: { context: { auth: AuthContext }, lo
 const homeRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: ROUTES.HOME,
+	beforeLoad: requireAuth,
+	component: HomeDashboard,
+})
+
+const questsRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: ROUTES.QUESTS,
 	beforeLoad: requireAuth,
 	component: HomePage,
 })
@@ -102,6 +110,7 @@ const loginRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
 	homeRoute,
+	questsRoute,
 	settingsRoute,
 	savesRoute,
 	listsRoute,

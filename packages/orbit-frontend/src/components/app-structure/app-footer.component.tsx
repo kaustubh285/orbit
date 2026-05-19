@@ -1,15 +1,16 @@
 import ROUTES from "@/routes"
 import { AppShell, Group, Menu, Text, UnstyledButton } from "@mantine/core"
-import { IconBookmark, IconFileText, IconList, IconMenu2, IconPlus, IconRocket, IconTimeline } from "@tabler/icons-react"
+import { IconBookmark, IconFileText, IconHome2, IconList, IconMenu2, IconPlus, IconRocket, IconTimeline } from "@tabler/icons-react"
 import { useLocation, useNavigate } from "@tanstack/react-router"
 import { useOrbitAppStore } from "@/store/orbit-app.store"
 
 const NAV_ITEMS = [
-	{ label: "Quests", icon: IconRocket, to: ROUTES.HOME, accent: "ocean-blue", shade: 4 },
+	{ label: "Quests", icon: IconRocket, to: ROUTES.QUESTS, accent: "ocean-blue", shade: 4 },
 	{ label: "Notes", icon: IconFileText, to: ROUTES.NOTES, accent: "gray", shade: 4 },
 	{ label: "Saves", icon: IconBookmark, to: ROUTES.SAVES, accent: "amber", shade: 5 },
 	{ label: "Lists", icon: IconList, to: ROUTES.LISTS, accent: "violet", shade: 5 },
 	{ label: "Timeline", icon: IconTimeline, to: ROUTES.TIMELINE, accent: "pink", shade: 4 },
+	{ label: "Home", icon: IconHome2, to: ROUTES.HOME, accent: "teal", shade: 4 },
 ]
 
 export function AppFooter() {
@@ -17,9 +18,7 @@ export function AppFooter() {
 	const location = useLocation()
 	const setCreateNewOpen = useOrbitAppStore((s) => s.actions.setCreateNewOpen)
 
-	const activeItem = NAV_ITEMS.find(({ to }) =>
-		to === ROUTES.HOME ? location.pathname === to : location.pathname.startsWith(to)
-	)
+	const activeItem = NAV_ITEMS.find(({ to }) => location.pathname.startsWith(to))
 
 	return (
 		<AppShell.Footer style={{ borderTop: "1px solid var(--mantine-color-dark-4)", paddingBottom: "env(safe-area-inset-bottom)" }}>
@@ -66,9 +65,7 @@ export function AppFooter() {
 						</Menu.Item>
 						<Menu.Divider />
 						{NAV_ITEMS.map(({ label, icon: Icon, to, accent, shade }) => {
-							const active = to === ROUTES.HOME
-								? location.pathname === to
-								: location.pathname.startsWith(to)
+							const active = location.pathname.startsWith(to)
 							return (
 								<Menu.Item
 									key={to}
