@@ -17,6 +17,8 @@ export const selectSaveSchema = z.object({
 	note: z.string().nullable(),
 	tags: z.array(z.string()),
 	status: z.enum(saveStatusEnum.enumValues),
+	aiSummary: z.string().nullable(),
+	aiEnrichedAt: z.string().datetime({ offset: true }).nullable(),
 	createdAt: z.string().datetime({ offset: true }),
 	updatedAt: z.string().datetime({ offset: true }),
 });
@@ -32,6 +34,8 @@ export const insertSaveSchema = z.object({
 	note: z.string().nullable().optional(),
 	status: z.enum(saveStatusEnum.enumValues).optional(),
 	listId: z.string().uuid().nullable().optional(),
+	tags: z.array(z.string()).nullable().optional(),
+	aiSummary: z.string().nullable().optional(),
 });
 
 export const patchSaveSchema = insertSaveSchema.partial();
@@ -44,6 +48,8 @@ const listQuerySchema = z.object({
 	platform: z.enum(savePlatformEnum.enumValues).optional(),
 	status: z.enum(saveStatusEnum.enumValues).optional(),
 	tag: z.string().optional(),
+	limit: z.coerce.number().int().min(1).max(100).default(50).openapi({ description: "Max results to return" }),
+	cursor: z.string().datetime({ offset: true }).optional().openapi({ description: "Return saves created before this ISO datetime (for pagination)" }),
 });
 
 export const list = createRoute({

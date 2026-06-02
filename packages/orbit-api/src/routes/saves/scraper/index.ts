@@ -17,8 +17,8 @@ export async function scrapeUrl(url: string): Promise<ScrapeResult> {
 
 	const provider =
 		sourcePlatform === "youtube" ? scrapeYouTube :
-		sourcePlatform === "reddit" ? scrapeReddit :
-		scrapeGeneric
+			sourcePlatform === "reddit" ? scrapeReddit :
+				scrapeGeneric
 
 	const meta: ProviderResult = await provider(url).catch(() => ({}))
 

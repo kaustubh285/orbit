@@ -85,6 +85,8 @@ const listQuerySchema = z.object({
 	status: z.enum(questStatusEnum.enumValues).optional(),
 	priority: z.enum(questPriorityEnum.enumValues).optional(),
 	date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().openapi({ description: "Filter by date in YYYY-MM-DD format" }),
+	limit: z.coerce.number().int().min(1).max(100).default(50).openapi({ description: "Max results to return" }),
+	cursor: z.string().datetime({ offset: true }).optional().openapi({ description: "Return quests created before this ISO datetime (for pagination)" }),
 });
 
 export const list = createRoute({

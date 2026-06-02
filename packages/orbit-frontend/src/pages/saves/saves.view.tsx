@@ -1,3 +1,4 @@
+import { UpdateSaveModal } from "@/components/saves/update-save-modal.component"
 import type { Save } from "@/types"
 import {
 	ActionIcon,
@@ -17,16 +18,18 @@ import {
 	Textarea,
 	Tooltip,
 } from "@mantine/core"
-import { useLocalStorage } from "@mantine/hooks"
+import { useDisclosure, useLocalStorage } from "@mantine/hooks"
 import {
 	IconBrandInstagram,
 	IconBrandReddit,
 	IconBrandYoutube,
+	IconEdit,
 	IconExternalLink,
 	IconLayoutGrid,
 	IconLayoutList,
 	IconRefresh,
 	IconSearch,
+	IconSparkles,
 	IconWorld,
 } from "@tabler/icons-react"
 import dayjs from "dayjs"
@@ -89,31 +92,34 @@ function AddSaveCard({ onAdd, isAdding }: { onAdd: (url: string) => void; isAddi
 	}
 
 	return (
-		<Card withBorder radius="md" padding={0} style={{ overflow: "hidden" }}>
-			<Box
-				style={{
-					aspectRatio: THUMB_RATIO,
-					display: "flex",
-					alignItems: "stretch",
-					background: "var(--mantine-color-gray-0)",
-					padding: 12,
-				}}
-			>
-				<Textarea
-					placeholder="Paste a URL to save..."
-					value={url}
-					onChange={(e) => setUrl(e.currentTarget.value)}
-					onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSave() } }}
-					variant="unstyled"
-					style={{ flex: 1 }}
-					styles={{ input: { height: "100%", resize: "none" } }}
-				/>
-			</Box>
-			<Box flex={1} h="auto" p="xs">
-				<Button fullWidth radius={0} color="amber" loading={isAdding} onClick={handleSave}>
-					Save
-				</Button>
-			</Box>
+		<Card
+			withBorder
+			radius="md"
+			padding="md"
+			style={{
+				borderStyle: "dashed",
+				borderColor: "var(--mantine-color-gray-4)",
+				display: "flex",
+				flexDirection: "column",
+				gap: 12,
+			}}
+		>
+			<Text size="xs" fw={600} c="dimmed" tt="uppercase" style={{ letterSpacing: 1 }}>
+				Save a link
+			</Text>
+			<Textarea
+				placeholder="Paste a URL to save..."
+				value={url}
+				onChange={(e) => setUrl(e.currentTarget.value)}
+				onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSave() } }}
+				variant="filled"
+				autosize
+				minRows={4}
+				styles={{ input: { resize: "none" } }}
+			/>
+			<Button fullWidth color="amber" loading={isAdding} onClick={handleSave}>
+				Save
+			</Button>
 		</Card>
 	)
 }
@@ -163,7 +169,7 @@ function AddSaveCardCompact({ onAdd, isAdding }: { onAdd: (url: string) => void;
 	)
 }
 
-function SaveCard({ save }: { save: Save }) {
+function SaveCard({ save, onEdit }: { save: Save, onEdit: (save: Save) => void }) {
 	const meta = PLATFORM_META[save.sourcePlatform]
 	const PlatformIcon = meta.Icon
 
@@ -232,6 +238,18 @@ function SaveCard({ save }: { save: Save }) {
 							<IconExternalLink size={14} />
 						</ActionIcon>
 					</Tooltip>
+
+					<Tooltip label="Edit">
+						<ActionIcon
+							onClick={() => onEdit(save)}
+							variant="subtle"
+							color="gray"
+							size="sm"
+							style={{ flexShrink: 0 }}
+						>
+							<IconEdit size={14} />
+						</ActionIcon>
+					</Tooltip>
 				</Group>
 
 				{(save.author || save.publishedAt) && (
@@ -242,25 +260,28 @@ function SaveCard({ save }: { save: Save }) {
 					</Text>
 				)}
 
-				{save.description && (
-					<Text size="xs" c="dimmed" lineClamp={2}>
-						{save.description}
-					</Text>
-				)}
+				{save.aiSummary ? (
+					<Group gap={4} align="flex-start" wrap="nowrap">
+						<IconSparkles size={11} style={{ color: "var(--mantine-color-violet-4)", marginTop: 2, flexShrink: 0 }} />
+						<Text size="xs" c="dimmed" lineClamp={2}>{save.aiSummary}</Text>
+					</Group>
+				) : save.description ? (
+					<Text size="xs" c="dimmed" lineClamp={2}>{save.description}</Text>
+				) : null}
 
 				{save.note && (
-					<Box
-						p="xs"
-						style={{
-							background: "var(--mantine-color-yellow-0)",
-							borderLeft: "2px solid var(--mantine-color-yellow-4)",
-							borderRadius: 4,
-						}}
-					>
-						<Text size="xs" fs="italic" c="yellow.8">
-							{save.note}
-						</Text>
-					</Box>
+					// <Box
+					// 	p="xs"
+					// 	style={{
+					// 		background: "var(--mantine-color-yellow-0)",
+					// 		borderLeft: "2px solid var(--mantine-color-yellow-4)",
+					// 		borderRadius: 4,
+					// 	}}
+					// >
+					// </Box>
+					<Text size="xs" fs="italic" c="yellow.8">
+						{save.note}
+					</Text>
 				)}
 
 				{save.tags.length > 0 && (
@@ -281,7 +302,7 @@ function SaveCard({ save }: { save: Save }) {
 	)
 }
 
-function SaveCardCompact({ save }: { save: Save }) {
+function SaveCardCompact({ save, onEdit }: { save: Save, onEdit: (save: Save) => void }) {
 	const meta = PLATFORM_META[save.sourcePlatform]
 	const PlatformIcon = meta.Icon
 
@@ -357,13 +378,28 @@ function SaveCardCompact({ save }: { save: Save }) {
 								<IconExternalLink size={14} />
 							</ActionIcon>
 						</Tooltip>
+
+						<Tooltip label="Edit">
+							<ActionIcon
+								onClick={() => onEdit(save)}
+								variant="subtle"
+								color="gray"
+								size="sm"
+								style={{ flexShrink: 0 }}
+							>
+								<IconEdit size={14} />
+							</ActionIcon>
+						</Tooltip>
 					</Group>
 
-					{save.description && (
-						<Text size="xs" c="dimmed" lineClamp={1}>
-							{save.description}
-						</Text>
-					)}
+					{save.aiSummary ? (
+						<Group gap={4} align="flex-start" wrap="nowrap">
+							<IconSparkles size={10} style={{ color: "var(--mantine-color-violet-4)", marginTop: 2, flexShrink: 0 }} />
+							<Text size="xs" c="dimmed" lineClamp={1}>{save.aiSummary}</Text>
+						</Group>
+					) : save.description ? (
+						<Text size="xs" c="dimmed" lineClamp={1}>{save.description}</Text>
+					) : null}
 
 					{save.note && (
 						<Text size="xs" fs="italic" c="yellow.7" lineClamp={1}>
@@ -450,9 +486,12 @@ export default function SavesView({
 	})
 
 	const isCompact = viewMode === "compact"
+	const [opened, { open, close }] = useDisclosure(false);
+	const [selectedSave, setSelectedSave] = useState<Save | null>(null)
 
 	return (
 		<Stack gap="md">
+			{selectedSave && <UpdateSaveModal save={selectedSave} opened={opened} onClose={close} />}
 			<Group wrap="nowrap" gap="sm">
 				<TextInput
 					placeholder="Search title, description, notes, platform..."
@@ -519,14 +558,14 @@ export default function SavesView({
 					<AddSaveCardCompact onAdd={onAdd} isAdding={isAdding} />
 					{isLoading
 						? [1, 2, 3, 4, 5].map((i) => <SaveCardSkeletonCompact key={i} />)
-						: filtered.map((save) => <SaveCardCompact key={save.id} save={save} />)}
+						: filtered.map((save) => <SaveCardCompact key={save.id} save={save} onEdit={(s) => { setSelectedSave(s); open() }} />)}
 				</Stack>
 			) : (
 				<SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
 					<AddSaveCard onAdd={onAdd} isAdding={isAdding} />
 					{isLoading
 						? [1, 2, 3, 4, 5].map((i) => <SaveCardSkeleton key={i} />)
-						: filtered.map((save) => <SaveCard key={save.id} save={save} />)}
+						: filtered.map((save) => <SaveCard key={save.id} save={save} onEdit={(s) => { setSelectedSave(s); open() }} />)}
 				</SimpleGrid>
 			)}
 

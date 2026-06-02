@@ -59,10 +59,16 @@ const itemIdParamsSchema = z.object({
 const notFoundSchema = z.object({ message: z.string() });
 const validationErrorSchema = z.object({ error: z.object({}).passthrough() });
 
+const listQuerySchema = z.object({
+	limit: z.coerce.number().int().min(1).max(100).default(50).openapi({ description: "Max results to return" }),
+	offset: z.coerce.number().int().min(0).default(0).openapi({ description: "Number of results to skip" }),
+});
+
 export const list = createRoute({
 	path: "/lists",
 	method: "get",
 	tags: ["Lists"],
+	request: { query: listQuerySchema },
 	responses: {
 		[HttpStatusCodes.OK]: jsonContent(z.array(selectListSchema), "List of lists"),
 	},

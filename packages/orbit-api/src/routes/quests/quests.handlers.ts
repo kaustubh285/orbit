@@ -1,9 +1,10 @@
-import { and, desc, eq, gte, lt, lte, or, ne } from "drizzle-orm";
+import { and, desc, eq, gte, lt, lte, or, ne, sql } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { db } from "../../db/db.js";
-import { questsTable } from "../../db/schemas/quests.schema.js";
+import { questsTable, questTypeEnum } from "../../db/schemas/quests.schema.js";
 import { listItemsTable } from "../../db/schemas/lists.schema.js";
 import type { AppRouteHandler } from "@/lib/types.js";
+import { toDate } from "@/lib/utils.js";
 import type {
 	CountRoute,
 	TimelineRoute,
@@ -21,8 +22,14 @@ export const countQuests: AppRouteHandler<CountRoute> = async (c) => {
 	const rangeStart = new Date(`${start}T00:00:00.000Z`);
 	const rangeEnd = new Date(`${end}T23:59:59.999Z`);
 
-	const quests = await db
-		.select({ type: questsTable.type, dueAt: questsTable.dueAt, startAt: questsTable.startAt })
+	const dateExpr = sql`date_trunc('day', COALESCE(${questsTable.dueAt}, ${questsTable.startAt}))`;
+
+	const result = await db
+		.select({
+			date: sql<string>`${dateExpr}::date::text`,
+			count: sql<number>`count(DISTINCT ${questsTable.type})::int`,
+			types: sql<(typeof questTypeEnum.enumValues[number])[]>`array_agg(DISTINCT ${questsTable.type})`,
+		})
 		.from(questsTable)
 		.where(
 			and(
@@ -33,21 +40,8 @@ export const countQuests: AppRouteHandler<CountRoute> = async (c) => {
 					and(gte(questsTable.startAt, rangeStart), lt(questsTable.startAt, rangeEnd)),
 				)!,
 			),
-		);
-
-	// Group by date string
-	const byDate = new Map<string, Set<typeof quests[0]["type"]>>();
-	for (const quest of quests) {
-		const dateStr = (quest.dueAt ?? quest.startAt)!.toISOString().split("T")[0];
-		if (!byDate.has(dateStr)) byDate.set(dateStr, new Set());
-		byDate.get(dateStr)!.add(quest.type);
-	}
-
-	const result = Array.from(byDate.entries()).map(([date, types]) => ({
-		date,
-		count: types.size,
-		types: Array.from(types),
-	}));
+		)
+		.groupBy(dateExpr);
 
 	return c.json(result, HttpStatusCodes.OK);
 };
@@ -78,31 +72,32 @@ export const timelineQuests: AppRouteHandler<TimelineRoute> = async (c) => {
 
 export const listQuests: AppRouteHandler<ListRoute> = async (c) => {
 	const userId = c.var.userId;
-	const { type, status, priority, date } = c.req.valid("query");
+	const { type, status, priority, date, limit, cursor } = c.req.valid("query");
 	const conditions = [eq(questsTable.userId, userId)];
 	if (type) conditions.push(eq(questsTable.type, type));
 	if (status) conditions.push(eq(questsTable.status, status));
 	if (priority) conditions.push(eq(questsTable.priority, priority));
 	if (date) {
-		const dayStart = new Date(`${date}T00:00:00.000Z`)
-		const dayEnd = new Date(`${date}T23:59:59.999Z`)
+		const dayStart = new Date(`${date}T00:00:00.000Z`);
+		const dayEnd = new Date(`${date}T23:59:59.999Z`);
 		conditions.push(
 			or(
 				and(gte(questsTable.dueAt, dayStart), lt(questsTable.dueAt, dayEnd)),
 				and(gte(questsTable.startAt, dayStart), lt(questsTable.startAt, dayEnd)),
 			)!,
-		)
+		);
 	}
+	if (cursor) conditions.push(lt(questsTable.createdAt, new Date(cursor)));
 
-	const quests = await db.select().from(questsTable).where(and(...conditions));
+	const quests = await db
+		.select()
+		.from(questsTable)
+		.where(and(...conditions))
+		.orderBy(desc(questsTable.createdAt))
+		.limit(limit);
+
 	return c.json(quests, HttpStatusCodes.OK);
 };
-
-function toDate(val: string | null | undefined): Date | null | undefined {
-	if (val === undefined) return undefined;
-	if (val === null) return null;
-	return new Date(val);
-}
 
 export const createQuest: AppRouteHandler<CreateRoute> = async (c) => {
 	const userId = c.var.userId;

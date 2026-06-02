@@ -39,6 +39,8 @@ export type Save = {
 	note: string | null;
 	tags: string[];
 	status: "active" | "archived";
+	aiSummary: string | null;
+	aiEnrichedAt: string | null;
 	createdAt: string;
 	updatedAt: string;
 }

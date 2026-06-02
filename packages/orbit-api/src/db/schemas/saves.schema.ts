@@ -49,6 +49,14 @@ export const savesTable = pgTable(
 		tags: text("tags").array().notNull().default([]),
 
 		status: saveStatusEnum("status").notNull().default("active"),
+
+
+		// AI
+		aiSummary: text("ai_summary"),
+		locationName: text(""),
+		locationLat: text(""),
+		locationLng: text(""),
+		aiEnrichedAt: timestamp({ withTimezone: true }),
 	},
 	(table) => ({
 		userStatusIdx: index("saves_user_status_idx").on(

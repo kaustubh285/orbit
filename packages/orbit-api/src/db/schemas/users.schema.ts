@@ -1,6 +1,4 @@
-import { boolean, integer, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-
-import { relations } from "drizzle-orm";
+import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { createdAt, id, updatedAt } from "../schema.helper";
 
 export const usersTable = pgTable("users", {
@@ -14,8 +12,6 @@ export const usersTable = pgTable("users", {
 	bio: text("bio"),
 	email: text("email").notNull().unique(),
 	avatar: text("avatar"),
-	passwordHash: text("password_hash"),
-
 
 	// metadata
 	country: text("country"),

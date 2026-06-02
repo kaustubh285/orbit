@@ -98,6 +98,14 @@ export type GetQuestsData = {
          * Filter by date in YYYY-MM-DD format
          */
         date?: string;
+        /**
+         * Max results to return
+         */
+        limit?: number;
+        /**
+         * Return quests created before this ISO datetime (for pagination)
+         */
+        cursor?: string;
     };
     url: '/quests';
 };
@@ -350,6 +358,14 @@ export type GetSavesData = {
         platform?: 'youtube' | 'reddit' | 'instagram' | 'web';
         status?: 'active' | 'archived';
         tag?: string;
+        /**
+         * Max results to return
+         */
+        limit?: number;
+        /**
+         * Return saves created before this ISO datetime (for pagination)
+         */
+        cursor?: string;
     };
     url: '/saves';
 };
@@ -371,6 +387,8 @@ export type GetSavesResponses = {
         note: string | null;
         tags: Array<string>;
         status: 'active' | 'archived';
+        aiSummary: string | null;
+        aiEnrichedAt: string | null;
         createdAt: string;
         updatedAt: string;
     }>;
@@ -393,6 +411,8 @@ export type PostSavesData = {
         note?: string | null;
         status?: 'active' | 'archived';
         listId?: string | null;
+        tags?: Array<string> | null;
+        aiSummary?: string | null;
     };
     path?: never;
     query?: never;
@@ -429,6 +449,8 @@ export type PostSavesResponses = {
         note: string | null;
         tags: Array<string>;
         status: 'active' | 'archived';
+        aiSummary: string | null;
+        aiEnrichedAt: string | null;
         createdAt: string;
         updatedAt: string;
     };
@@ -502,6 +524,8 @@ export type GetSavesByIdResponses = {
         note: string | null;
         tags: Array<string>;
         status: 'active' | 'archived';
+        aiSummary: string | null;
+        aiEnrichedAt: string | null;
         createdAt: string;
         updatedAt: string;
     };
@@ -524,6 +548,8 @@ export type PatchSavesByIdData = {
         note?: string | null;
         status?: 'active' | 'archived';
         listId?: string | null;
+        tags?: Array<string> | null;
+        aiSummary?: string | null;
     };
     path: {
         id: string;
@@ -568,6 +594,8 @@ export type PatchSavesByIdResponses = {
         note: string | null;
         tags: Array<string>;
         status: 'active' | 'archived';
+        aiSummary: string | null;
+        aiEnrichedAt: string | null;
         createdAt: string;
         updatedAt: string;
     };
@@ -578,7 +606,16 @@ export type PatchSavesByIdResponse = PatchSavesByIdResponses[keyof PatchSavesByI
 export type GetListsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Max results to return
+         */
+        limit?: number;
+        /**
+         * Number of results to skip
+         */
+        offset?: number | null;
+    };
     url: '/lists';
 };
 
@@ -746,6 +783,8 @@ export type GetListsByIdResponses = {
                 note: string | null;
                 tags: Array<string>;
                 status: 'active' | 'archived';
+                aiSummary: string | null;
+                aiEnrichedAt: string | null;
                 createdAt: string;
                 updatedAt: string;
             } | null;
@@ -885,6 +924,8 @@ export type PostListsByIdItemsResponses = {
             note: string | null;
             tags: Array<string>;
             status: 'active' | 'archived';
+            aiSummary: string | null;
+            aiEnrichedAt: string | null;
             createdAt: string;
             updatedAt: string;
         } | null;

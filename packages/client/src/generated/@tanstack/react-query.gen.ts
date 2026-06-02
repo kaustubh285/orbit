@@ -2,7 +2,7 @@
 
 import { type Options, get, getQuestsCount, getQuestsTimeline, getQuests, postQuests, deleteQuestsById, getQuestsById, patchQuestsById, getSaves, postSaves, deleteSavesById, getSavesById, patchSavesById, getLists, postLists, deleteListsById, getListsById, patchListsById, postListsByIdItems, deleteListsByIdItemsByItemId } from '../sdk.gen';
 import { queryOptions, infiniteQueryOptions, type InfiniteData, type DefaultError, type UseMutationOptions } from '@tanstack/react-query';
-import type { GetData, GetQuestsCountData, GetQuestsCountResponse, GetQuestsTimelineData, GetQuestsTimelineResponse, GetQuestsData, PostQuestsData, PostQuestsError, PostQuestsResponse, DeleteQuestsByIdData, DeleteQuestsByIdError, DeleteQuestsByIdResponse, GetQuestsByIdData, PatchQuestsByIdData, PatchQuestsByIdError, PatchQuestsByIdResponse, GetSavesData, PostSavesData, PostSavesError, PostSavesResponse, DeleteSavesByIdData, DeleteSavesByIdError, DeleteSavesByIdResponse, GetSavesByIdData, PatchSavesByIdData, PatchSavesByIdError, PatchSavesByIdResponse, GetListsData, PostListsData, PostListsError, PostListsResponse, DeleteListsByIdData, DeleteListsByIdError, DeleteListsByIdResponse, GetListsByIdData, PatchListsByIdData, PatchListsByIdError, PatchListsByIdResponse, PostListsByIdItemsData, PostListsByIdItemsError, PostListsByIdItemsResponse, DeleteListsByIdItemsByItemIdData, DeleteListsByIdItemsByItemIdError, DeleteListsByIdItemsByItemIdResponse } from '../types.gen';
+import type { GetData, GetQuestsCountData, GetQuestsCountResponse, GetQuestsTimelineData, GetQuestsTimelineResponse, GetQuestsData, GetQuestsResponse, PostQuestsData, PostQuestsError, PostQuestsResponse, DeleteQuestsByIdData, DeleteQuestsByIdError, DeleteQuestsByIdResponse, GetQuestsByIdData, PatchQuestsByIdData, PatchQuestsByIdError, PatchQuestsByIdResponse, GetSavesData, GetSavesResponse, PostSavesData, PostSavesError, PostSavesResponse, DeleteSavesByIdData, DeleteSavesByIdError, DeleteSavesByIdResponse, GetSavesByIdData, PatchSavesByIdData, PatchSavesByIdError, PatchSavesByIdResponse, GetListsData, GetListsResponse, PostListsData, PostListsError, PostListsResponse, DeleteListsByIdData, DeleteListsByIdError, DeleteListsByIdResponse, GetListsByIdData, PatchListsByIdData, PatchListsByIdError, PatchListsByIdResponse, PostListsByIdItemsData, PostListsByIdItemsError, PostListsByIdItemsResponse, DeleteListsByIdItemsByItemIdData, DeleteListsByIdItemsByItemIdError, DeleteListsByIdItemsByItemIdResponse } from '../types.gen';
 import { client as _heyApiClient } from '../client.gen';
 
 export type QueryKey<TOptions extends Options> = [
@@ -187,6 +187,32 @@ export const getQuestsOptions = (options?: Options<GetQuestsData>) => {
     });
 };
 
+export const getQuestsInfiniteQueryKey = (options?: Options<GetQuestsData>): QueryKey<Options<GetQuestsData>> => createQueryKey('getQuests', options, true);
+
+export const getQuestsInfiniteOptions = (options?: Options<GetQuestsData>) => {
+    return infiniteQueryOptions<GetQuestsResponse, DefaultError, InfiniteData<GetQuestsResponse>, QueryKey<Options<GetQuestsData>>, string | Pick<QueryKey<Options<GetQuestsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetQuestsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    cursor: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getQuests({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getQuestsInfiniteQueryKey(options)
+    });
+};
+
 export const postQuestsQueryKey = (options: Options<PostQuestsData>) => createQueryKey('postQuests', options);
 
 export const postQuestsOptions = (options: Options<PostQuestsData>) => {
@@ -280,6 +306,32 @@ export const getSavesOptions = (options?: Options<GetSavesData>) => {
     });
 };
 
+export const getSavesInfiniteQueryKey = (options?: Options<GetSavesData>): QueryKey<Options<GetSavesData>> => createQueryKey('getSaves', options, true);
+
+export const getSavesInfiniteOptions = (options?: Options<GetSavesData>) => {
+    return infiniteQueryOptions<GetSavesResponse, DefaultError, InfiniteData<GetSavesResponse>, QueryKey<Options<GetSavesData>>, string | Pick<QueryKey<Options<GetSavesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetSavesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    cursor: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getSaves({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getSavesInfiniteQueryKey(options)
+    });
+};
+
 export const postSavesQueryKey = (options: Options<PostSavesData>) => createQueryKey('postSaves', options);
 
 export const postSavesOptions = (options: Options<PostSavesData>) => {
@@ -370,6 +422,32 @@ export const getListsOptions = (options?: Options<GetListsData>) => {
             return data;
         },
         queryKey: getListsQueryKey(options)
+    });
+};
+
+export const getListsInfiniteQueryKey = (options?: Options<GetListsData>): QueryKey<Options<GetListsData>> => createQueryKey('getLists', options, true);
+
+export const getListsInfiniteOptions = (options?: Options<GetListsData>) => {
+    return infiniteQueryOptions<GetListsResponse, DefaultError, InfiniteData<GetListsResponse>, QueryKey<Options<GetListsData>>, number | null | Pick<QueryKey<Options<GetListsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<GetListsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    offset: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await getLists({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: getListsInfiniteQueryKey(options)
     });
 };
 

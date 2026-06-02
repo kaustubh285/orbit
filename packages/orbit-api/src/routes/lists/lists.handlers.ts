@@ -17,7 +17,13 @@ import type {
 
 export const listLists: AppRouteHandler<ListRoute> = async (c) => {
 	const userId = c.var.userId;
-	const lists = await db.select().from(listsTable).where(eq(listsTable.userId, userId));
+	const { limit, offset } = c.req.valid("query");
+	const lists = await db
+		.select()
+		.from(listsTable)
+		.where(eq(listsTable.userId, userId))
+		.limit(limit)
+		.offset(offset);
 	return c.json(lists, HttpStatusCodes.OK);
 };
 
