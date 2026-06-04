@@ -23,6 +23,10 @@ export function useSaves() {
 		)
 	}
 
+	const mostRecentFiveSaves = useQuery(
+		getSavesOptions({ query: { limit: 5 } })
+	)
+
 	return {
 		saves: saves.data,
 		isLoading: saves.isLoading,
@@ -30,5 +34,7 @@ export function useSaves() {
 		refetch: saves.refetch,
 		addSave,
 		isAdding: createSave.isPending,
+		mostRecentFiveSaves: mostRecentFiveSaves.data,
+		mostRecentFiveSavesIsLoading: mostRecentFiveSaves.isLoading,
 	}
 }

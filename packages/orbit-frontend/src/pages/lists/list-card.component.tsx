@@ -6,6 +6,7 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { listAccentColor } from './lists.utils'
 import { ListMenu } from './list-menu.component'
+import { PrivacyAwareText } from '@/components/privacy-aware-text.component'
 
 dayjs.extend(relativeTime)
 
@@ -58,12 +59,12 @@ export function ListCard({
 					}}
 				>
 					<Text style={{ fontSize: 30, lineHeight: 1, marginBottom: 6 }}>{list.icon}</Text>
-					<Text fw={700} size="sm" style={{ color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }} lineClamp={1}>
+					<PrivacyAwareText fw={700} size="sm" style={{ color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }} lineClamp={1}>
 						{list.name}
-					</Text>
-					<Text size="xs" style={{ color: 'rgba(255,255,255,0.65)' }} lineClamp={1}>
+					</PrivacyAwareText>
+					<PrivacyAwareText size="xs" style={{ color: 'rgba(255,255,255,0.65)' }} lineClamp={1}>
 						{list.description ?? '--'}
-					</Text>
+					</PrivacyAwareText>
 
 					{/* Accent bar */}
 					<Box style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: accent }} />
@@ -103,9 +104,9 @@ export function ListCard({
 							</Box>
 						)}
 						<Stack gap={1} style={{ minWidth: 0, flex: 1 }}>
-							<Text size="xs" fw={500} truncate>
+							<PrivacyAwareText size="xs" fw={500} truncate>
 								{list.recentSave.title ?? list.recentSave.sourceUrl}
-							</Text>
+							</PrivacyAwareText>
 							<Text size="xs" c="dimmed">
 								{formatSaveDate(list.recentSave.createdAt)}
 							</Text>

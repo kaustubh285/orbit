@@ -1,3 +1,4 @@
+import { PrivacyAwareText } from "@/components/privacy-aware-text.component"
 import { UpdateSaveModal } from "@/components/saves/update-save-modal.component"
 import type { Save } from "@/types"
 import {
@@ -179,12 +180,32 @@ function SaveCard({ save, onEdit }: { save: Save, onEdit: (save: Save) => void }
 				<Box
 					style={{
 						aspectRatio: THUMB_RATIO,
-						backgroundImage: `url(${save.thumbnailUrl})`,
+						backgroundImage: save.thumbnailUrl ? `url(${save.thumbnailUrl})` : `linear-gradient(135deg, ${meta.color}55, ${meta.color}99)`,
 						backgroundSize: "cover",
 						backgroundPosition: "center",
 						position: "relative",
 					}}
 				>
+					<Box
+						style={{
+							position: "absolute",
+							inset: 0,
+							background: "linear-gradient(to top, rgba(0,0,0,0.82) 35%, rgba(0,0,0,0.25) 100%)",
+						}}
+					/>
+
+					{/* Title bottom */}
+					<Box style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "0 8px 8px" }}>
+						<PrivacyAwareText
+							size="xs"
+							fw={600}
+							lineClamp={2}
+							fz="h6"
+							style={{ color: "#fff", lineHeight: 1.3 }}
+						>
+							{save.title ?? save.sourceUrl}
+						</PrivacyAwareText>
+					</Box>
 					<Badge
 						size="xs"
 						color={meta.color}
@@ -220,10 +241,26 @@ function SaveCard({ save, onEdit }: { save: Save, onEdit: (save: Save) => void }
 			)}
 
 			<Stack gap={6} p="sm">
-				<Group justify="space-between" align="flex-start" wrap="nowrap">
-					<Text fw={600} size="sm" lineClamp={2} style={{ flex: 1 }}>
+				<Group justify="end" align="flex-start" wrap="nowrap">
+					{/*<PrivacyAwareText fw={600} size="sm" lineClamp={2} style={{ flex: 1 }}>
 						{save.title ?? save.sourceUrl}
-					</Text>
+					</PrivacyAwareText>*/}
+					{(save.author || save.publishedAt) && (
+						<Stack flex={1}>
+							{save.author && <PrivacyAwareText size="xs" c="dimmed">
+								{save.author}
+							</PrivacyAwareText>}
+							{
+								save.author && save.publishedAt && <PrivacyAwareText size="xs" c="dimmed">
+									{save.author && save.publishedAt && " · "}
+								</PrivacyAwareText>
+							}
+
+							{save.publishedAt && <PrivacyAwareText size="xs" c="dimmed">
+								{save.publishedAt && dayjs(save.publishedAt).fromNow()}
+							</PrivacyAwareText>}
+						</Stack>
+					)}
 					<Tooltip label="Open link">
 						<ActionIcon
 							component="a"
@@ -252,53 +289,38 @@ function SaveCard({ save, onEdit }: { save: Save, onEdit: (save: Save) => void }
 					</Tooltip>
 				</Group>
 
-				{(save.author || save.publishedAt) && (
-					<Text size="xs" c="dimmed">
-						{save.author}
-						{save.author && save.publishedAt && " · "}
-						{save.publishedAt && dayjs(save.publishedAt).fromNow()}
-					</Text>
-				)}
+
 
 				{save.aiSummary ? (
 					<Group gap={4} align="flex-start" wrap="nowrap">
 						<IconSparkles size={11} style={{ color: "var(--mantine-color-violet-4)", marginTop: 2, flexShrink: 0 }} />
-						<Text size="xs" c="dimmed" lineClamp={2}>{save.aiSummary}</Text>
+						<PrivacyAwareText size="xs" c="dimmed" lineClamp={2}>{save.aiSummary}</PrivacyAwareText>
 					</Group>
 				) : save.description ? (
-					<Text size="xs" c="dimmed" lineClamp={2}>{save.description}</Text>
+					<PrivacyAwareText size="xs" c="dimmed" lineClamp={2}>{save.description}</PrivacyAwareText>
 				) : null}
 
 				{save.note && (
-					// <Box
-					// 	p="xs"
-					// 	style={{
-					// 		background: "var(--mantine-color-yellow-0)",
-					// 		borderLeft: "2px solid var(--mantine-color-yellow-4)",
-					// 		borderRadius: 4,
-					// 	}}
-					// >
-					// </Box>
-					<Text size="xs" fs="italic" c="yellow.8">
+					<PrivacyAwareText size="xs" fs="italic" c="yellow.8">
 						{save.note}
-					</Text>
+					</PrivacyAwareText>
 				)}
 
 				{save.tags.length > 0 && (
 					<Group gap={4} wrap="wrap">
 						{save.tags.slice(0, 6).map((tag) => (
 							<Badge key={tag} size="xs" variant="light" color="gray" radius="sm">
-								{tag}
+								<PrivacyAwareText size="xs">{tag}</PrivacyAwareText>
 							</Badge>
 						))}
 					</Group>
 				)}
 
-				<Text size="xs" c="dimmed" mt={2}>
+				{save.createdAt && <PrivacyAwareText size="xs" c="dimmed" mt={2}>
 					Saved {dayjs(save.createdAt).fromNow()}
-				</Text>
+				</PrivacyAwareText>}
 			</Stack>
-		</Card>
+		</Card >
 	)
 }
 

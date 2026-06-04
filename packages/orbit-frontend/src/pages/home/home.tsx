@@ -12,7 +12,6 @@ export function HomePage() {
 	const modalQuest = useQuestsStore((state) => state.modalQuest)
 	const { openModal, closeModal } = useQuestsStore((state) => state.actions)
 	const { quests, questsData, isFromCache, submitQuest, toggleQuest, editQuest } = useHome()
-
 	return (
 		<Stack gap="xs">
 			<CalendarScroll />

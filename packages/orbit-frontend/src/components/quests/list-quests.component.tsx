@@ -4,6 +4,7 @@ import type { Quest } from "@/types"
 import { ActionIcon, Badge, Skeleton, Stack, Text, Textarea, TextInput } from "@mantine/core"
 import { IconCheck, IconCircleDot, IconDots } from "@tabler/icons-react"
 import { useState } from "react"
+import { PrivacyAwareText } from "../privacy-aware-text.component"
 
 const QUEST_TYPES: Quest["type"][] = ["todo", "note", "event", "daily"]
 
@@ -50,16 +51,7 @@ export function QuestRow({
 	const showLastDone = (quest.type === "todo" || quest.type === "event") && quest.lastCompletedAt
 	const { privacyMode } = useOrbitAppStore()
 
-	const getQuestTitle = () => {
-		if (privacyMode) {
-			// const redactedChar = "█"
-			const redactedChar = "*"
-			const visibleChars = quest.title.substring(0, Math.min(quest.title.length, 3))
-			const hiddenChars = quest.title.substring(3).replace(/\S/g, redactedChar)
-			return visibleChars + hiddenChars
-		}
-		return quest.title
-	}
+
 	return (
 		<div
 			style={{
@@ -76,14 +68,14 @@ export function QuestRow({
 				type={quest.type}
 				onClick={isToggleable ? () => onToggle(quest) : undefined}
 			/>
-			<Text
+			<PrivacyAwareText
 				size="md"
 				td={isCompleted ? "line-through" : undefined}
 				c={isCompleted ? "dimmed" : undefined}
 				style={{ flex: 1 }}
 			>
-				{getQuestTitle()}
-			</Text>
+				{quest.title}
+			</PrivacyAwareText>
 			{showLastDone && (
 				<Badge
 					color="green"
