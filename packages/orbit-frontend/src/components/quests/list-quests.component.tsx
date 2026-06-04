@@ -36,7 +36,7 @@ function daysAgoLabel(iso: string): string {
 	return `${months}mo ago`
 }
 
-function QuestRow({
+export function QuestRow({
 	quest,
 	onToggle,
 	onOpen,
@@ -118,7 +118,7 @@ function QuestRow({
 	)
 }
 
-function NewQuestRow({ onSubmit }: { onSubmit: (title: string, type: Quest["type"]) => void }) {
+export function NewQuestRow({ onSubmit }: { onSubmit: (title: string, type: Quest["type"]) => void }) {
 	const [type, setType] = useState<Quest["type"]>("todo")
 	const [title, setTitle] = useState("")
 

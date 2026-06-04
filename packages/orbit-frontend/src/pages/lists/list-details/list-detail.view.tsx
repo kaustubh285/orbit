@@ -25,10 +25,11 @@ import {
 } from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import type { List } from '@/types'
+import type { List, Quest } from '@/types'
 import { listAccentColor } from '../lists.utils'
 import { ListFormDrawer } from '../list-form-drawer.component'
 import { useState } from 'react'
+import { QuestRow, NewQuestRow } from '@/components/quests/list-quests.component'
 
 dayjs.extend(relativeTime)
 
@@ -42,13 +43,6 @@ const PLATFORM_META: Record<Platform, { label: string; color: string; Icon: Reac
 	reddit: { label: 'Reddit', color: 'orange', Icon: IconBrandReddit },
 	instagram: { label: 'Instagram', color: 'grape', Icon: IconBrandInstagram },
 	web: { label: 'Web', color: 'cyan', Icon: IconWorld },
-}
-
-const QUEST_TYPE_LABELS: Record<string, string> = {
-	todo: 'To-do',
-	note: 'Note',
-	event: 'Event',
-	daily: 'Daily',
 }
 
 function SaveItemCard({ item, onRemove }: { item: ListItem; onRemove: () => void }) {
@@ -158,39 +152,6 @@ function SaveItemCard({ item, onRemove }: { item: ListItem; onRemove: () => void
 	)
 }
 
-function QuestItem({ item, onRemove }: { item: ListItem; onRemove: () => void }) {
-	const quest = item.quest!
-	return (
-		<Group
-			wrap="nowrap"
-			justify="space-between"
-			style={{
-				padding: '8px 12px',
-				borderRadius: 6,
-				background: 'var(--mantine-color-dark-6)',
-				border: '1px solid var(--mantine-color-dark-4)',
-			}}
-		>
-			<Group gap="xs" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
-				<Badge size="xs" variant="light" color="blue">
-					{QUEST_TYPE_LABELS[quest.type] ?? quest.type}
-				</Badge>
-				<Text size="sm" truncate style={{ flex: 1 }}>
-					{quest.title}
-				</Text>
-				{quest.status === 'completed' && (
-					<Badge size="xs" variant="dot" color="green">Done</Badge>
-				)}
-			</Group>
-			<Tooltip label="Remove from list" withArrow>
-				<ActionIcon variant="subtle" color="gray" size="sm" onClick={onRemove}>
-					<IconTrash size={13} />
-				</ActionIcon>
-			</Tooltip>
-		</Group>
-	)
-}
-
 function SectionHeader({ label, count }: { label: string; count: number }) {
 	return (
 		<Text size="xs" c="dimmed" fw={600} tt="uppercase" style={{ letterSpacing: '0.05em' }}>
@@ -204,12 +165,18 @@ export function ListDetailView({
 	isLoading,
 	onUpdate,
 	onRemoveItem,
+	submitQuest,
+	toggleQuest,
+	onOpenQuest,
 	isUpdating,
 }: {
 	list: ListWithItems | undefined
 	isLoading: boolean
 	onUpdate: (name: string, description?: string, color?: string, icon?: string) => void
 	onRemoveItem: (itemId: string) => void
+	submitQuest: (title: string, type: Quest["type"]) => void
+	toggleQuest: (quest: Quest) => void
+	onOpenQuest: (quest: Quest) => void
 	isUpdating: boolean
 }) {
 	const [editOpen, setEditOpen] = useState(false)
@@ -241,7 +208,7 @@ export function ListDetailView({
 	}
 
 	const editInitial: List | undefined = list
-		? { id: list.id, userId: list.userId, name: list.name, description: list.description, color: list.color, icon: list.icon, createdAt: list.createdAt, updatedAt: list.updatedAt }
+		? { id: list.id, userId: list.userId, name: list.name, description: list.description, color: list.color, icon: list.icon, createdAt: list.createdAt, updatedAt: list.updatedAt, recentSave: null }
 		: undefined
 
 	return (
@@ -291,31 +258,45 @@ export function ListDetailView({
 						/>
 					)}
 
-					{allItems.length === 0 ? (
-						<Text size="sm" c="dimmed">No items in this list yet.</Text>
-					) : filteredItems.length === 0 ? (
-						<Text size="sm" c="dimmed">No items match "{search}"</Text>
-					) : (
-						<Stack gap="xl">
-							{saveItems.length > 0 && (
-								<Stack gap="sm">
-									<SectionHeader label="Saves" count={saveItems.length} />
-									{saveItems.map((item) => (
-										<SaveItemCard key={item.id} item={item} onRemove={() => onRemoveItem(item.id)} />
-									))}
-								</Stack>
-							)}
+					<Stack gap="xl">
+						{saveItems.length > 0 && (
+							<Stack gap="sm">
+								<SectionHeader label="Saves" count={saveItems.length} />
+								{saveItems.map((item) => (
+									<SaveItemCard key={item.id} item={item} onRemove={() => onRemoveItem(item.id)} />
+								))}
+							</Stack>
+						)}
 
-							{questItems.length > 0 && (
-								<Stack gap="sm">
-									<SectionHeader label="Quests" count={questItems.length} />
-									{questItems.map((item) => (
-										<QuestItem key={item.id} item={item} onRemove={() => onRemoveItem(item.id)} />
-									))}
-								</Stack>
-							)}
+						<Stack gap="xs">
+							<SectionHeader label="Quests" count={questItems.length} />
+							<div style={{ borderBottom: '1px dotted var(--mantine-color-gray-4)' }}>
+								{questItems.map((item) => (
+									<Group key={item.id} wrap="nowrap" gap={0}>
+										<div style={{ flex: 1, minWidth: 0 }}>
+											<QuestRow
+												quest={item.quest as Quest}
+												onToggle={toggleQuest}
+												onOpen={onOpenQuest}
+											/>
+										</div>
+										<Tooltip label="Remove from list" withArrow>
+											<ActionIcon
+												variant="subtle"
+												color="gray"
+												size="sm"
+												style={{ flexShrink: 0, marginRight: 4 }}
+												onClick={() => onRemoveItem(item.id)}
+											>
+												<IconTrash size={13} />
+											</ActionIcon>
+										</Tooltip>
+									</Group>
+								))}
+								<NewQuestRow onSubmit={submitQuest} />
+							</div>
 						</Stack>
-					)}
+					</Stack>
 				</Stack>
 			)}
 

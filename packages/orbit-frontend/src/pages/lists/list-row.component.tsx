@@ -1,5 +1,6 @@
 import type { List } from '@/types'
-import { Group, Skeleton, Stack, Text } from '@mantine/core'
+import { Box, Group, Skeleton, Stack, Text } from '@mantine/core'
+import { IconBookmark } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { listAccentColor } from './lists.utils'
 import { ListMenu } from './list-menu.component'
@@ -19,37 +20,83 @@ export function ListRow({
 		<Group
 			justify="space-between"
 			wrap="nowrap"
+			gap={0}
 			style={{
-				padding: '8px 10px',
-				paddingLeft: 10,
-				borderBottom: '1px dotted var(--mantine-color-dark-4)',
-				borderLeft: `3px solid ${accent}`,
+				borderRadius: 10,
+				border: '1px solid var(--mantine-color-dark-4)',
+				background: 'var(--mantine-color-dark-7)',
+				overflow: 'hidden',
 			}}
 		>
+			{/* Accent strip */}
+			<Box style={{ width: 4, alignSelf: 'stretch', background: accent, flexShrink: 0 }} />
+
 			<Link
 				to="/lists/$id"
 				params={{ id: list.id }}
-				style={{ flex: 1, minWidth: 0, textDecoration: 'none', color: 'inherit' }}
+				style={{ flex: 1, minWidth: 0, textDecoration: 'none', color: 'inherit', padding: '10px 12px' }}
 			>
-				<Group gap="sm" wrap="nowrap">
+				<Group gap="sm" wrap="nowrap" align="center">
 					<Text style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>{list.icon}</Text>
-					<Stack gap={2} style={{ minWidth: 0 }}>
-						<Text size="sm" fw={500} truncate>{list.name}</Text>
-						{list.description && (
+					<Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+						<Text size="sm" fw={600} truncate>{list.name}</Text>
+						{list.recentSave ? (
+							<Group gap={4} wrap="nowrap">
+								<IconBookmark size={10} style={{ color: accent, flexShrink: 0 }} />
+								<Text size="xs" c="dimmed" truncate>
+									{list.recentSave.title ?? list.recentSave.sourceUrl}
+								</Text>
+							</Group>
+						) : list.description ? (
 							<Text size="xs" c="dimmed" truncate>{list.description}</Text>
-						)}
+						) : null}
 					</Stack>
+
+					{/* Thumbnail */}
+					{list.recentSave?.thumbnailUrl && (
+						<Box
+							style={{
+								width: 44,
+								height: 44,
+								flexShrink: 0,
+								borderRadius: 6,
+								backgroundImage: `url(${list.recentSave.thumbnailUrl})`,
+								backgroundSize: 'cover',
+								backgroundPosition: 'center',
+								border: '1px solid var(--mantine-color-dark-4)',
+							}}
+						/>
+					)}
 				</Group>
 			</Link>
-			<ListMenu list={list} onEdit={onEdit} onDelete={onDelete} />
+
+			<Box pr={8}>
+				<ListMenu list={list} onEdit={onEdit} onDelete={onDelete} />
+			</Box>
 		</Group>
 	)
 }
 
 export function ListRowSkeleton() {
 	return (
-		<Group style={{ padding: '8px 10px', borderBottom: '1px dotted var(--mantine-color-dark-4)' }}>
-			<Skeleton height={12} width="40%" />
+		<Group
+			wrap="nowrap"
+			gap={0}
+			style={{
+				borderRadius: 10,
+				border: '1px solid var(--mantine-color-dark-4)',
+				overflow: 'hidden',
+			}}
+		>
+			<Skeleton width={4} height={56} radius={0} />
+			<Group gap="sm" wrap="nowrap" style={{ flex: 1, padding: '10px 12px' }}>
+				<Skeleton height={22} width={22} radius="sm" />
+				<Stack gap={4} style={{ flex: 1 }}>
+					<Skeleton height={12} width="35%" />
+					<Skeleton height={10} width="55%" />
+				</Stack>
+				<Skeleton height={44} width={44} radius="sm" />
+			</Group>
 		</Group>
 	)
 }

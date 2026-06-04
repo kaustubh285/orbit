@@ -16,6 +16,10 @@ export const selectListSchema = z.object({
 	updatedAt: z.string().datetime({ offset: true }),
 });
 
+export const selectListWithRecentSaveSchema = selectListSchema.extend({
+	recentSave: selectSaveSchema.nullable(),
+});
+
 export const selectListItemSchema = z.object({
 	id: z.string().uuid(),
 	listId: z.string().uuid(),
@@ -70,7 +74,7 @@ export const list = createRoute({
 	tags: ["Lists"],
 	request: { query: listQuerySchema },
 	responses: {
-		[HttpStatusCodes.OK]: jsonContent(z.array(selectListSchema), "List of lists"),
+		[HttpStatusCodes.OK]: jsonContent(z.array(selectListWithRecentSaveSchema), "List of lists"),
 	},
 });
 

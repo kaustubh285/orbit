@@ -24,6 +24,7 @@ export type List = {
 	icon: string
 	createdAt: string
 	updatedAt: string
+	recentSave: Save | null
 }
 
 export type Save = {

@@ -2050,6 +2050,106 @@
                       "updatedAt": {
                         "type": "string",
                         "format": "date-time"
+                      },
+                      "recentSave": {
+                        "type": "object",
+                        "nullable": true,
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "userId": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "sourceUrl": {
+                            "type": "string",
+                            "format": "uri"
+                          },
+                          "sourcePlatform": {
+                            "type": "string",
+                            "enum": [
+                              "youtube",
+                              "reddit",
+                              "instagram",
+                              "web"
+                            ]
+                          },
+                          "title": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "description": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "thumbnailUrl": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "author": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "publishedAt": {
+                            "type": "string",
+                            "nullable": true,
+                            "format": "date-time"
+                          },
+                          "note": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "tags": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "active",
+                              "archived"
+                            ]
+                          },
+                          "aiSummary": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "aiEnrichedAt": {
+                            "type": "string",
+                            "nullable": true,
+                            "format": "date-time"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "userId",
+                          "sourceUrl",
+                          "sourcePlatform",
+                          "title",
+                          "description",
+                          "thumbnailUrl",
+                          "author",
+                          "publishedAt",
+                          "note",
+                          "tags",
+                          "status",
+                          "aiSummary",
+                          "aiEnrichedAt",
+                          "createdAt",
+                          "updatedAt"
+                        ]
                       }
                     },
                     "required": [
@@ -2060,7 +2160,8 @@
                       "color",
                       "icon",
                       "createdAt",
-                      "updatedAt"
+                      "updatedAt",
+                      "recentSave"
                     ]
                   }
                 }

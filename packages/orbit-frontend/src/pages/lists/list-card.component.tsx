@@ -1,8 +1,20 @@
 import type { List } from '@/types'
 import { Box, Group, Skeleton, Stack, Text } from '@mantine/core'
+import { IconBookmark } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import { listAccentColor } from './lists.utils'
 import { ListMenu } from './list-menu.component'
+
+dayjs.extend(relativeTime)
+
+function formatSaveDate(dateStr: string) {
+	const date = dayjs(dateStr)
+	return dayjs().diff(date, 'day') < 7
+		? date.fromNow()
+		: date.format('MMM D, YYYY')
+}
 
 export function ListCard({
 	list,
@@ -18,27 +30,95 @@ export function ListCard({
 	return (
 		<Box
 			style={{
-				borderRadius: 8,
+				borderRadius: 12,
 				border: '1px solid var(--mantine-color-dark-4)',
-				borderTop: `3px solid ${accent}`,
-				padding: '12px 14px',
 				background: 'var(--mantine-color-dark-7)',
+				overflow: 'hidden',
+				display: 'flex',
+				flexDirection: 'column',
 			}}
+
 		>
-			<Group justify="space-between" align="flex-start" wrap="nowrap">
-				<Link
-					to="/lists/$id"
-					params={{ id: list.id }}
-					style={{ flex: 1, minWidth: 0, textDecoration: 'none', color: 'inherit' }}
+			{/* Hero — always accent gradient, icon + name */}
+			<Link
+				to="/lists/$id"
+				params={{ id: list.id }}
+				style={{ textDecoration: 'none', color: 'inherit' }}
+			>
+				<Box
+					style={{
+						position: 'relative',
+						aspectRatio: '5/2',
+						background: `linear-gradient(135deg, ${accent}33, ${accent}66)`,
+						display: 'flex',
+						flexDirection: 'column',
+						alignItems: 'flex-start',
+						justifyContent: 'flex-end',
+						padding: '10px 12px',
+					}}
 				>
-					<Stack gap={6}>
-						<Text style={{ fontSize: 28, lineHeight: 1 }}>{list.icon}</Text>
-						<Text fw={600} size="sm" truncate>{list.name}</Text>
-						{list.description && (
-							<Text size="xs" c="dimmed" lineClamp={2}>{list.description}</Text>
+					<Text style={{ fontSize: 30, lineHeight: 1, marginBottom: 6 }}>{list.icon}</Text>
+					<Text fw={700} size="sm" style={{ color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }} lineClamp={1}>
+						{list.name}
+					</Text>
+					<Text size="xs" style={{ color: 'rgba(255,255,255,0.65)' }} lineClamp={1}>
+						{list.description ?? '--'}
+					</Text>
+
+					{/* Accent bar */}
+					<Box style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: accent }} />
+				</Box>
+
+				{/* Recent save row */}
+				{list.recentSave ? (
+					<Group gap="sm" wrap="nowrap" px="sm" py={10} align="center">
+						{list.recentSave.thumbnailUrl ? (
+							<Box
+								style={{
+									width: 36,
+									height: 36,
+									flexShrink: 0,
+									borderRadius: 5,
+									backgroundImage: `url(${list.recentSave.thumbnailUrl})`,
+									backgroundSize: 'cover',
+									backgroundPosition: 'center',
+									border: '1px solid var(--mantine-color-dark-4)',
+								}}
+							/>
+						) : (
+							<Box
+								style={{
+									width: 36,
+									height: 36,
+									flexShrink: 0,
+									borderRadius: 5,
+									background: `${accent}22`,
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'center',
+									border: '1px solid var(--mantine-color-dark-4)',
+								}}
+							>
+								<IconBookmark size={14} style={{ color: accent }} />
+							</Box>
 						)}
-					</Stack>
-				</Link>
+						<Stack gap={1} style={{ minWidth: 0, flex: 1 }}>
+							<Text size="xs" fw={500} truncate>
+								{list.recentSave.title ?? list.recentSave.sourceUrl}
+							</Text>
+							<Text size="xs" c="dimmed">
+								{formatSaveDate(list.recentSave.createdAt)}
+							</Text>
+						</Stack>
+					</Group>
+				) : (
+					<Group px="sm" py={10}>
+						<Text size="xs" c="dimmed">No saves yet</Text>
+					</Group>
+				)}
+			</Link>
+
+			<Group justify="flex-end" px="sm" pb={6} mt={-4}>
 				<ListMenu list={list} onEdit={onEdit} onDelete={onDelete} />
 			</Group>
 		</Box>
@@ -47,9 +127,15 @@ export function ListCard({
 
 export function ListCardSkeleton() {
 	return (
-		<Box style={{ borderRadius: 8, border: '1px solid var(--mantine-color-dark-4)', padding: '12px 14px' }}>
-			<Skeleton height={14} width="60%" mb={8} />
-			<Skeleton height={10} width="80%" />
+		<Box style={{ borderRadius: 12, border: '1px solid var(--mantine-color-dark-4)', overflow: 'hidden' }}>
+			<Skeleton height={0} style={{ aspectRatio: '5/2' }} radius={0} />
+			<Group gap="sm" px="sm" py={10}>
+				<Skeleton height={36} width={36} radius="sm" />
+				<Stack gap={4} style={{ flex: 1 }}>
+					<Skeleton height={11} width="70%" />
+					<Skeleton height={9} width="35%" />
+				</Stack>
+			</Group>
 		</Box>
 	)
 }

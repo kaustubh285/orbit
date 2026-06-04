@@ -632,6 +632,24 @@ export type GetListsResponses = {
         icon: string;
         createdAt: string;
         updatedAt: string;
+        recentSave: {
+            id: string;
+            userId: string;
+            sourceUrl: string;
+            sourcePlatform: 'youtube' | 'reddit' | 'instagram' | 'web';
+            title: string | null;
+            description: string | null;
+            thumbnailUrl: string | null;
+            author: string | null;
+            publishedAt: string | null;
+            note: string | null;
+            tags: Array<string>;
+            status: 'active' | 'archived';
+            aiSummary: string | null;
+            aiEnrichedAt: string | null;
+            createdAt: string;
+            updatedAt: string;
+        } | null;
     }>;
 };
 

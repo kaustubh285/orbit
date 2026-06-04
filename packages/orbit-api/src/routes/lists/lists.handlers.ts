@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, isNotNull } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { db } from "../../db/db.js";
 import { listsTable, listItemsTable } from "../../db/schemas/lists.schema.js";
@@ -18,12 +18,36 @@ import type {
 export const listLists: AppRouteHandler<ListRoute> = async (c) => {
 	const userId = c.var.userId;
 	const { limit, offset } = c.req.valid("query");
-	const lists = await db
-		.select()
+
+	const rows = await db
+		.selectDistinctOn([listsTable.id], {
+			id: listsTable.id,
+			userId: listsTable.userId,
+			name: listsTable.name,
+			description: listsTable.description,
+			color: listsTable.color,
+			icon: listsTable.icon,
+			createdAt: listsTable.createdAt,
+			updatedAt: listsTable.updatedAt,
+			recentSave: savesTable,
+		})
 		.from(listsTable)
+		.leftJoin(
+			listItemsTable,
+			and(eq(listItemsTable.listId, listsTable.id), isNotNull(listItemsTable.saveId)),
+		)
+		.leftJoin(savesTable, eq(savesTable.id, listItemsTable.saveId))
 		.where(eq(listsTable.userId, userId))
+		.orderBy(listsTable.id, desc(listItemsTable.createdAt))
 		.limit(limit)
 		.offset(offset);
+
+	// Drizzle left-join returns all-null object when no match — normalize to null
+	const lists = rows.map(({ recentSave, ...list }) => ({
+		...list,
+		recentSave: recentSave?.id ? recentSave : null,
+	}));
+
 	return c.json(lists, HttpStatusCodes.OK);
 };
 
