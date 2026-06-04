@@ -1,14 +1,15 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
 	ActionIcon, Button, Chip, Drawer, Group,
 	Select, Stack, Text, Textarea, TextInput,
 } from '@mantine/core'
 import { DateTimePicker } from '@mantine/dates'
 import {
-	IconBookmark, IconCalendarEvent, IconFileText,
+	IconBookmark, IconCalendarEvent, IconClipboardCheckFilled, IconFileText,
+	IconPackageImport,
 	IconRefresh, IconSparkles, IconSquareCheck,
 } from '@tabler/icons-react'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useParams } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import { useCreateNew, type UiType, type QuestFields } from './use-create-new.hook'
 import ROUTES from '@/routes'
@@ -163,6 +164,13 @@ export function CreateNewComponent() {
 	const navigate = useNavigate()
 	const isDesktop = useMediaQuery("(min-width: 48em)", false, { getInitialValueInEffect: false })
 
+	const params = useParams({ strict: false })
+	const id = 'id' in params ? params.id : undefined
+
+	useEffect(() => {
+		if (id) setListId(id)
+	}, [id])
+
 	// Auto-detect save mode from URL; user can override with a chip tap
 	const effectiveType: UiType = uiTypeOverride ?? (looksLikeUrl(title) ? 'save' : 'todo')
 
@@ -204,6 +212,11 @@ export function CreateNewComponent() {
 			: effectiveType === 'note' ? 'Create note'
 				: 'Add quest'
 
+	const importFromClipboard = () => {
+		navigator.clipboard.readText().then((text) => {
+			setTitle(text)
+		})
+	}
 	return (
 		<>
 			<Drawer
@@ -219,15 +232,21 @@ export function CreateNewComponent() {
 			>
 				<Stack gap="md" justify="space-between" h="100%">
 					<Stack gap="md">
-						<TextInput
-							placeholder="Type something or paste a URL…"
-							value={title}
-							onChange={(e) => setTitle(e.currentTarget.value)}
-							autoFocus
-							onKeyDown={(e) => {
-								if (e.key === 'Enter' && effectiveType !== 'note') handleSubmit()
-							}}
-						/>
+						<Group w={"100%"}>
+							< TextInput
+								flex={1}
+								placeholder="Type something or paste a URL…"
+								value={title}
+								onChange={(e) => setTitle(e.currentTarget.value)}
+								autoFocus
+								onKeyDown={(e) => {
+									if (e.key === 'Enter' && effectiveType !== 'note') handleSubmit()
+								}}
+							/>
+							<ActionIcon>
+								<IconClipboardCheckFilled height={20} onClick={importFromClipboard} />
+							</ActionIcon>
+						</Group>
 
 						{title && (
 							<Chip.Group value={effectiveType} onChange={(v) => handleTypeChange(v as UiType)}>

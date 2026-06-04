@@ -45,7 +45,7 @@ export const UpdateSaveModal = ({
 	onClose: () => void
 }) => {
 	const { updateSave, isUpdating } = useUpdateSaveHook()
-	console.log(save)
+
 	const [title, setTitle] = useState(save.title ?? "")
 	const [description, setDescription] = useState(save.description ?? "")
 	const [note, setNote] = useState(save.note ?? "")
