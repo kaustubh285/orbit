@@ -1,5 +1,5 @@
 import ROUTES from "@/routes"
-import { AppShell, Group, Menu, Text, UnstyledButton } from "@mantine/core"
+import { AppShell, Button, ActionIcon, Group, Menu, Text, UnstyledButton } from "@mantine/core"
 import { IconBookmark, IconFileText, IconHome2, IconList, IconMenu2, IconPlus, IconRocket, IconTimeline } from "@tabler/icons-react"
 import { useLocation, useNavigate } from "@tanstack/react-router"
 import { useOrbitAppStore } from "@/store/orbit-app.store"
@@ -22,36 +22,37 @@ export function AppFooter() {
 
 	return (
 		<AppShell.Footer style={{ borderTop: "1px solid var(--mantine-color-dark-4)", paddingBottom: "env(safe-area-inset-bottom)" }}>
-			<Group h="100%" justify="space-between" align="center" px="md">
-				<Group gap={4}>
-					{activeItem && (
-						<>
-							<activeItem.icon
-								size={20}
-								stroke={2}
-								color={`var(--mantine-color-${activeItem.accent}-${activeItem.shade})`}
-							/>
-							<Text size="sm" fw={600} c={`${activeItem.accent}.${activeItem.shade}`}>
-								{activeItem.label}
-							</Text>
-						</>
-					)}
-				</Group>
-
-				<Menu position="top-end" withArrow shadow="md" width={180}>
+			<Group h="100%" justify="space-between" align="center" px="md" gap={40}>
+				<Menu position="top-start" shadow="md" flex={1} >
 					<Menu.Target>
-						<UnstyledButton
-							style={{
-								display: "flex",
-								alignItems: "center",
-								gap: 6,
-								padding: "8px 12px",
-								borderRadius: 10,
-								background: "var(--mantine-color-dark-6)",
-							}}
-						>
-							<IconMenu2 size={20} color="var(--mantine-color-dimmed)" />
-						</UnstyledButton>
+						<Group gap={10} >
+
+
+							<UnstyledButton
+								style={{
+									display: "flex",
+									alignItems: "center",
+									gap: 6,
+									padding: "8px 12px",
+									borderRadius: 10,
+									background: "var(--mantine-color-dark-6)",
+								}}
+							>
+								<IconMenu2 size={20} color="var(--mantine-color-dimmed)" />
+							</UnstyledButton>
+							{activeItem && (
+								<Group gap={6} flex={1}>
+									<activeItem.icon
+										size={20}
+										stroke={2}
+										color={`var(--mantine-color-${activeItem.accent}-${activeItem.shade})`}
+									/>
+									<Text size="sm" fw={600} c={`${activeItem.accent}.${activeItem.shade}`}>
+										{activeItem.label}
+									</Text>
+								</Group>
+							)}
+						</Group>
 					</Menu.Target>
 
 					<Menu.Dropdown>
@@ -86,6 +87,13 @@ export function AppFooter() {
 						})}
 					</Menu.Dropdown>
 				</Menu>
+
+
+
+				<ActionIcon onClick={() => setCreateNewOpen(true)}>
+					<IconPlus size={20} />
+				</ActionIcon>
+
 			</Group>
 		</AppShell.Footer>
 	)
