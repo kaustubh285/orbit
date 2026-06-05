@@ -15,7 +15,11 @@ export function useSaves() {
 
 	function addSave(url: string) {
 		const id = crypto.randomUUID()
-		const payload = { sourceUrl: url }
+		const listMatch = window.location.pathname.match(/^\/lists\/([^/]+)/)
+		const payload = {
+			sourceUrl: url,
+			...(listMatch ? { listId: listMatch[1] } : {}),
+		}
 		addPendingSubmission({ id, createdAt: new Date().toISOString(), apiCallKey: "postSave", payload })
 		createSave.mutate(
 			{ body: payload } as Parameters<typeof createSave.mutate>[0],

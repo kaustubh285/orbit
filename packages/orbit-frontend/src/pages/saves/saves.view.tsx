@@ -36,6 +36,7 @@ import {
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { useState } from "react"
+import { useSaves } from "./use-saves.hook"
 
 dayjs.extend(relativeTime)
 
@@ -509,16 +510,13 @@ function SaveCardSkeletonCompact() {
 export default function SavesView({
 	saves,
 	isLoading,
-	onAdd,
-	isAdding,
 	onRefetch,
 }: {
 	saves: Save[]
 	isLoading: boolean
-	onAdd: (url: string) => void
-	isAdding: boolean
-	onRefetch: () => void
+	onRefetch?: () => void
 }) {
+	const { addSave, isAdding } = useSaves()
 	const [platform, setPlatform] = useState<Platform | "all">("all")
 	const [search, setSearch] = useState("")
 	const [activeTags, setActiveTags] = useState<string[]>([])
@@ -581,11 +579,13 @@ export default function SavesView({
 							<IconLayoutList size={15} />
 						</ActionIcon>
 					</Tooltip>
-					<Tooltip label="Refresh">
-						<ActionIcon variant="subtle" color="gray" onClick={onRefetch} loading={isLoading} size="sm">
-							<IconRefresh size={15} />
-						</ActionIcon>
-					</Tooltip>
+					{onRefetch && (
+						<Tooltip label="Refresh">
+							<ActionIcon variant="subtle" color="gray" onClick={onRefetch} loading={isLoading} size="sm">
+								<IconRefresh size={15} />
+							</ActionIcon>
+						</Tooltip>
+					)}
 				</Group>
 			</Group>
 
@@ -595,14 +595,14 @@ export default function SavesView({
 
 			{isCompact ? (
 				<Stack gap="sm">
-					<AddSaveCardCompact onAdd={onAdd} isAdding={isAdding} />
+					<AddSaveCardCompact onAdd={addSave} isAdding={isAdding} />
 					{isLoading
 						? [1, 2, 3, 4, 5].map((i) => <SaveCardSkeletonCompact key={i} />)
 						: filtered.map((save) => <SaveCardCompact key={save.id} save={save} onEdit={(s) => { setSelectedSave(s); open() }} />)}
 				</Stack>
 			) : (
 				<SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-					<AddSaveCard onAdd={onAdd} isAdding={isAdding} />
+					<AddSaveCard onAdd={addSave} isAdding={isAdding} />
 					{isLoading
 						? [1, 2, 3, 4, 5].map((i) => <SaveCardSkeleton key={i} />)
 						: filtered.map((save) => <SaveCard key={save.id} save={save} onEdit={(s) => { setSelectedSave(s); open() }} />)}
