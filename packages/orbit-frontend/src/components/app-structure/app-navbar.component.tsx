@@ -5,12 +5,12 @@ import { useLocation, useNavigate } from "@tanstack/react-router"
 import { useOrbitAppStore } from "@/store/orbit-app.store"
 
 const NAV_ITEMS = [
-	{ label: "Quests", icon: IconRocket, to: ROUTES.QUESTS, accent: "ocean-blue", shade: 9 },
-	{ label: "Notes", icon: IconFileText, to: ROUTES.NOTES, accent: "gray", shade: 8 },
-	{ label: "Saves", icon: IconBookmark, to: ROUTES.SAVES, accent: "amber", shade: 9 },
-	{ label: "Lists", icon: IconList, to: ROUTES.LISTS, accent: "violet", shade: 9 },
-	{ label: "Timeline", icon: IconTimeline, to: ROUTES.TIMELINE, accent: "pink", shade: 9 },
 	{ label: "Home", icon: IconHome2, to: ROUTES.HOME, accent: "teal", shade: 9 },
+	{ label: "Quests", icon: IconRocket, to: ROUTES.QUESTS, accent: "ocean-blue", shade: 9 },
+	{ label: "Lists", icon: IconList, to: ROUTES.LISTS, accent: "violet", shade: 9 },
+	{ label: "Saves", icon: IconBookmark, to: ROUTES.SAVES, accent: "amber", shade: 9 },
+	{ label: "Timeline", icon: IconTimeline, to: ROUTES.TIMELINE, accent: "pink", shade: 9 },
+	{ label: "Notes", icon: IconFileText, to: ROUTES.NOTES, accent: "gray", shade: 8 },
 ]
 
 export function AppNavbar() {

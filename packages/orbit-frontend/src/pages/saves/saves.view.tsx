@@ -1,3 +1,4 @@
+import { MultiSelectFilter } from "@/components/multi-select-filter.component"
 import { PrivacyAwareText } from "@/components/privacy-aware-text.component"
 import { UpdateSaveModal } from "@/components/saves/update-save-modal.component"
 import type { Save } from "@/types"
@@ -7,9 +8,8 @@ import {
 	Box,
 	Button,
 	Card,
-	Chip,
+	Flex,
 	Group,
-	ScrollArea,
 	Select,
 	SimpleGrid,
 	Skeleton,
@@ -64,6 +64,7 @@ function matchesSearch(save: Save, query: string): boolean {
 	const q = query.toLowerCase()
 	return (
 		(save.title?.toLowerCase().includes(q) ?? false) ||
+		(save.aiSummary?.toLowerCase().includes(q) ?? false) ||
 		(save.description?.toLowerCase().includes(q) ?? false) ||
 		(save.note?.toLowerCase().includes(q) ?? false) ||
 		PLATFORM_META[save.sourcePlatform].label.toLowerCase().includes(q) ||
@@ -136,35 +137,34 @@ function AddSaveCardCompact({ onAdd, isAdding }: { onAdd: (url: string) => void;
 	}
 
 	return (
-		<Card withBorder radius="md" padding={0} style={{ overflow: "hidden" }}>
-			<Group wrap="nowrap" gap={0} style={{ height: 80 }}>
-				<Box
-					style={{
-						width: "35%",
-						flexShrink: 0,
-						height: "100%",
-						background: "var(--mantine-color-gray-0)",
-						padding: 10,
-						display: "flex",
-						alignItems: "stretch",
-					}}
-				>
+		<Card
+			withBorder
+			radius="md"
+			padding="sm"
+			style={{
+				borderStyle: "dashed",
+				borderColor: "var(--mantine-color-gray-4)",
+			}}
+		>
+			<Group wrap="nowrap" gap="sm" align="flex-end">
+				<Stack gap={4} style={{ flex: 1 }}>
+					<Text size="xs" fw={600} c="dimmed" tt="uppercase" style={{ letterSpacing: 1 }}>
+						Save a link
+					</Text>
 					<Textarea
-						placeholder="Paste a URL..."
+						placeholder="Paste a URL to save..."
 						value={url}
 						onChange={(e) => setUrl(e.currentTarget.value)}
 						onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSave() } }}
-						variant="unstyled"
-						size="xs"
-						style={{ flex: 1 }}
-						styles={{ input: { height: "100%", resize: "none", fontSize: 11 } }}
+						variant="filled"
+						autosize
+						minRows={2}
+						styles={{ input: { resize: "none" } }}
 					/>
-				</Box>
-				<Box style={{ flex: 1, display: "flex", alignItems: "center", padding: "0 12px" }}>
-					<Button size="xs" color="amber" loading={isAdding} onClick={handleSave}>
-						Save
-					</Button>
-				</Box>
+				</Stack>
+				<Button color="amber" loading={isAdding} onClick={handleSave} size="sm" style={{ flexShrink: 0 }}>
+					Save
+				</Button>
 			</Group>
 		</Card>
 	)
@@ -329,7 +329,7 @@ function SaveCardCompact({ save, onEdit }: { save: Save, onEdit: (save: Save) =>
 	const PlatformIcon = meta.Icon
 
 	return (
-		<Card withBorder radius="md" padding={0} style={{ overflow: "hidden" }}>
+		<Card withBorder radius="md" padding={0} style={{ overflow: "hidden", position: "relative" }}>
 			<Group wrap="nowrap" gap={0} style={{ minHeight: 80 }}>
 				{save.thumbnailUrl ? (
 					<Box
@@ -337,13 +337,21 @@ function SaveCardCompact({ save, onEdit }: { save: Save, onEdit: (save: Save) =>
 							width: "35%",
 							flexShrink: 0,
 							alignSelf: "stretch",
-							backgroundImage: `url(${save.thumbnailUrl})`,
+							backgroundImage: save.thumbnailUrl ? `url(${save.thumbnailUrl})` : `linear-gradient(135deg, ${meta.color}55, ${meta.color}99)`,
 							backgroundSize: "cover",
 							backgroundPosition: "center",
 							position: "relative",
 							minHeight: 80,
 						}}
 					>
+
+						<Box
+							style={{
+								position: "absolute",
+								inset: 0,
+								background: "linear-gradient(to top, rgba(0,0,0,0.62) 35%, rgba(0,0,0,0.25) 100%)",
+							}}
+						/>
 						<Badge
 							size="xs"
 							color={meta.color}
@@ -368,6 +376,14 @@ function SaveCardCompact({ save, onEdit }: { save: Save, onEdit: (save: Save) =>
 							minHeight: 80,
 						}}
 					>
+
+						<Box
+							style={{
+								position: "absolute",
+								inset: 0,
+								background: "linear-gradient(to top, rgba(0,0,0,0.62) 35%, rgba(0,0,0,0.25) 100%)",
+							}}
+						/>
 						<PlatformIcon size={24} color={`var(--mantine-color-${meta.color}-5)`} />
 						<Badge
 							size="xs"
@@ -383,9 +399,9 @@ function SaveCardCompact({ save, onEdit }: { save: Save, onEdit: (save: Save) =>
 
 				<Stack gap={4} p="sm" style={{ flex: 1, minWidth: 0 }}>
 					<Group justify="space-between" align="flex-start" wrap="nowrap">
-						<Text fw={600} size="sm" lineClamp={1} style={{ flex: 1 }}>
+						<PrivacyAwareText fw={600} size="sm" lineClamp={1} style={{ flex: 1 }}>
 							{save.title ?? save.sourceUrl}
-						</Text>
+						</PrivacyAwareText>
 						<Tooltip label="Open link">
 							<ActionIcon
 								component="a"
@@ -417,32 +433,44 @@ function SaveCardCompact({ save, onEdit }: { save: Save, onEdit: (save: Save) =>
 					{save.aiSummary ? (
 						<Group gap={4} align="flex-start" wrap="nowrap">
 							<IconSparkles size={10} style={{ color: "var(--mantine-color-violet-4)", marginTop: 2, flexShrink: 0 }} />
-							<Text size="xs" c="dimmed" lineClamp={1}>{save.aiSummary}</Text>
+							<PrivacyAwareText size="xs" c="dimmed" lineClamp={1}>{save.aiSummary}</PrivacyAwareText>
 						</Group>
 					) : save.description ? (
-						<Text size="xs" c="dimmed" lineClamp={1}>{save.description}</Text>
+						<PrivacyAwareText size="xs" c="dimmed" lineClamp={1}>{save.description}</PrivacyAwareText>
 					) : null}
 
 					{save.note && (
-						<Text size="xs" fs="italic" c="yellow.7" lineClamp={1}>
+						<PrivacyAwareText size="xs" fs="italic" c="yellow.7" lineClamp={1}>
 							{save.note}
-						</Text>
+						</PrivacyAwareText>
 					)}
+
+
+					<Group>
+						{save.author && <PrivacyAwareText size="xs" c="dimmed">
+							{save.author && `${save.author} · `}
+						</PrivacyAwareText>}
+
+						{save.createdAt && <PrivacyAwareText size="xs" c="dimmed">
+							{dayjs(save.createdAt).fromNow()}
+						</PrivacyAwareText>}
+					</Group>
+
 
 					{save.tags.length > 0 && (
-						<Group gap={4}>
-							{save.tags.slice(0, 4).map((tag) => (
-								<Badge key={tag} size="xs" variant="light" color="gray" radius="sm">
-									{tag}
+						<Group gap={4} wrap="nowrap">
+							{save.tags.slice(0, 3).map((tag) => (
+								<Badge key={tag} size="xs" variant="light" color="gray" radius="sm" style={{ flexShrink: 0 }}>
+									<PrivacyAwareText fz="9px">{tag}</PrivacyAwareText>
 								</Badge>
 							))}
+							{save.tags.length > 3 && (
+								<Badge size="xs" variant="outline" color="gray" radius="sm" style={{ flexShrink: 0 }}>
+									+{save.tags.length - 3}
+								</Badge>
+							)}
 						</Group>
 					)}
-
-					<Text size="xs" c="dimmed">
-						{save.author && `${save.author} · `}
-						{dayjs(save.createdAt).fromNow()}
-					</Text>
 				</Stack>
 			</Group>
 		</Card>
@@ -493,7 +521,7 @@ export default function SavesView({
 }) {
 	const [platform, setPlatform] = useState<Platform | "all">("all")
 	const [search, setSearch] = useState("")
-	const [activeTag, setActiveTag] = useState<string | null>(null)
+	const [activeTags, setActiveTags] = useState<string[]>([])
 	const [viewMode, setViewMode] = useLocalStorage<ViewMode>({
 		key: "saves-view-mode",
 		defaultValue: "grid",
@@ -503,7 +531,7 @@ export default function SavesView({
 
 	const filtered = saves.filter((s) => {
 		const platformMatch = platform === "all" || s.sourcePlatform === platform
-		const tagMatch = !activeTag || s.tags.includes(activeTag)
+		const tagMatch = activeTags.length === 0 || activeTags.some((t) => s.tags.includes(t))
 		return platformMatch && tagMatch && matchesSearch(s, search)
 	})
 
@@ -562,17 +590,7 @@ export default function SavesView({
 			</Group>
 
 			{allTags.length > 0 && (
-				<ScrollArea scrollbarSize={4}>
-					<Chip.Group value={activeTag ?? ""} onChange={(v) => setActiveTag(v || null)}>
-						<Group gap={6} wrap="nowrap" pb={4}>
-							{allTags.map((tag) => (
-								<Chip key={tag} size="xs" value={tag} variant="light" radius="sm">
-									{tag}
-								</Chip>
-							))}
-						</Group>
-					</Chip.Group>
-				</ScrollArea>
+				<MultiSelectFilter options={allTags} selected={activeTags} onSelect={setActiveTags} />
 			)}
 
 			{isCompact ? (
@@ -593,7 +611,7 @@ export default function SavesView({
 
 			{!isLoading && filtered.length === 0 && (
 				<Text c="dimmed" ta="center" size="sm" mt="xl">
-					{search || platform !== "all" || activeTag ? "No saves match your filters" : "No saves yet"}
+					{search || platform !== "all" || activeTags.length > 0 ? "No saves match your filters" : "No saves yet"}
 				</Text>
 			)}
 		</Stack>

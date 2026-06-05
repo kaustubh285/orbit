@@ -4,6 +4,7 @@ import { IconFileText, IconPlus } from "@tabler/icons-react"
 import { useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 import ROUTES from "@/routes"
+import { PrivacyAwareText } from "@/components/privacy-aware-text.component"
 
 function NoteCard({ note, onClick }: { note: Quest; onClick: () => void }) {
 	const preview = note.body
@@ -23,14 +24,14 @@ function NoteCard({ note, onClick }: { note: Quest; onClick: () => void }) {
 		>
 			<Group gap="xs" mb={preview ? 4 : 0}>
 				<IconFileText size={14} color="var(--mantine-color-gray-5)" />
-				<Text size="sm" fw={500} style={{ flex: 1 }}>
+				<PrivacyAwareText size="sm" fw={500} style={{ flex: 1 }}>
 					{note.title}
-				</Text>
+				</PrivacyAwareText>
 			</Group>
 			{preview && (
-				<Text size="xs" c="dimmed" lineClamp={2} pl={22}>
+				<PrivacyAwareText size="xs" c="dimmed" lineClamp={2} pl={22}>
 					{preview}
-				</Text>
+				</PrivacyAwareText>
 			)}
 		</Box>
 	)
