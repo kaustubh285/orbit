@@ -1,8 +1,9 @@
 import { useOrbitAppStore } from "@/store/orbit-app.store"
 import { Box, Text, type TextProps } from "@mantine/core"
+import type React from "react"
 import { useState } from "react"
 
-interface PrivacyAwareTextProps extends TextProps {
+interface PrivacyAwareTextProps extends Omit<TextProps, "style"> {
 	children: any
 	revealOnHover?: boolean
 	component?: React.ElementType
@@ -10,6 +11,7 @@ interface PrivacyAwareTextProps extends TextProps {
 	target?: string
 	rel?: string
 	justify?: string
+	style?: React.CSSProperties
 }
 
 const isTouchDevice = () => window.matchMedia("(hover: none)").matches
@@ -21,39 +23,30 @@ export function PrivacyAwareText({ children, revealOnHover = true, style, ...pro
 	const blurred = privacyMode && !revealed
 	const touchDevice = isTouchDevice()
 
-	if (
-		props.href || props.justify
-	) {
-		return (<Box
-			{...props}
-			onMouseEnter={revealOnHover && privacyMode && !touchDevice ? () => setRevealed(true) : undefined}
-			onMouseLeave={revealOnHover && privacyMode && !touchDevice ? () => setRevealed(false) : undefined}
-			onClick={revealOnHover && privacyMode && touchDevice ? () => setRevealed((r) => !r) : undefined}
-			style={{
-				...style,
-				filter: blurred ? "blur(5px)" : undefined,
-				transition: "filter 0.2s ease",
-				userSelect: blurred ? "none" : undefined,
-				cursor: privacyMode && revealOnHover ? "pointer" : undefined,
-			}}
-		>
-			{children}
-		</Box>)
+	const privacyStyle: React.CSSProperties = {
+		...style,
+		filter: blurred ? "blur(5px)" : undefined,
+		transition: "filter 0.2s ease",
+		userSelect: blurred ? "none" : undefined,
+		cursor: privacyMode && revealOnHover ? "pointer" : undefined,
 	}
+
+	const handlers = {
+		onMouseEnter: revealOnHover && privacyMode && !touchDevice ? () => setRevealed(true) : undefined,
+		onMouseLeave: revealOnHover && privacyMode && !touchDevice ? () => setRevealed(false) : undefined,
+		onClick: revealOnHover && privacyMode && touchDevice ? () => setRevealed((r) => !r) : undefined,
+	}
+
+	if (props.href || props.justify) {
+		return (
+			<Box {...props as any} {...handlers} style={privacyStyle}>
+				{children}
+			</Box>
+		)
+	}
+
 	return (
-		<Text
-			{...props}
-			onMouseEnter={revealOnHover && privacyMode && !touchDevice ? () => setRevealed(true) : undefined}
-			onMouseLeave={revealOnHover && privacyMode && !touchDevice ? () => setRevealed(false) : undefined}
-			onClick={revealOnHover && privacyMode && touchDevice ? () => setRevealed((r) => !r) : undefined}
-			style={{
-				...style,
-				filter: blurred ? "blur(5px)" : undefined,
-				transition: "filter 0.2s ease",
-				userSelect: blurred ? "none" : undefined,
-				cursor: privacyMode && revealOnHover ? "pointer" : undefined,
-			}}
-		>
+		<Text {...props as any} {...handlers} style={privacyStyle}>
 			{children}
 		</Text>
 	)
