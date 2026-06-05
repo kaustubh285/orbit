@@ -43,7 +43,7 @@ function RecentSaveCard({ save }: { save: Save }) {
 
 
 	return (
-		<Box
+		<PrivacyAwareText
 			component="a"
 			href={save.sourceUrl}
 			target="_blank"
@@ -56,11 +56,9 @@ function RecentSaveCard({ save }: { save: Save }) {
 				borderRadius: 10,
 				overflow: "hidden",
 				cursor: "pointer",
-				background: privacyMode
-					? `linear-gradient(135deg, ${meta.hex}55, ${meta.hex}99)`
-					: save.thumbnailUrl
-						? `url(${save.thumbnailUrl}) center/cover no-repeat`
-						: `linear-gradient(135deg, ${meta.hex}55, ${meta.hex}99)`,
+				background: save.thumbnailUrl
+					? `url(${save.thumbnailUrl}) center/cover no-repeat`
+					: `linear-gradient(135deg, ${meta.hex}55, ${meta.hex}99)`,
 				border: "1px solid var(--mantine-color-dark-4)",
 			}}
 		>
@@ -89,7 +87,7 @@ function RecentSaveCard({ save }: { save: Save }) {
 					{save.title ?? save.sourceUrl}
 				</PrivacyAwareText>
 			</Box>
-		</Box>
+		</PrivacyAwareText>
 	)
 }
 

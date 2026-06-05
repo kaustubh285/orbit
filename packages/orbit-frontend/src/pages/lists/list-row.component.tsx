@@ -4,6 +4,7 @@ import { IconBookmark } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { listAccentColor } from './lists.utils'
 import { ListMenu } from './list-menu.component'
+import { PrivacyAwareText } from '@/components/privacy-aware-text.component'
 
 export function ListRow({
 	list,
@@ -37,24 +38,24 @@ export function ListRow({
 				style={{ flex: 1, minWidth: 0, textDecoration: 'none', color: 'inherit', padding: '10px 12px' }}
 			>
 				<Group gap="sm" wrap="nowrap" align="center">
-					<Text style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>{list.icon}</Text>
+					<PrivacyAwareText style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>{list.icon}</PrivacyAwareText>
 					<Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
-						<Text size="sm" fw={600} truncate>{list.name}</Text>
+						<PrivacyAwareText size="sm" fw={600} truncate>{list.name}</PrivacyAwareText>
 						{list.recentSave ? (
 							<Group gap={4} wrap="nowrap">
 								<IconBookmark size={10} style={{ color: accent, flexShrink: 0 }} />
-								<Text size="xs" c="dimmed" truncate>
+								<PrivacyAwareText size="xs" c="dimmed" truncate>
 									{list.recentSave.title ?? list.recentSave.sourceUrl}
-								</Text>
+								</PrivacyAwareText>
 							</Group>
 						) : list.description ? (
-							<Text size="xs" c="dimmed" truncate>{list.description}</Text>
+							<PrivacyAwareText size="xs" c="dimmed" truncate>{list.description}</PrivacyAwareText>
 						) : null}
 					</Stack>
 
 					{/* Thumbnail */}
 					{list.recentSave?.thumbnailUrl && (
-						<Box
+						<PrivacyAwareText
 							style={{
 								width: 44,
 								height: 44,
@@ -65,7 +66,9 @@ export function ListRow({
 								backgroundPosition: 'center',
 								border: '1px solid var(--mantine-color-dark-4)',
 							}}
-						/>
+						>
+							<span />
+						</PrivacyAwareText>
 					)}
 				</Group>
 			</Link>

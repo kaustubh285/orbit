@@ -74,7 +74,7 @@ export function ListCard({
 				{list.recentSave ? (
 					<Group gap="sm" wrap="nowrap" px="sm" py={10} align="center">
 						{list.recentSave.thumbnailUrl ? (
-							<Box
+							<PrivacyAwareText
 								style={{
 									width: 36,
 									height: 36,
@@ -85,9 +85,11 @@ export function ListCard({
 									backgroundPosition: 'center',
 									border: '1px solid var(--mantine-color-dark-4)',
 								}}
-							/>
+							>
+								<span />
+							</PrivacyAwareText>
 						) : (
-							<Box
+							<PrivacyAwareText
 								style={{
 									width: 36,
 									height: 36,
@@ -101,15 +103,15 @@ export function ListCard({
 								}}
 							>
 								<IconBookmark size={14} style={{ color: accent }} />
-							</Box>
+							</PrivacyAwareText>
 						)}
 						<Stack gap={1} style={{ minWidth: 0, flex: 1 }}>
 							<PrivacyAwareText size="xs" fw={500} truncate>
 								{list.recentSave.title ?? list.recentSave.sourceUrl}
 							</PrivacyAwareText>
-							<Text size="xs" c="dimmed">
+							<PrivacyAwareText size="xs" c="dimmed">
 								{formatSaveDate(list.recentSave.createdAt)}
-							</Text>
+							</PrivacyAwareText>
 						</Stack>
 					</Group>
 				) : (
