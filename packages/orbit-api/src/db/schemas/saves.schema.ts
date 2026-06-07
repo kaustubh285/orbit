@@ -4,10 +4,12 @@ import {
 	text,
 	uuid,
 	timestamp,
+	boolean,
 	index,
 } from "drizzle-orm/pg-core";
 import { id, createdAt, updatedAt } from "../schema.helper";
 import { usersTable } from "./users.schema";
+
 
 export const savePlatformEnum = pgEnum("save_platform", [
 	"youtube",
@@ -52,6 +54,7 @@ export const savesTable = pgTable(
 
 
 		// AI
+		shouldAISummaries: boolean("should_ai_summaries").notNull().default(false),
 		aiSummary: text("ai_summary"),
 		locationName: text(""),
 		locationLat: text(""),

@@ -413,6 +413,7 @@ export type PostSavesData = {
         listId?: string | null;
         tags?: Array<string> | null;
         aiSummary?: string | null;
+        shouldAISummaries?: boolean;
     };
     path?: never;
     query?: never;
@@ -550,6 +551,7 @@ export type PatchSavesByIdData = {
         listId?: string | null;
         tags?: Array<string> | null;
         aiSummary?: string | null;
+        shouldAISummaries?: boolean;
     };
     path: {
         id: string;

@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
 	getListsOptions,
 	getQuestsQueryKey, getSavesQueryKey,
@@ -6,8 +6,11 @@ import {
 } from '@orbit/client'
 import { useQuestsStore } from '@/store/quests.store'
 import { useOrbitAppStore } from '@/store/orbit-app.store'
+import type { List } from '@/types'
+import { useState } from 'react'
+import { getLists } from '@orbit/client'
 
-// UiType is what the user sees. 'memory' maps to type:'event' + isRemembral:true on the backend.
+
 export type UiType = 'todo' | 'note' | 'event' | 'memory' | 'daily' | 'save'
 
 export type QuestFields = {
@@ -21,9 +24,19 @@ export type QuestFields = {
 export function useCreateNew() {
 	const selectedDate = useQuestsStore((s) => s.selectedDate)
 	const queryClient = useQueryClient()
-	const { addPendingSubmission, removePendingSubmission } = useOrbitAppStore((s) => s.actions)
+	const { addPendingSubmission, removePendingSubmission, setCurrentLists } = useOrbitAppStore((s) => s.actions)
+	const lists = useOrbitAppStore((s) => s.currentLists)
+	const [isRefetchingLists, setIsRefetchingLists] = useState(false)
 
-	const lists = useQuery(getListsOptions())
+	async function refetchLists() {
+		setIsRefetchingLists(true)
+		try {
+			const { data } = await getLists({})
+			if (data) setCurrentLists(data as List[])
+		} finally {
+			setIsRefetchingLists(false)
+		}
+	}
 
 	const createQuest = useMutation({
 		...postQuestsMutation(),
@@ -35,12 +48,13 @@ export function useCreateNew() {
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: getSavesQueryKey() }),
 	})
 
-	function submitSave(sourceUrl: string, note?: string, listId?: string) {
+	function submitSave(sourceUrl: string, note?: string, listId?: string, shouldAISummaries?: boolean) {
 		const pendingId = crypto.randomUUID()
 		const payload = {
 			sourceUrl,
 			...(note?.trim() ? { note: note.trim() } : {}),
 			...(listId ? { listId } : {}),
+			shouldAISummaries: shouldAISummaries ?? false,
 		}
 		addPendingSubmission({ id: pendingId, createdAt: new Date().toISOString(), apiCallKey: 'postSave', payload })
 		createSave.mutate(
@@ -74,7 +88,7 @@ export function useCreateNew() {
 		return quest
 	}
 
-	async function onSubmit(uiType: UiType, title: string, fields: QuestFields, saveNote: string, listId?: string) {
+	async function onSubmit(uiType: UiType, title: string, fields: QuestFields, saveNote: string, listId?: string, shouldAISummaries?: boolean) {
 		const trimmed = title.trim()
 		if (!trimmed) return null
 
@@ -85,7 +99,7 @@ export function useCreateNew() {
 		}
 
 		if (uiType === 'save') {
-			submitSave(trimmed, saveNote, listId)
+			submitSave(trimmed, saveNote, listId, shouldAISummaries)
 			return null
 		}
 
@@ -93,8 +107,10 @@ export function useCreateNew() {
 	}
 
 	return {
-		lists: lists.data ?? [],
+		lists,
 		onSubmit,
 		isPending: createQuest.isPending || createSave.isPending,
+		refetchLists,
+		isRefetchingLists,
 	}
 }

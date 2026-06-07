@@ -19,6 +19,7 @@ import { useSaves } from "../saves/use-saves.hook"
 import { getQuestsOptions } from "@orbit/client"
 import { useQuery } from "@tanstack/react-query"
 import { PrivacyAwareText } from "@/components/privacy-aware-text.component"
+import { CachedItems } from "@/components/app-structure/cached-items.component"
 
 const NAV_CARDS = [
 	{ label: "Quests", description: "Todos, events & dailies", icon: IconRocket, to: ROUTES.QUESTS, accent: "ocean-blue", shade: 4 },
@@ -195,6 +196,9 @@ export function HomeDashboard() {
 					New
 				</Button>
 			</Group>
+
+			<CachedItems />
+
 
 			{/* Insights */}
 			<Stack gap="xs">

@@ -1,0 +1,1 @@
+ALTER TABLE "saves" ADD COLUMN "should_ai_summaries" boolean DEFAULT false NOT NULL;

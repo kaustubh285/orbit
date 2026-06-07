@@ -36,6 +36,7 @@ export const insertSaveSchema = z.object({
 	listId: z.string().uuid().nullable().optional(),
 	tags: z.array(z.string()).nullable().optional(),
 	aiSummary: z.string().nullable().optional(),
+	shouldAISummaries: z.boolean().optional().default(true),
 });
 
 export const patchSaveSchema = insertSaveSchema.partial();

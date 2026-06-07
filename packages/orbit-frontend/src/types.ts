@@ -24,7 +24,7 @@ export type List = {
 	icon: string
 	createdAt: string
 	updatedAt: string
-	recentSave: Save | null
+	recentSave?: Save | null
 }
 
 export type Save = {
@@ -40,6 +40,7 @@ export type Save = {
 	note: string | null;
 	tags: string[];
 	status: "active" | "archived";
+	shouldAISummaries: boolean;
 	aiSummary: string | null;
 	aiEnrichedAt: string | null;
 	createdAt: string;

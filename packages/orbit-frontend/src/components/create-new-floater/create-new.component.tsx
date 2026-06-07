@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
 	ActionIcon, Button, Chip, Drawer, Group,
-	Select, Stack, Text, Textarea, TextInput,
+	Select, Stack, Switch, Text, Textarea, TextInput,
 } from '@mantine/core'
 import { DateTimePicker } from '@mantine/dates'
 import {
@@ -132,16 +132,30 @@ function MemoryFields({ fields, onChange }: {
 	)
 }
 
-function SaveFields({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function SaveFields({
+	note, onNoteChange, shouldAISummaries, onShouldAISummariesChange,
+}: {
+	note: string
+	onNoteChange: (v: string) => void
+	shouldAISummaries: boolean
+	onShouldAISummariesChange: (v: boolean) => void
+}) {
 	return (
-		<Textarea
-			placeholder="Why are you saving this? (optional)"
-			value={value}
-			onChange={(e) => onChange(e.currentTarget.value)}
-			autosize
-			minRows={2}
-			maxRows={4}
-		/>
+		<Stack gap="sm">
+			<Textarea
+				placeholder="Why are you saving this? (optional)"
+				value={note}
+				onChange={(e) => onNoteChange(e.currentTarget.value)}
+				autosize
+				minRows={2}
+				maxRows={4}
+			/>
+			<Switch
+				label="Enable AI summary"
+				checked={shouldAISummaries}
+				onChange={(e) => onShouldAISummariesChange(e.currentTarget.checked)}
+			/>
+		</Stack>
 	)
 }
 
@@ -158,9 +172,10 @@ export function CreateNewComponent() {
 	const [uiTypeOverride, setUiTypeOverride] = useState<UiType | null>(null)
 	const [fields, setFields] = useState<QuestFields>(EMPTY_FIELDS)
 	const [saveNote, setSaveNote] = useState('')
+	const [shouldAISummaries, setShouldAISummaries] = useState(false)
 	const [listId, setListId] = useState<string | null>(null)
 
-	const { lists, onSubmit, isPending } = useCreateNew()
+	const { lists, onSubmit, isPending, refetchLists, isRefetchingLists } = useCreateNew()
 	const navigate = useNavigate()
 	const isDesktop = useMediaQuery("(min-width: 48em)", false, { getInitialValueInEffect: false })
 
@@ -183,6 +198,7 @@ export function CreateNewComponent() {
 		setUiTypeOverride(null)
 		setFields(EMPTY_FIELDS)
 		setSaveNote('')
+		setShouldAISummaries(false)
 		setListId(null)
 	}
 
@@ -200,7 +216,7 @@ export function CreateNewComponent() {
 	}
 
 	async function handleSubmit() {
-		const result = await onSubmit(effectiveType, title, fields, saveNote, listId ?? undefined)
+		const result = await onSubmit(effectiveType, title, fields, saveNote, listId ?? undefined, shouldAISummaries)
 		handleClose()
 		if (result?.id && effectiveType === 'note') {
 			navigate({ to: ROUTES.NOTE_DETAIL, params: { noteId: result.id } })
@@ -266,7 +282,14 @@ export function CreateNewComponent() {
 						{title && effectiveType === 'todo' && <TodoFields value={fields.dueAt} onChange={(v) => patchFields({ dueAt: v })} />}
 						{title && effectiveType === 'event' && <EventFields fields={fields} onChange={patchFields} />}
 						{title && effectiveType === 'memory' && <MemoryFields fields={fields} onChange={patchFields} />}
-						{title && effectiveType === 'save' && <SaveFields value={saveNote} onChange={setSaveNote} />}
+						{title && effectiveType === 'save' && (
+							<SaveFields
+								note={saveNote}
+								onNoteChange={setSaveNote}
+								shouldAISummaries={shouldAISummaries}
+								onShouldAISummariesChange={setShouldAISummaries}
+							/>
+						)}
 						{title && effectiveType === 'note' && <Text size="xs" c="dimmed">Opens in the note editor after creating.</Text>}
 
 						{title && lists.length > 0 && (
@@ -278,6 +301,12 @@ export function CreateNewComponent() {
 								data={lists.map((l) => ({ value: l.id, label: l.name }))}
 							/>
 						)}
+
+
+						<Button variant="subtle" color="gray" size="xs" leftSection={<IconRefresh size={13} />} onClick={() => refetchLists()} loading={isRefetchingLists}>
+						Re-fetch lists
+					</Button>
+
 					</Stack>
 
 					<Stack gap="xs">

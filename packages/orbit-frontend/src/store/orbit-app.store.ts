@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import type { Quest } from "@/types"
+import type { List, Quest } from "@/types"
 
 export type PendingQuestPayload = {
 	type: Quest["type"]
@@ -28,6 +28,7 @@ type OrbitApp = {
 	lastSignedIn: boolean
 	createNewOpen: boolean
 	pendingSubmissions: PendingSubmission[]
+	currentLists: List[]
 	actions: {
 		togglePrivacyMode: () => void
 		setLastSignedIn: (value: boolean) => void
@@ -35,6 +36,7 @@ type OrbitApp = {
 		addPendingSubmission: (submission: PendingSubmission) => void
 		removePendingSubmission: (id: string) => void
 		clearPendingSubmissions: () => void
+		setCurrentLists: (lists: List[]) => void
 	}
 }
 
@@ -45,6 +47,7 @@ export const useOrbitAppStore = create<OrbitApp>()(
 			lastSignedIn: false,
 			createNewOpen: false,
 			pendingSubmissions: [],
+			currentLists: [],
 			actions: {
 				togglePrivacyMode: () => set((state) => ({ privacyMode: !state.privacyMode })),
 				setLastSignedIn: (value) => set({ lastSignedIn: value }),
@@ -54,6 +57,7 @@ export const useOrbitAppStore = create<OrbitApp>()(
 				removePendingSubmission: (id) =>
 					set((state) => ({ pendingSubmissions: state.pendingSubmissions.filter((s) => s.id !== id) })),
 				clearPendingSubmissions: () => set({ pendingSubmissions: [] }),
+				setCurrentLists: (lists) => set({ currentLists: lists }),
 			},
 		}),
 		{

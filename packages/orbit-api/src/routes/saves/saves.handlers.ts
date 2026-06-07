@@ -58,7 +58,7 @@ export const createSave: AppRouteHandler<CreateRoute> = async (c) => {
 	}
 
 	// fire-and-forget: scrape then enrich
-	enrichSave(save.id, rest.sourceUrl, userId, logger);
+	enrichSave(save.id, rest.sourceUrl, userId, logger, rest.shouldAISummaries);
 
 	return c.json(save, HttpStatusCodes.CREATED);
 };
@@ -68,6 +68,7 @@ async function enrichSave(
 	sourceUrl: string,
 	userId: string,
 	logger: any,
+	shouldAISummaries: boolean = true,
 ) {
 	try {
 		// step 1: scrape
@@ -85,6 +86,8 @@ async function enrichSave(
 				tags: scraped.tags,
 			})
 			.where(eq(savesTable.id, saveId));
+
+		if (!shouldAISummaries) return;
 
 		// step 2: get existing tags + lists for AI context
 		const allSaves = await db

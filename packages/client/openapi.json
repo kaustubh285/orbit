@@ -1424,6 +1424,10 @@
                   "aiSummary": {
                     "type": "string",
                     "nullable": true
+                  },
+                  "shouldAISummaries": {
+                    "type": "boolean",
+                    "default": true
                   }
                 },
                 "required": [
@@ -1788,6 +1792,10 @@
                   "aiSummary": {
                     "type": "string",
                     "nullable": true
+                  },
+                  "shouldAISummaries": {
+                    "type": "boolean",
+                    "default": true
                   }
                 }
               }

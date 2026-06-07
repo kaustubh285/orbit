@@ -9,6 +9,7 @@ import {
 	Modal,
 	Select,
 	Stack,
+	Switch,
 	Text,
 	Textarea,
 	TextInput,
@@ -51,6 +52,7 @@ export const UpdateSaveModal = ({
 	const [note, setNote] = useState(save.note ?? "")
 	const [status, setStatus] = useState<Save["status"]>(save.status)
 	const [tags, setTags] = useState<string[]>(save.tags)
+	const [shouldAISummaries, setShouldAISummaries] = useState(save.shouldAISummaries)
 	const [aiSummary, setAiSummary] = useState(save.aiSummary ?? "")
 
 	useEffect(() => {
@@ -59,6 +61,7 @@ export const UpdateSaveModal = ({
 		setNote(save.note ?? "")
 		setStatus(save.status)
 		setTags(save.tags)
+		setShouldAISummaries(save.shouldAISummaries)
 		setAiSummary(save.aiSummary ?? "")
 	}, [save.id])
 
@@ -69,6 +72,7 @@ export const UpdateSaveModal = ({
 			note: note.trim() || null,
 			tags,
 			status,
+			shouldAISummaries,
 			aiSummary: aiSummary.trim() || null,
 		})
 		onClose()
@@ -170,6 +174,13 @@ export const UpdateSaveModal = ({
 					autosize
 					minRows={2}
 					maxRows={4}
+				/>
+
+				<Switch
+					label="Enable AI summary"
+					description="When on, AI will generate a summary for this save"
+					checked={shouldAISummaries}
+					onChange={(e) => setShouldAISummaries(e.currentTarget.checked)}
 				/>
 
 				<Textarea

@@ -6,12 +6,21 @@ import {
 	patchListsByIdMutation,
 	postListsMutation,
 } from '@orbit/client'
+import { useOrbitAppStore } from '@/store/orbit-app.store'
+import { useEffect } from 'react'
+import type { List } from '@/types'
 
 export function useLists() {
 	const queryClient = useQueryClient()
 	const invalidate = () => queryClient.invalidateQueries({ queryKey: getListsQueryKey() })
+	const { setCurrentLists } = useOrbitAppStore((s) => s.actions)
+
 
 	const lists = useQuery(getListsOptions())
+	useEffect(() => {
+		if (lists.data) setCurrentLists(lists.data as List[])
+	}, [lists.data])
+
 
 	const createList = useMutation({ ...postListsMutation(), onSuccess: invalidate })
 	const updateList = useMutation({ ...patchListsByIdMutation(), onSuccess: invalidate })

@@ -15,8 +15,9 @@ export const useUpdateSaveHook = () => {
 			title?: string | null
 			description?: string | null
 			note?: string | null
-			status?: "active" | "archived",
+			status?: "active" | "archived"
 			tags: string[]
+			shouldAISummaries?: boolean
 			aiSummary?: string | null
 		},
 	) {
