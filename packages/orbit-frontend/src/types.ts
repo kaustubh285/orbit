@@ -40,7 +40,7 @@ export type Save = {
 	note: string | null;
 	tags: string[];
 	status: "active" | "archived";
-	shouldAISummaries: boolean;
+	shouldAISummaries?: boolean;
 	aiSummary: string | null;
 	aiEnrichedAt: string | null;
 	createdAt: string;
