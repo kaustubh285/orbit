@@ -4,12 +4,13 @@ import index from "./routes/index.route.js"
 import quests from "./routes/quests/quests.route.js"
 import saves from "./routes/saves/saves.route.js"
 import lists from "./routes/lists/lists.route.js"
+import reports from "./routes/reports/reports.route.js"
 import env from "./env.js"
 
 const app = createApp()
 configureOpenAPI(app)
 
-const routes = [index, quests, saves, lists]
+const routes = [index, quests, saves, lists, reports]
 routes.forEach((route) => {
 	app.route("/", route)
 })

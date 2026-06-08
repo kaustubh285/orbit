@@ -6,6 +6,7 @@ import {
 	IconBrandInstagram,
 	IconBrandReddit,
 	IconBrandYoutube,
+	IconChartBar,
 	IconFileText,
 	IconList,
 	IconPlus,
@@ -180,7 +181,7 @@ export function HomeDashboard() {
 	const setCreateNewOpen = useOrbitAppStore((s) => s.actions.setCreateNewOpen)
 	const { mostRecentFiveSaves, mostRecentFiveSavesIsLoading } = useSaves()
 	const { dueToday, completedToday, overdue } = useDashboardStats()
-
+	const navigate = useNavigate()
 	return (
 		<Stack gap="xl" pt="sm">
 			<Group justify="space-between" align="flex-end">
@@ -188,13 +189,24 @@ export function HomeDashboard() {
 					<Text fw={700} size="xl">Orbit</Text>
 					<Text size="sm" c="dimmed">Your personal command centre</Text>
 				</Stack>
-				<Button
-					leftSection={<IconPlus size={14} />}
-					size="sm"
-					onClick={() => setCreateNewOpen(true)}
-				>
-					New
-				</Button>
+				<Group gap="xs">
+					<Button
+						leftSection={<IconChartBar size={14} />}
+						size="sm"
+						variant="subtle"
+						color="gray"
+						onClick={() => navigate({ to: ROUTES.REPORT })}
+					>
+						Report
+					</Button>
+					<Button
+						leftSection={<IconPlus size={14} />}
+						size="sm"
+						onClick={() => setCreateNewOpen(true)}
+					>
+						New
+					</Button>
+				</Group>
 			</Group>
 
 			<CachedItems />

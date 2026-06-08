@@ -1325,6 +1325,12 @@
                       "updatedAt": {
                         "type": "string",
                         "format": "date-time"
+                      },
+                      "lists": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
                       }
                     },
                     "required": [
@@ -1343,7 +1349,8 @@
                       "aiSummary",
                       "aiEnrichedAt",
                       "createdAt",
-                      "updatedAt"
+                      "updatedAt",
+                      "lists"
                     ]
                   }
                 }
@@ -3183,6 +3190,199 @@
                   },
                   "required": [
                     "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/report/in-app": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": true,
+            "name": "startDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": true,
+            "name": "endDate",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Report",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "startDate": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "endDate": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "generatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "questsCompleted": {
+                          "type": "number"
+                        },
+                        "questsIncomplete": {
+                          "type": "number"
+                        },
+                        "questCompletionRate": {
+                          "type": "number"
+                        },
+                        "overdueQuests": {
+                          "type": "number"
+                        },
+                        "savesAdded": {
+                          "type": "number"
+                        },
+                        "savesArchived": {
+                          "type": "number"
+                        },
+                        "aiSummariesGenerated": {
+                          "type": "number"
+                        },
+                        "savesByPlatform": {
+                          "type": "object",
+                          "properties": {
+                            "youtube": {
+                              "type": "number"
+                            },
+                            "reddit": {
+                              "type": "number"
+                            },
+                            "instagram": {
+                              "type": "number"
+                            },
+                            "web": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "youtube",
+                            "reddit",
+                            "instagram",
+                            "web"
+                          ]
+                        },
+                        "topTags": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "tag": {
+                                "type": "string"
+                              },
+                              "count": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "tag",
+                              "count"
+                            ]
+                          }
+                        },
+                        "topLists": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "savesAdded": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "savesAdded"
+                            ]
+                          }
+                        },
+                        "notesCreated": {
+                          "type": "number"
+                        },
+                        "notesEdited": {
+                          "type": "number"
+                        },
+                        "activeDays": {
+                          "type": "number"
+                        },
+                        "remembrals": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "date": {
+                                "type": "string",
+                                "format": "date-time"
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "date"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "questsCompleted",
+                        "questsIncomplete",
+                        "questCompletionRate",
+                        "overdueQuests",
+                        "savesAdded",
+                        "savesArchived",
+                        "aiSummariesGenerated",
+                        "savesByPlatform",
+                        "topTags",
+                        "topLists",
+                        "notesCreated",
+                        "notesEdited",
+                        "activeDays",
+                        "remembrals"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "userId",
+                    "startDate",
+                    "endDate",
+                    "generatedAt",
+                    "data"
                   ]
                 }
               }

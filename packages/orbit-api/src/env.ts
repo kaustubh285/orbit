@@ -11,7 +11,6 @@ const EnvSchema = z.object({
 	LOG_LEVEL: z.enum(["fatal", "debug", "info", "warn", "error"]),
 	VERSION: z.string(),
 	DATABASE_URL: z.string().url(),
-	FRONTEND_URL: z.string().default("*"),
 	CLERK_SECRET_KEY: z.string().min(1),
 	ANTHROPIC_API_KEY: z.string().optional(),
 });

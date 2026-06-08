@@ -391,6 +391,7 @@ export type GetSavesResponses = {
         aiEnrichedAt: string | null;
         createdAt: string;
         updatedAt: string;
+        lists: Array<string>;
     }>;
 };
 
@@ -983,6 +984,60 @@ export type DeleteListsByIdItemsByItemIdResponses = {
 };
 
 export type DeleteListsByIdItemsByItemIdResponse = DeleteListsByIdItemsByItemIdResponses[keyof DeleteListsByIdItemsByItemIdResponses];
+
+export type GetReportInAppData = {
+    body?: never;
+    path?: never;
+    query: {
+        startDate: string;
+        endDate: string;
+    };
+    url: '/report/in-app';
+};
+
+export type GetReportInAppResponses = {
+    /**
+     * Report
+     */
+    200: {
+        userId: string;
+        startDate: string;
+        endDate: string;
+        generatedAt: string;
+        data: {
+            questsCompleted: number;
+            questsIncomplete: number;
+            questCompletionRate: number;
+            overdueQuests: number;
+            savesAdded: number;
+            savesArchived: number;
+            aiSummariesGenerated: number;
+            savesByPlatform: {
+                youtube: number;
+                reddit: number;
+                instagram: number;
+                web: number;
+            };
+            topTags: Array<{
+                tag: string;
+                count: number;
+            }>;
+            topLists: Array<{
+                name: string;
+                savesAdded: number;
+            }>;
+            notesCreated: number;
+            notesEdited: number;
+            activeDays: number;
+            remembrals: Array<{
+                name: string;
+                date: string;
+            }>;
+        };
+    };
+};
+
+export type GetReportInAppResponse = GetReportInAppResponses[keyof GetReportInAppResponses];
 
 export type ClientOptions = {
     baseUrl: 'http://localhost:9999' | (string & {});

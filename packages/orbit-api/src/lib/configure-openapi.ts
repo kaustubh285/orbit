@@ -18,10 +18,23 @@ export const openAPIConfig = {
 	]
 }
 
+function isLocalhost(c: Parameters<Parameters<AppOpenAPI["use"]>[0]>[0]): boolean {
+	const host = c.req.header("host") ?? ""
+	const hostname = host.split(":")[0]
+	return hostname === "localhost" || hostname === "127.0.0.1"
+}
+
 export default function configureOpenAPI(app: AppOpenAPI) {
+	app.use("/doc", async (c, next) => {
+		if (!isLocalhost(c)) return c.json({ message: "Not found" }, 404)
+		return next()
+	})
 	app.doc("/doc", openAPIConfig)
 
-
+	app.use("/api-docs", async (c, next) => {
+		if (!isLocalhost(c)) return c.json({ message: "Not found" }, 404)
+		return next()
+	})
 	app.get('/api-docs', Scalar({
 		layout: "classic",
 		defaultHttpClient: {

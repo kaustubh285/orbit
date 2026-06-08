@@ -8,6 +8,7 @@ const ROUTES = {
 	NOTES: "/notes",
 	NOTE_DETAIL: "/notes/$noteId",
 	TIMELINE: "/timeline",
+	REPORT: "/report",
 	LOGIN: "/sign-in",
 } as const
 
