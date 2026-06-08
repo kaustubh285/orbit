@@ -1,10 +1,11 @@
 import type { List } from '@/types'
-import { ActionIcon, Button, Group, SimpleGrid, Stack, Text, TextInput } from '@mantine/core'
-import { IconLayoutGrid, IconLayoutList, IconList, IconPlus, IconSearch } from '@tabler/icons-react'
+import { Button, Group, SimpleGrid, Stack, Text, TextInput } from '@mantine/core'
+import { IconList, IconPlus, IconSearch } from '@tabler/icons-react'
 import { useState } from 'react'
 import { ListCard, ListCardSkeleton } from './list-card.component'
 import { ListFormDrawer } from './list-form-drawer.component'
 import { ListRow, ListRowSkeleton } from './list-row.component'
+import { ListsFilterAndSort, type ListViewMode, type SortDir, type SortField } from './lists-filter-and-sort.component'
 
 export function ListsView({
 	lists,
@@ -21,17 +22,32 @@ export function ListsView({
 	onDelete: (id: string) => void
 	isCreating: boolean
 }) {
-	const [view, setView] = useState<'grid' | 'row'>('grid')
+	const [view, setView] = useState<ListViewMode>('grid')
+	const [sortField, setSortField] = useState<SortField>('createdAt')
+	const [sortDir, setSortDir] = useState<SortDir>('desc')
 	const [createOpen, setCreateOpen] = useState(false)
 	const [editTarget, setEditTarget] = useState<List | null>(null)
 	const [search, setSearch] = useState('')
 
-	const filteredLists = search.trim()
-		? lists.filter((l) => {
+	const filteredLists = lists
+		.filter((l) => {
+			if (!search.trim()) return true
 			const q = search.toLowerCase()
 			return l.name.toLowerCase().includes(q) || (l.description ?? '').toLowerCase().includes(q)
 		})
-		: lists
+		.sort((a, b) => {
+			let cmp = 0
+			if (sortField === 'name') {
+				cmp = a.name.localeCompare(b.name)
+			} else if (sortField === 'createdAt') {
+				cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+			} else {
+				const aDate = a.recentSave?.createdAt ? new Date(a.recentSave.createdAt).getTime() : 0
+				const bDate = b.recentSave?.createdAt ? new Date(b.recentSave.createdAt).getTime() : 0
+				cmp = aDate - bDate
+			}
+			return sortDir === 'asc' ? cmp : -cmp
+		})
 
 	function handleEditSubmit(name: string, description?: string, color?: string, icon?: string) {
 		if (!editTarget) return
@@ -40,28 +56,15 @@ export function ListsView({
 	}
 
 	return (
-		<Stack gap="md">
+		<Stack gap="md" pb="md">
 			<Group justify="space-between">
 				<Text fw={600} size="lg">Lists</Text>
 				<Group gap="xs">
-					<ActionIcon
-						variant={view === 'grid' ? 'filled' : 'subtle'}
-						color="gray"
-						size="sm"
-						onClick={() => setView('grid')}
-						aria-label="Grid view"
-					>
-						<IconLayoutGrid size={14} />
-					</ActionIcon>
-					<ActionIcon
-						variant={view === 'row' ? 'filled' : 'subtle'}
-						color="gray"
-						size="sm"
-						onClick={() => setView('row')}
-						aria-label="Row view"
-					>
-						<IconLayoutList size={14} />
-					</ActionIcon>
+					<ListsFilterAndSort
+						view={view} setView={setView}
+						sortField={sortField} setSortField={setSortField}
+						sortDir={sortDir} setSortDir={setSortDir}
+					/>
 					<Button size="xs" leftSection={<IconPlus size={12} />} onClick={() => setCreateOpen(true)}>
 						New list
 					</Button>

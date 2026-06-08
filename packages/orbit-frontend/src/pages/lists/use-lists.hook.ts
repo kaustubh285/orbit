@@ -46,7 +46,7 @@ export function useLists() {
 	}
 
 	return {
-		lists: lists.data ?? [],
+		lists: lists?.data?.sort((a, b) => a.createdAt - b.createdAt) ?? [],
 		isLoading: lists.isLoading,
 		onCreate,
 		onUpdate,

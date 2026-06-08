@@ -4,12 +4,13 @@ type MultiSelectFilterProps = {
 	options: string[]
 	selected: string[]
 	onSelect: (selected: string[]) => void
+	placeholder?: string
 }
 
-export function MultiSelectFilter({ options, selected, onSelect }: MultiSelectFilterProps) {
+export function MultiSelectFilter({ options, selected, onSelect, placeholder = "Filter by tags" }: MultiSelectFilterProps) {
 	return (
 		<MultiSelect
-			placeholder="Filter by tags"
+			placeholder={placeholder}
 			data={options}
 			value={selected}
 			onChange={onSelect}

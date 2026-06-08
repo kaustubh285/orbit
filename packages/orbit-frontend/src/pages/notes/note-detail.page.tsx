@@ -43,8 +43,8 @@ function NoteEditor({ noteId, initialTitle, initialBody }: {
 	}
 
 	return (
-		<Box style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-			<Group justify="space-between" mb="xs">
+		<Box>
+			<Group justify="space-between" mb="0">
 				<TextInput
 					value={title}
 					onChange={(e) => setTitle(e.currentTarget.value)}
@@ -61,8 +61,17 @@ function NoteEditor({ noteId, initialTitle, initialBody }: {
 				</Button>
 			</Group>
 
-			<RichTextEditor editor={editor} style={{ flex: 1, border: "none" }}>
-				<RichTextEditor.Toolbar sticky>
+			<RichTextEditor
+				editor={editor}
+				style={{ border: "none" }}
+				styles={{
+					content: {
+						height: "calc(100dvh - var(--app-shell-header-height) - var(--app-shell-footer-height, 0px) - var(--app-shell-padding) * 2 - 180px)",
+						overflowY: "auto",
+					}
+				}}
+			>
+				<RichTextEditor.Toolbar>
 					<RichTextEditor.ControlsGroup>
 						<RichTextEditor.Bold />
 						<RichTextEditor.Italic />
@@ -114,8 +123,8 @@ export function NoteDetailPage() {
 	}
 
 	return (
-		<Box style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-			<Group mb="md">
+		<Box>
+			<Group mb="0">
 				<ActionIcon variant="subtle" onClick={() => navigate({ to: "/notes" })}>
 					<IconArrowLeft size={18} />
 				</ActionIcon>

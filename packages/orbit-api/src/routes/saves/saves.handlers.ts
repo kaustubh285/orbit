@@ -1,4 +1,4 @@
-import { and, desc, eq, lt, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, lt, sql } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { db } from "../../db/db.js";
 import { savesTable } from "../../db/schemas/saves.schema.js";
@@ -26,9 +26,15 @@ export const listSaves: AppRouteHandler<ListRoute> = async (c) => {
 	if (cursor) conditions.push(lt(savesTable.createdAt, new Date(cursor)));
 
 	const saves = await db
-		.select()
+		.select({
+			...getTableColumns(savesTable),
+			lists: sql<string[]>`ARRAY_REMOVE(ARRAY_AGG(${listsTable.name}), NULL)`,
+		})
 		.from(savesTable)
+		.leftJoin(listItemsTable, eq(listItemsTable.saveId, savesTable.id))
+		.leftJoin(listsTable, eq(listsTable.id, listItemsTable.listId))
 		.where(and(...conditions))
+		.groupBy(savesTable.id)
 		.orderBy(desc(savesTable.createdAt))
 		.limit(limit);
 

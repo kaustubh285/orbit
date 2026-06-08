@@ -53,13 +53,17 @@ const listQuerySchema = z.object({
 	cursor: z.string().datetime({ offset: true }).optional().openapi({ description: "Return saves created before this ISO datetime (for pagination)" }),
 });
 
+export const selectSaveWithListsSchema = selectSaveSchema.extend({
+	lists: z.array(z.string()),
+});
+
 export const list = createRoute({
 	path: "/saves",
 	method: "get",
 	tags: ["Saves"],
 	request: { query: listQuerySchema },
 	responses: {
-		[HttpStatusCodes.OK]: jsonContent(z.array(selectSaveSchema), "List of saves"),
+		[HttpStatusCodes.OK]: jsonContent(z.array(selectSaveWithListsSchema), "List of saves"),
 	},
 });
 

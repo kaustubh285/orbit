@@ -84,7 +84,7 @@ export function NotesView({
 	}
 
 	return (
-		<Stack gap="xs">
+		<Stack gap="xs" pb="md">
 			<NewNoteInput onSubmit={onSubmit} />
 			{notes.length === 0 ? (
 				<Text size="sm" c="dimmed" ta="center" mt="xl">
