@@ -188,7 +188,7 @@ function SaveCard({ save, onEdit }: { save: Save, onEdit: (save: Save) => void }
 	const PlatformIcon = meta.Icon
 
 	return (
-		<Card withBorder radius="md" padding={0} style={{ overflow: "hidden" }}>
+		<Card withBorder radius="md" padding={0} style={{ overflow: "hidden" }} onClick={() => onEdit(save)}>
 			{save.thumbnailUrl ? (
 				<Box
 					style={{
@@ -342,7 +342,7 @@ function SaveCardCompact({ save, onEdit }: { save: Save, onEdit: (save: Save) =>
 	const PlatformIcon = meta.Icon
 
 	return (
-		<Card withBorder radius="md" padding={0} style={{ overflow: "hidden", position: "relative" }}>
+		<Card withBorder radius="md" padding={0} style={{ overflow: "hidden", position: "relative" }} onClick={() => onEdit(save)}>
 			<Group wrap="nowrap" gap={0} style={{ minHeight: 80 }}>
 				{save.thumbnailUrl ? (
 					<Box
