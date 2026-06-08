@@ -19,25 +19,35 @@ const enrichmentSchema = z.object({
 
 export type EnrichmentResult = z.infer<typeof enrichmentSchema>;
 
-export async function aiOverview({ title, description, tags, lists }: { title: string, description: string, tags: string[], lists: string[] }): Promise<EnrichmentResult | null> {
+export async function aiOverview({ title, description, note, tags, lists, selectedList }: {
+	title: string,
+	description: string,
+	note?: string | null,
+	tags: string[],
+	lists: string[],
+	selectedList?: { name: string; description: string | null } | null,
+}): Promise<EnrichmentResult | null> {
+
+	const listContextLine = selectedList
+		? `SAVED TO LIST: "${selectedList.name}"${selectedList.description ? ` — ${selectedList.description.slice(0, 120)}` : ""}`
+		: `USER'S LISTS: ${lists.length ? lists.join(", ") : "None yet"}\nIf none of these fit, invent a short list name (2-3 words) that would suit this content.`;
 
 	const prompt = `You are a content tagger and summariser. Given a saved item, produce a JSON response.
 
 		ITEM:
 		- Title: ${title || "Unknown"}
-		- Description: ${description || "No description"}
+		- Description: ${description || "No description"}${note ? `\n\t\t- User's note: ${note}` : ""}
+
+		${listContextLine}
 
 		USER'S EXISTING TAGS (reuse these where applicable, create new ones only when nothing fits):
 		${tags.length ? tags.join(", ") : "None yet"}
 
-		USER'S LISTS (for context about their interests, do not use as tags):
-		${lists.length ? lists.join(", ") : "None yet"}
-
 		Respond with ONLY valid JSON, no markdown fences, no explanation:
 		{
-		  "summary": "2-3 sentence summary of what this content is about",
+		  "summary": "2-3 sentence summary tailored to why the user saved this",
 		  "tags": ["tag1", "tag2", "tag3"],
-		  "list": "most relevant list name from the user's lists, or empty string",
+		  "list": "${selectedList ? selectedList.name : "existing list name if it fits, otherwise a new short list name"}",
 		  "location": { "name": "Place name", "context": "why mentioned" } or null,
 		  "timeSensitive": false
 		}`;

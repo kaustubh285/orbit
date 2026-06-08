@@ -43,7 +43,7 @@ type OrbitApp = {
 export const useOrbitAppStore = create<OrbitApp>()(
 	persist(
 		(set) => ({
-			privacyMode: true,
+			privacyMode: false,
 			lastSignedIn: false,
 			createNewOpen: false,
 			pendingSubmissions: [],
@@ -66,6 +66,7 @@ export const useOrbitAppStore = create<OrbitApp>()(
 				privacyMode: state.privacyMode,
 				lastSignedIn: state.lastSignedIn,
 				pendingSubmissions: state.pendingSubmissions,
+				currentLists: state.currentLists,
 			}),
 		}
 	)

@@ -45,6 +45,7 @@ export const createSave: AppRouteHandler<CreateRoute> = async (c) => {
 		.values({
 			sourcePlatform: detectPlatform(rest.sourceUrl),
 			...rest,
+			tags: rest.tags ?? undefined,
 			userId,
 			...(publishedAt !== undefined ? { publishedAt: toDate(publishedAt) } : {}),
 		})
@@ -58,7 +59,7 @@ export const createSave: AppRouteHandler<CreateRoute> = async (c) => {
 	}
 
 	// fire-and-forget: scrape then enrich
-	enrichSave(save.id, rest.sourceUrl, userId, logger, rest.shouldAISummaries);
+	enrichSave(save.id, rest.sourceUrl, userId, logger, rest.shouldAISummaries, listId ?? null, rest.note ?? null);
 
 	return c.json(save, HttpStatusCodes.CREATED);
 };
@@ -69,12 +70,14 @@ async function enrichSave(
 	userId: string,
 	logger: any,
 	shouldAISummaries: boolean = true,
+	listId: string | null = null,
+	note: string | null = null,
 ) {
 	try {
 		// step 1: scrape
 		const scraped = await scrapeUrl(sourceUrl);
 
-		await db
+		const updatedSave = await db
 			.update(savesTable)
 			.set({
 				sourcePlatform: scraped.sourcePlatform,
@@ -85,7 +88,7 @@ async function enrichSave(
 				publishedAt: scraped.publishedAt,
 				tags: scraped.tags,
 			})
-			.where(eq(savesTable.id, saveId));
+			.where(eq(savesTable.id, saveId)).returning();
 
 		if (!shouldAISummaries) return;
 
@@ -98,18 +101,21 @@ async function enrichSave(
 		const existingTags = [...new Set(allSaves.flatMap((s) => s.tags))];
 
 		const userLists = await db
-			.select({ name: listsTable.name })
+			.select({ id: listsTable.id, name: listsTable.name, description: listsTable.description })
 			.from(listsTable)
 			.where(eq(listsTable.userId, userId));
 
 		const listNames = userLists.map((l) => l.name);
+		const selectedList = listId ? (userLists.find((l) => l.id === listId) ?? null) : null;
 
 		// step 3: AI enrichment
 		const ai = await aiOverview({
 			title: scraped.title || "",
 			description: scraped.description || "",
+			note,
 			tags: existingTags,
 			lists: listNames,
+			selectedList: selectedList ? { name: selectedList.name, description: selectedList.description } : null,
 		});
 
 		if (ai) {
@@ -131,6 +137,29 @@ async function enrichSave(
 					aiEnrichedAt: new Date(),
 				})
 				.where(eq(savesTable.id, saveId));
+
+			// Assign to a list if user didn't already pick one and AI suggested one
+			if (!listId && ai.list) {
+				const match = userLists.find(
+					(l) => l.name.toLowerCase() === ai.list.toLowerCase()
+				);
+
+				let targetListId: string;
+				if (match) {
+					targetListId = match.id;
+				} else {
+					const [newList] = await db
+						.insert(listsTable)
+						.values({ userId, name: ai.list })
+						.returning({ id: listsTable.id });
+					targetListId = newList.id;
+				}
+
+				await db
+					.insert(listItemsTable)
+					.values({ listId: targetListId, saveId, questId: null })
+					.onConflictDoNothing();
+			}
 		}
 	} catch (err) {
 		logger.warn({ err, saveId }, "enrich pipeline failed");

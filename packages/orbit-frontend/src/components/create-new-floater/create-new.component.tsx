@@ -172,7 +172,7 @@ export function CreateNewComponent() {
 	const [uiTypeOverride, setUiTypeOverride] = useState<UiType | null>(null)
 	const [fields, setFields] = useState<QuestFields>(EMPTY_FIELDS)
 	const [saveNote, setSaveNote] = useState('')
-	const [shouldAISummaries, setShouldAISummaries] = useState(false)
+	const [shouldAISummaries, setShouldAISummaries] = useState(true)
 	const [listId, setListId] = useState<string | null>(null)
 
 	const { lists, onSubmit, isPending, refetchLists, isRefetchingLists } = useCreateNew()
@@ -304,8 +304,8 @@ export function CreateNewComponent() {
 
 
 						<Button variant="subtle" color="gray" size="xs" leftSection={<IconRefresh size={13} />} onClick={() => refetchLists()} loading={isRefetchingLists}>
-						Re-fetch lists
-					</Button>
+							Re-fetch lists
+						</Button>
 
 					</Stack>
 

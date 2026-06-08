@@ -1,6 +1,6 @@
 import { AppShell, Center, Loader } from "@mantine/core"
 import { useMediaQuery } from "@mantine/hooks"
-import { Outlet } from "@tanstack/react-router"
+import { Navigate, Outlet, useRouterState } from "@tanstack/react-router"
 import { useAuth } from "@clerk/react"
 import "./app.css"
 import { AppHeader } from "./components/app-structure/app-header.component"
@@ -10,12 +10,14 @@ import { CreateNewComponent } from "./components/create-new-floater/create-new.c
 import { useSyncPending } from "./hooks/use-sync-pending.hook"
 import { useOrbitAppStore } from "./store/orbit-app.store"
 import { useEffect, useState } from "react"
+import ROUTES from "./routes"
 
 export function App() {
 	const { isLoaded, isSignedIn } = useAuth()
 	const lastSignedIn = useOrbitAppStore((s) => s.lastSignedIn)
 	const setLastSignedIn = useOrbitAppStore((s) => s.actions.setLastSignedIn)
 	const [offlineFallback, setOfflineFallback] = useState(false)
+	const { location } = useRouterState()
 	// useSyncPending()
 
 	// Keep lastSignedIn in sync with Clerk's auth state
@@ -47,13 +49,16 @@ export function App() {
 	}
 
 	if (!effectivelySignedIn) {
+		if (location.pathname !== ROUTES.LOGIN) {
+			return <Navigate to={ROUTES.LOGIN} />
+		}
 		return <Outlet />
 	}
 
 	return (
 		<AppShell
 			padding={{ base: "sm", sm: "md" }}
-			header={{ height: 60 }}
+			header={{ height: "calc(60px + env(safe-area-inset-top))" }}
 			navbar={{ width: 200, breakpoint: "sm", collapsed: { mobile: true } }}
 			footer={{ height: "calc(64px + env(safe-area-inset-bottom))", collapsed: isDesktop }}
 		>
