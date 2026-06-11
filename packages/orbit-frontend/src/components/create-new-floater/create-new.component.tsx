@@ -15,6 +15,7 @@ import { useCreateNew, type UiType, type QuestFields } from './use-create-new.ho
 import ROUTES from '@/routes'
 import { useOrbitAppStore } from '@/store/orbit-app.store'
 import { useMediaQuery } from '@mantine/hooks'
+import { Picker, type PickerProps } from '@gfazioli/mantine-picker';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -291,7 +292,7 @@ export function CreateNewComponent() {
 							/>
 						)}
 						{title && effectiveType === 'note' && <Text size="xs" c="dimmed">Opens in the note editor after creating.</Text>}
-
+						{/*
 						{title && lists.length > 0 && (
 							<Select
 								placeholder="Add to a list (optional)"
@@ -300,12 +301,29 @@ export function CreateNewComponent() {
 								clearable
 								data={lists.map((l) => ({ value: l.id, label: l.name }))}
 							/>
+						)}*/}
+
+						{title && lists.length > 0 && (
+							<Stack gap={4}>
+								<Group justify="space-between">
+									<Text size="xs" c="dimmed">Add to a list (optional)</Text>
+									<Button variant="subtle" color="gray" size="xs" leftSection={<IconRefresh size={13} />} onClick={() => refetchLists()} loading={isRefetchingLists}>
+										Re-fetch lists
+									</Button>
+								</Group>
+								<Picker loop hapticFeedback withDividers={false} withMask wheelSensitivity={4.3} momentum={2.4} perspective={160} enable3D={true}
+									visibleItems={4}
+									value={listId ?? 'none'}
+									data={['none', ...lists.map((l) => l.id)]}
+									renderItem={(id) => (
+										<span>{id === 'none' ? '— none —' : lists.find((l) => l.id === id)?.name ?? String(id)}</span>
+									)}
+									onChange={(v) => setListId(v === 'none' ? null : v as string)}
+								/>
+							</Stack>
 						)}
 
 
-						<Button variant="subtle" color="gray" size="xs" leftSection={<IconRefresh size={13} />} onClick={() => refetchLists()} loading={isRefetchingLists}>
-							Re-fetch lists
-						</Button>
 
 					</Stack>
 

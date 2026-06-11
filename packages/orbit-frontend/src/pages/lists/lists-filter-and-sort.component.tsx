@@ -28,7 +28,7 @@ const SORT_LABELS: Record<SortField, string> = {
 }
 
 export function ListsFilterAndSort({ view, setView, sortField, setSortField, sortDir, setSortDir }: Props) {
-	const isNonDefault = sortField !== 'createdAt' || sortDir !== 'desc'
+	const isNonDefault = sortField !== 'saveCreatedAt' || sortDir !== 'desc'
 
 	return (
 		<Menu closeOnItemClick={false} width={220} position="bottom-end">

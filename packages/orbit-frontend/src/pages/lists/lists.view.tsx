@@ -23,7 +23,7 @@ export function ListsView({
 	isCreating: boolean
 }) {
 	const [view, setView] = useState<ListViewMode>('grid')
-	const [sortField, setSortField] = useState<SortField>('createdAt')
+	const [sortField, setSortField] = useState<SortField>('saveCreatedAt')
 	const [sortDir, setSortDir] = useState<SortDir>('desc')
 	const [createOpen, setCreateOpen] = useState(false)
 	const [editTarget, setEditTarget] = useState<List | null>(null)

@@ -106,8 +106,14 @@ export function useCreateNew() {
 		return submitQuest(uiType, trimmed, fields, listId)
 	}
 
+	const sortedLists = [...lists].sort((a, b) => {
+		const aDate = a.recentSave?.createdAt ? new Date(a.recentSave.createdAt).getTime() : 0
+		const bDate = b.recentSave?.createdAt ? new Date(b.recentSave.createdAt).getTime() : 0
+		return bDate - aDate
+	})
+
 	return {
-		lists,
+		lists: sortedLists,
 		onSubmit,
 		isPending: createQuest.isPending || createSave.isPending,
 		refetchLists,
