@@ -292,16 +292,7 @@ export function CreateNewComponent() {
 							/>
 						)}
 						{title && effectiveType === 'note' && <Text size="xs" c="dimmed">Opens in the note editor after creating.</Text>}
-						{/*
-						{title && lists.length > 0 && (
-							<Select
-								placeholder="Add to a list (optional)"
-								value={listId}
-								onChange={setListId}
-								clearable
-								data={lists.map((l) => ({ value: l.id, label: l.name }))}
-							/>
-						)}*/}
+
 
 						{title && lists.length > 0 && (
 							<Stack gap={4}>
@@ -311,7 +302,7 @@ export function CreateNewComponent() {
 										Re-fetch lists
 									</Button>
 								</Group>
-								<Picker loop hapticFeedback withDividers={false} withMask wheelSensitivity={4.3} momentum={2.4} perspective={160} enable3D={true}
+								{/*<Picker loop hapticFeedback withDividers={false} withMask wheelSensitivity={4.3} momentum={2.4} perspective={160} enable3D={true}
 									visibleItems={4}
 									value={listId ?? 'none'}
 									data={['none', ...lists.map((l) => l.id)]}
@@ -319,6 +310,14 @@ export function CreateNewComponent() {
 										<span>{id === 'none' ? '— none —' : lists.find((l) => l.id === id)?.name ?? String(id)}</span>
 									)}
 									onChange={(v) => setListId(v === 'none' ? null : v as string)}
+								/>*/}
+
+								<Select
+									placeholder="Add to a list (optional)"
+									value={listId}
+									onChange={setListId}
+									clearable
+									data={lists.map((l) => ({ value: l.id, label: l.name }))}
 								/>
 							</Stack>
 						)}

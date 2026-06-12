@@ -29,28 +29,24 @@ export async function aiOverview({ title, description, note, tags, lists, select
 }): Promise<EnrichmentResult | null> {
 
 	const listContextLine = selectedList
-		? `SAVED TO LIST: "${selectedList.name}"${selectedList.description ? ` — ${selectedList.description.slice(0, 120)}` : ""}`
-		: `USER'S LISTS: ${lists.length ? lists.join(", ") : "None yet"}\nIf none of these fit, invent a short list name (2-3 words) that would suit this content.`;
+		? `LIST: "${selectedList.name}"${selectedList.description ? ` — ${selectedList.description.slice(0, 80)}` : ""}`
+		: `LISTS: ${lists.length ? lists.join(", ") : "none"} (pick best fit or invent a 2-3 word name)`;
 
-	const prompt = `You are a content tagger and summariser. Given a saved item, produce a JSON response.
+	const intentLine = note ? `\nINTENT (user's note — must drive summary & tags): ${note}` : "";
 
-		ITEM:
-		- Title: ${title || "Unknown"}
-		- Description: ${description || "No description"}${note ? `\n\t\t- User's note: ${note}` : ""}
+	const prompt = `Tag and summarise a saved item. JSON only, no markdown fences.
 
-		${listContextLine}
+TITLE: ${title || "Unknown"}
+DESC: ${description || "None"}${intentLine}
+${listContextLine}
+TAGS (reuse where relevant, add new if needed): ${tags.length ? tags.join(", ") : "none"}
 
-		USER'S EXISTING TAGS (reuse these where applicable, create new ones only when nothing fits):
-		${tags.length ? tags.join(", ") : "None yet"}
+Rules:
+- If INTENT exists: summary must lead with the user's goal/action from it; tags must capture that intent (e.g. action, timing, purpose)
+- Otherwise: summarise why the user likely saved this (2-3 sentences)
+- timeSensitive: true only if there's a real deadline or time-bound event
 
-		Respond with ONLY valid JSON, no markdown fences, no explanation:
-		{
-		  "summary": "2-3 sentence summary tailored to why the user saved this",
-		  "tags": ["tag1", "tag2", "tag3"],
-		  "list": "${selectedList ? selectedList.name : "existing list name if it fits, otherwise a new short list name"}",
-		  "location": { "name": "Place name", "context": "why mentioned" } or null,
-		  "timeSensitive": false
-		}`;
+{"summary":"...","tags":["..."],"list":"${selectedList ? selectedList.name : "..."}","location":{"name":"...","context":"..."},"timeSensitive":false}`;
 
 
 	try {
