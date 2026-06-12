@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
 	ActionIcon, Button, Chip, Drawer, Group,
-	Select, Stack, Switch, Text, Textarea, TextInput,
+	MultiSelect, Stack, Switch, Text, Textarea, TextInput,
 } from '@mantine/core'
 import { DateTimePicker } from '@mantine/dates'
 import {
@@ -174,7 +174,7 @@ export function CreateNewComponent() {
 	const [fields, setFields] = useState<QuestFields>(EMPTY_FIELDS)
 	const [saveNote, setSaveNote] = useState('')
 	const [shouldAISummaries, setShouldAISummaries] = useState(true)
-	const [listId, setListId] = useState<string | null>(null)
+	const [listIds, setListIds] = useState<string[]>([])
 
 	const { lists, onSubmit, isPending, refetchLists, isRefetchingLists } = useCreateNew()
 	const navigate = useNavigate()
@@ -184,7 +184,7 @@ export function CreateNewComponent() {
 	const id = 'id' in params ? params.id : undefined
 
 	useEffect(() => {
-		if (id) setListId(id)
+		if (id) setListIds([id])
 	}, [id])
 
 	// Auto-detect save mode from URL; user can override with a chip tap
@@ -200,7 +200,7 @@ export function CreateNewComponent() {
 		setFields(EMPTY_FIELDS)
 		setSaveNote('')
 		setShouldAISummaries(false)
-		setListId(null)
+		setListIds([])
 	}
 
 	function handleClose() {
@@ -217,7 +217,7 @@ export function CreateNewComponent() {
 	}
 
 	async function handleSubmit() {
-		const result = await onSubmit(effectiveType, title, fields, saveNote, listId ?? undefined, shouldAISummaries)
+		const result = await onSubmit(effectiveType, title, fields, saveNote, listIds, shouldAISummaries)
 		handleClose()
 		if (result?.id && effectiveType === 'note') {
 			navigate({ to: ROUTES.NOTE_DETAIL, params: { noteId: result.id } })
@@ -297,25 +297,15 @@ export function CreateNewComponent() {
 						{title && lists.length > 0 && (
 							<Stack gap={4}>
 								<Group justify="space-between">
-									<Text size="xs" c="dimmed">Add to a list (optional)</Text>
+									<Text size="xs" c="dimmed">Add to lists (optional)</Text>
 									<Button variant="subtle" color="gray" size="xs" leftSection={<IconRefresh size={13} />} onClick={() => refetchLists()} loading={isRefetchingLists}>
 										Re-fetch lists
 									</Button>
 								</Group>
-								{/*<Picker loop hapticFeedback withDividers={false} withMask wheelSensitivity={4.3} momentum={2.4} perspective={160} enable3D={true}
-									visibleItems={4}
-									value={listId ?? 'none'}
-									data={['none', ...lists.map((l) => l.id)]}
-									renderItem={(id) => (
-										<span>{id === 'none' ? '— none —' : lists.find((l) => l.id === id)?.name ?? String(id)}</span>
-									)}
-									onChange={(v) => setListId(v === 'none' ? null : v as string)}
-								/>*/}
-
-								<Select
-									placeholder="Add to a list (optional)"
-									value={listId}
-									onChange={setListId}
+								<MultiSelect
+									placeholder="Add to one or more lists…"
+									value={listIds}
+									onChange={setListIds}
 									clearable
 									data={lists.map((l) => ({ value: l.id, label: l.name }))}
 								/>

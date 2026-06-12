@@ -1,12 +1,14 @@
 import { useUpdateSaveHook } from "@/hooks/use-update-save.hook"
 import type { Save } from "@/types"
 import {
+	ActionIcon,
 	Badge,
 	Box,
 	Button,
 	Divider,
 	Group,
 	Modal,
+	Pill,
 	Select,
 	Stack,
 	Switch,
@@ -19,6 +21,7 @@ import {
 	IconBrandInstagram,
 	IconBrandReddit,
 	IconBrandYoutube,
+	IconEditCircle,
 	IconExternalLink,
 	IconWorld,
 } from "@tabler/icons-react"
@@ -54,6 +57,8 @@ export const UpdateSaveModal = ({
 	const [tags, setTags] = useState<string[]>(save.tags)
 	const [shouldAISummaries, setShouldAISummaries] = useState(save.shouldAISummaries)
 	const [aiSummary, setAiSummary] = useState(save.aiSummary ?? "")
+
+	const [editMode, setEditMode] = useState(false)
 
 	useEffect(() => {
 		setTitle(save.title ?? "")
@@ -144,81 +149,142 @@ export const UpdateSaveModal = ({
 					</Button>
 				</Group>
 
-				<Divider />
 
-				{/* Editable fields */}
 
-				<MultiSelectCreatable options={save.tags} value={tags} onChange={setTags} placeholder="Add tags" />
-				<TextInput
-					label="Title"
-					value={title}
-					onChange={(e) => setTitle(e.currentTarget.value)}
-					placeholder="No title"
-				/>
 
-				<Textarea
-					label="Description"
-					value={description}
-					onChange={(e) => setDescription(e.currentTarget.value)}
-					placeholder="No description"
-					autosize
-					minRows={2}
-					maxRows={5}
-				/>
 
-				<Textarea
-					label="Note"
-					value={note}
-					onChange={(e) => setNote(e.currentTarget.value)}
-					placeholder="Why did you save this?"
-					autosize
-					minRows={2}
-					maxRows={4}
-				/>
-
-				<Switch
-					label="Enable AI summary"
-					description="When on, AI will generate a summary for this save"
-					checked={shouldAISummaries}
-					onChange={(e) => setShouldAISummaries(e.currentTarget.checked)}
-				/>
-
-				<Textarea
-					label={
-						<Group gap={6}>
-							<Text size="sm" fw={500}>AI Summary</Text>
-							{save.aiEnrichedAt && (
-								<Text size="xs" c="dimmed">enriched {dayjs(save.aiEnrichedAt).fromNow()}</Text>
-							)}
+				{!editMode ?
+					<Stack gap="md">
+						<Group justify="space-between" align="center">
+							<Badge variant="dot" color={status === "active" ? "green" : "gray"} size="sm">
+								{status}
+							</Badge>
+							<ActionIcon variant="subtle" color="gray" loading={isUpdating} onClick={() => setEditMode(true)}>
+								<IconEditCircle size={16} />
+							</ActionIcon>
 						</Group>
-					}
-					value={aiSummary}
-					onChange={(e) => setAiSummary(e.currentTarget.value)}
-					placeholder="No AI summary yet"
-					autosize
-					minRows={2}
-					maxRows={5}
-				/>
 
-				<Select
-					label="Status"
-					value={status}
-					onChange={(v) => setStatus((v ?? "active") as Save["status"])}
-					data={[
-						{ value: "active", label: "Active" },
-						{ value: "archived", label: "Archived" },
-					]}
-					allowDeselect={false}
-				/>
+						<Divider />
 
-				<Group justify="flex-end" gap="sm" mt="xs">
-					<Button variant="subtle" color="gray" onClick={onClose}>
-						Cancel
-					</Button>
-					<Button color="amber" loading={isUpdating} onClick={handleSave}>
-						Save changes
-					</Button>
-				</Group>
+						<Stack gap={2}>
+							<Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: '0.05em' }}>Title</Text>
+							<Text size="sm">{title || "—"}</Text>
+						</Stack>
+
+						{description && (
+							<Stack gap={2}>
+								<Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: '0.05em' }}>Description</Text>
+								<Text size="sm" c="dimmed">{description}</Text>
+							</Stack>
+						)}
+
+						{note && (
+							<>
+								<Divider />
+								<Stack gap={2}>
+									<Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: '0.05em' }}>Your note</Text>
+									<Text size="sm">{note}</Text>
+								</Stack>
+							</>
+						)}
+
+						{aiSummary && (
+							<>
+								<Divider />
+								<Stack gap={2}>
+									<Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: '0.05em' }}>AI Summary</Text>
+									<Text size="sm" c="dimmed" fs="italic">{aiSummary}</Text>
+								</Stack>
+							</>
+						)}
+
+						{tags.length > 0 && (
+							<Group gap={4} mt={4}>
+								{tags.map((tag) => (
+									<Pill key={tag} size="xs">{tag}</Pill>
+								))}
+							</Group>
+						)}
+					</Stack>
+
+					: <Stack>
+
+						{/* Editable fields */}
+						<TextInput
+							label="Title"
+							value={title}
+							onChange={(e) => setTitle(e.currentTarget.value)}
+							placeholder="No title"
+						/>
+
+						<Textarea
+							label="Description"
+							value={description}
+							onChange={(e) => setDescription(e.currentTarget.value)}
+							placeholder="No description"
+							autosize
+							minRows={2}
+							maxRows={5}
+						/>
+						<Divider />
+
+						<Textarea
+							label="Note"
+							value={note}
+							onChange={(e) => setNote(e.currentTarget.value)}
+							placeholder="Why did you save this?"
+							autosize
+							minRows={2}
+							maxRows={4}
+						/>
+
+						<MultiSelectCreatable options={save.tags} value={tags} onChange={setTags} placeholder="Add tags" />
+
+						<Switch
+							label="Enable AI summary"
+							description="When on, AI will generate a summary for this save"
+							checked={shouldAISummaries}
+							onChange={(e) => setShouldAISummaries(e.currentTarget.checked)}
+						/>
+
+						<Textarea
+							label={
+								<Group gap={6}>
+									<Text size="sm" fw={500}>AI Summary</Text>
+									{save.aiEnrichedAt && (
+										<Text size="xs" c="dimmed">enriched {dayjs(save.aiEnrichedAt).fromNow()}</Text>
+									)}
+								</Group>
+							}
+							value={aiSummary}
+							onChange={(e) => setAiSummary(e.currentTarget.value)}
+							placeholder="No AI summary yet"
+							autosize
+							minRows={2}
+							maxRows={5}
+						/>
+
+						<Select
+							label="Status"
+							value={status}
+							onChange={(v) => setStatus((v ?? "active") as Save["status"])}
+							data={[
+								{ value: "active", label: "Active" },
+								{ value: "archived", label: "Archived" },
+							]}
+							allowDeselect={false}
+						/>
+
+						<Group justify="flex-end" gap="sm" mt="xs">
+							<Button variant="subtle" color="gray" onClick={() => setEditMode(false)}>
+								Cancel
+							</Button>
+							<Button color="amber" loading={isUpdating} onClick={handleSave}>
+								Save changes
+							</Button>
+						</Group>
+					</Stack>}
+
 			</Stack>
 		</Modal>
 	)

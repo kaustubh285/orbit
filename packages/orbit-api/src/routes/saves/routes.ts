@@ -33,7 +33,7 @@ export const insertSaveSchema = z.object({
 	publishedAt: z.string().datetime({ offset: true }).nullable().optional(),
 	note: z.string().nullable().optional(),
 	status: z.enum(saveStatusEnum.enumValues).optional(),
-	listId: z.string().uuid().nullable().optional(),
+	listIds: z.array(z.string().uuid()).optional(),
 	tags: z.array(z.string()).nullable().optional(),
 	aiSummary: z.string().nullable().optional(),
 	shouldAISummaries: z.boolean().optional().default(true),

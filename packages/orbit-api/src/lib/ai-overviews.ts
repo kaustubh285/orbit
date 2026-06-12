@@ -19,20 +19,23 @@ const enrichmentSchema = z.object({
 
 export type EnrichmentResult = z.infer<typeof enrichmentSchema>;
 
-export async function aiOverview({ title, description, note, tags, lists, selectedList }: {
+export async function aiOverview({ title, description, note, tags, lists, selectedLists }: {
 	title: string,
 	description: string,
 	note?: string | null,
 	tags: string[],
 	lists: string[],
-	selectedList?: { name: string; description: string | null } | null,
+	selectedLists?: { name: string; description: string | null }[],
 }): Promise<EnrichmentResult | null> {
 
-	const listContextLine = selectedList
-		? `LIST: "${selectedList.name}"${selectedList.description ? ` — ${selectedList.description.slice(0, 80)}` : ""}`
-		: `LISTS: ${lists.length ? lists.join(", ") : "none"} (pick best fit or invent a 2-3 word name)`;
+	const hasSelected = selectedLists && selectedLists.length > 0;
+	const listContextLine = hasSelected
+		? `LISTS SAVED TO: ${selectedLists!.map((l) => `"${l.name}"${l.description ? ` — ${l.description.slice(0, 60)}` : ""}`).join("; ")}`
+		: `USER'S LISTS: ${lists.length ? lists.join(", ") : "none"} (pick best fit or invent a 2-3 word name)`;
 
 	const intentLine = note ? `\nINTENT (user's note — must drive summary & tags): ${note}` : "";
+
+	const listPlaceholder = hasSelected ? selectedLists![0].name : "...";
 
 	const prompt = `Tag and summarise a saved item. JSON only, no markdown fences.
 
@@ -45,8 +48,9 @@ Rules:
 - If INTENT exists: summary must lead with the user's goal/action from it; tags must capture that intent (e.g. action, timing, purpose)
 - Otherwise: summarise why the user likely saved this (2-3 sentences)
 - timeSensitive: true only if there's a real deadline or time-bound event
+- list: return one best-fit list name from the lists above
 
-{"summary":"...","tags":["..."],"list":"${selectedList ? selectedList.name : "..."}","location":{"name":"...","context":"..."},"timeSensitive":false}`;
+{"summary":"...","tags":["..."],"list":"${listPlaceholder}","location":{"name":"...","context":"..."},"timeSensitive":false}`;
 
 
 	try {

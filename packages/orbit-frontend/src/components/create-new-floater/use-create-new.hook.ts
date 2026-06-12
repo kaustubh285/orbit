@@ -48,12 +48,12 @@ export function useCreateNew() {
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: getSavesQueryKey() }),
 	})
 
-	function submitSave(sourceUrl: string, note?: string, listId?: string, shouldAISummaries?: boolean) {
+	function submitSave(sourceUrl: string, note?: string, listIds?: string[], shouldAISummaries?: boolean) {
 		const pendingId = crypto.randomUUID()
 		const payload = {
 			sourceUrl,
 			...(note?.trim() ? { note: note.trim() } : {}),
-			...(listId ? { listId } : {}),
+			...(listIds?.length ? { listIds } : {}),
 			shouldAISummaries: shouldAISummaries ?? false,
 		}
 		addPendingSubmission({ id: pendingId, createdAt: new Date().toISOString(), apiCallKey: 'postSave', payload })
@@ -63,7 +63,7 @@ export function useCreateNew() {
 		)
 	}
 
-	async function submitQuest(uiType: Exclude<UiType, 'save'>, title: string, fields: QuestFields, listId?: string) {
+	async function submitQuest(uiType: Exclude<UiType, 'save'>, title: string, fields: QuestFields, listIds?: string[]) {
 		const questType = uiType === 'memory' ? 'event' : uiType
 		const payload: Record<string, unknown> = { type: questType, title }
 
@@ -79,7 +79,7 @@ export function useCreateNew() {
 			payload.emoji = fields.emoji
 		}
 
-		if (listId) payload.listId = listId
+		if (listIds?.length) payload.listIds = listIds
 
 		const pendingId = crypto.randomUUID()
 		addPendingSubmission({ id: pendingId, createdAt: new Date().toISOString(), apiCallKey: 'postQuest', payload: payload as any })
@@ -88,22 +88,22 @@ export function useCreateNew() {
 		return quest
 	}
 
-	async function onSubmit(uiType: UiType, title: string, fields: QuestFields, saveNote: string, listId?: string, shouldAISummaries?: boolean) {
+	async function onSubmit(uiType: UiType, title: string, fields: QuestFields, saveNote: string, listIds?: string[], shouldAISummaries?: boolean) {
 		const trimmed = title.trim()
 		if (!trimmed) return null
 
 		// Auto-inherit list from current URL (e.g. /lists/:id)
-		if (!listId) {
-			const match = window.location.pathname.match(/^\/lists\/([^/]+)/)
-			if (match) listId = match[1]
+		const match = window.location.pathname.match(/^\/lists\/([^/]+)/)
+		if (match && !listIds?.includes(match[1])) {
+			listIds = [...(listIds ?? []), match[1]]
 		}
 
 		if (uiType === 'save') {
-			submitSave(trimmed, saveNote, listId, shouldAISummaries)
+			submitSave(trimmed, saveNote, listIds, shouldAISummaries)
 			return null
 		}
 
-		return submitQuest(uiType, trimmed, fields, listId)
+		return submitQuest(uiType, trimmed, fields, listIds)
 	}
 
 	const sortedLists = [...lists].sort((a, b) => {

@@ -43,29 +43,31 @@ export const listSaves: AppRouteHandler<ListRoute> = async (c) => {
 
 export const createSave: AppRouteHandler<CreateRoute> = async (c) => {
 	const userId = c.var.userId;
-	const { publishedAt, listId, ...rest } = c.req.valid("json");
+	const { publishedAt, ...rest } = c.req.valid("json");
 	const logger = c.var.logger;
+
+	const { listIds, ...insertRest } = rest;
 
 	const [save] = await db
 		.insert(savesTable)
 		.values({
-			sourcePlatform: detectPlatform(rest.sourceUrl),
-			...rest,
-			tags: rest.tags ?? undefined,
+			sourcePlatform: detectPlatform(insertRest.sourceUrl),
+			...insertRest,
+			tags: insertRest.tags ?? undefined,
 			userId,
 			...(publishedAt !== undefined ? { publishedAt: toDate(publishedAt) } : {}),
 		})
 		.returning();
 
-	if (listId) {
+	if (listIds?.length) {
 		await db
 			.insert(listItemsTable)
-			.values({ listId, saveId: save.id, questId: null })
+			.values(listIds.map((listId) => ({ listId, saveId: save.id, questId: null })))
 			.onConflictDoNothing();
 	}
 
 	// fire-and-forget: scrape then enrich
-	enrichSave(save.id, rest.sourceUrl, userId, logger, rest.shouldAISummaries, listId ?? null, rest.note ?? null);
+	enrichSave(save.id, insertRest.sourceUrl, userId, logger, insertRest.shouldAISummaries, listIds ?? [], insertRest.note ?? null);
 
 	return c.json(save, HttpStatusCodes.CREATED);
 };
@@ -76,14 +78,14 @@ async function enrichSave(
 	userId: string,
 	logger: any,
 	shouldAISummaries: boolean = true,
-	listId: string | null = null,
+	listIds: string[] = [],
 	note: string | null = null,
 ) {
 	try {
 		// step 1: scrape
 		const scraped = await scrapeUrl(sourceUrl);
 
-		const updatedSave = await db
+		await db
 			.update(savesTable)
 			.set({
 				sourcePlatform: scraped.sourcePlatform,
@@ -112,7 +114,9 @@ async function enrichSave(
 			.where(eq(listsTable.userId, userId));
 
 		const listNames = userLists.map((l) => l.name);
-		const selectedList = listId ? (userLists.find((l) => l.id === listId) ?? null) : null;
+		const selectedLists = listIds.length
+			? userLists.filter((l) => listIds.includes(l.id)).map((l) => ({ name: l.name, description: l.description }))
+			: [];
 
 		// step 3: AI enrichment
 		const ai = await aiOverview({
@@ -121,7 +125,7 @@ async function enrichSave(
 			note,
 			tags: existingTags,
 			lists: listNames,
-			selectedList: selectedList ? { name: selectedList.name, description: selectedList.description } : null,
+			selectedLists,
 		});
 
 		if (ai) {
@@ -138,14 +142,14 @@ async function enrichSave(
 					aiSummary: ai.summary,
 					tags: mergedTags,
 					locationName: ai.location?.name ?? null,
-					locationLat: null, // geocode later if needed
+					locationLat: null,
 					locationLng: null,
 					aiEnrichedAt: new Date(),
 				})
 				.where(eq(savesTable.id, saveId));
 
 			// Assign to a list if user didn't already pick one and AI suggested one
-			if (!listId && ai.list) {
+			if (!listIds.length && ai.list) {
 				const match = userLists.find(
 					(l) => l.name.toLowerCase() === ai.list.toLowerCase()
 				);
