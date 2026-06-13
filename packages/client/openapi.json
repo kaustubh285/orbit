@@ -1416,10 +1416,12 @@
                       "archived"
                     ]
                   },
-                  "listId": {
-                    "type": "string",
-                    "nullable": true,
-                    "format": "uuid"
+                  "listIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
                   },
                   "tags": {
                     "type": "array",
@@ -1565,6 +1567,72 @@
                   },
                   "required": [
                     "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/saves/backfill": {
+      "post": {
+        "tags": [
+          "Saves"
+        ],
+        "responses": {
+          "200": {
+            "description": "Backfill result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "updated": {
+                      "type": "number"
+                    },
+                    "failed": {
+                      "type": "number"
+                    },
+                    "skipped": {
+                      "type": "number"
+                    },
+                    "details": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "platform": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "updated",
+                              "failed",
+                              "skipped"
+                            ]
+                          },
+                          "error": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "platform",
+                          "status"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "updated",
+                    "failed",
+                    "skipped",
+                    "details"
                   ]
                 }
               }
@@ -1784,10 +1852,12 @@
                       "archived"
                     ]
                   },
-                  "listId": {
-                    "type": "string",
-                    "nullable": true,
-                    "format": "uuid"
+                  "listIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
                   },
                   "tags": {
                     "type": "array",

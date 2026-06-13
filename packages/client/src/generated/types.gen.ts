@@ -411,7 +411,7 @@ export type PostSavesData = {
         publishedAt?: string | null;
         note?: string | null;
         status?: 'active' | 'archived';
-        listId?: string | null;
+        listIds?: Array<string>;
         tags?: Array<string> | null;
         aiSummary?: string | null;
         shouldAISummaries?: boolean;
@@ -459,6 +459,32 @@ export type PostSavesResponses = {
 };
 
 export type PostSavesResponse = PostSavesResponses[keyof PostSavesResponses];
+
+export type PostSavesBackfillData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/saves/backfill';
+};
+
+export type PostSavesBackfillResponses = {
+    /**
+     * Backfill result
+     */
+    200: {
+        updated: number;
+        failed: number;
+        skipped: number;
+        details: Array<{
+            id: string;
+            platform: string;
+            status: 'updated' | 'failed' | 'skipped';
+            error?: string;
+        }>;
+    };
+};
+
+export type PostSavesBackfillResponse = PostSavesBackfillResponses[keyof PostSavesBackfillResponses];
 
 export type DeleteSavesByIdData = {
     body?: never;
@@ -549,7 +575,7 @@ export type PatchSavesByIdData = {
         publishedAt?: string | null;
         note?: string | null;
         status?: 'active' | 'archived';
-        listId?: string | null;
+        listIds?: Array<string>;
         tags?: Array<string> | null;
         aiSummary?: string | null;
         shouldAISummaries?: boolean;
