@@ -192,8 +192,8 @@ export function HomeDashboard() {
 		setIsBackfilling(true)
 		setBackfillResult(null)
 		try {
-			const { data } = await client.post<BackfillResult>({ url: "/saves/backfill", throwOnError: false })
-			if (data) setBackfillResult(data)
+			const { data } = await client.post({ url: "/saves/backfill", throwOnError: false })
+			if (data) setBackfillResult(data as BackfillResult)
 		} finally {
 			setIsBackfilling(false)
 		}
