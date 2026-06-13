@@ -10,6 +10,7 @@ router.use("*", resolveUser);
 router
 	.openapi(routes.list, handlers.listSaves)
 	.openapi(routes.create, handlers.createSave)
+	.openapi(routes.backfill, handlers.backfillSaves)
 	.openapi(routes.getOne, handlers.getOneSave)
 	.openapi(routes.update, handlers.updateSave)
 	.openapi(routes.remove, handlers.removeSave);

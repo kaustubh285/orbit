@@ -2,6 +2,18 @@ import { createRoute } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { z } from "zod";
+
+export const backfillResultSchema = z.object({
+	updated: z.number(),
+	failed: z.number(),
+	skipped: z.number(),
+	details: z.array(z.object({
+		id: z.string(),
+		platform: z.string(),
+		status: z.enum(["updated", "failed", "skipped"]),
+		error: z.string().optional(),
+	})),
+});
 import { savePlatformEnum, saveStatusEnum } from "../../db/schemas/saves.schema.js";
 
 export const selectSaveSchema = z.object({
@@ -55,6 +67,15 @@ const listQuerySchema = z.object({
 
 export const selectSaveWithListsSchema = selectSaveSchema.extend({
 	lists: z.array(z.string()),
+});
+
+export const backfill = createRoute({
+	path: "/saves/backfill",
+	method: "post",
+	tags: ["Saves"],
+	responses: {
+		[HttpStatusCodes.OK]: jsonContent(backfillResultSchema, "Backfill result"),
+	},
 });
 
 export const list = createRoute({
@@ -117,6 +138,7 @@ export const remove = createRoute({
 	},
 });
 
+export type BackfillRoute = typeof backfill;
 export type ListRoute = typeof list;
 export type CreateRoute = typeof create;
 export type GetOneRoute = typeof getOne;

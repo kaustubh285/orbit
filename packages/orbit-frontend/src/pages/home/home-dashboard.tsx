@@ -17,10 +17,11 @@ import {
 import { useNavigate } from "@tanstack/react-router"
 import { useOrbitAppStore } from "@/store/orbit-app.store"
 import { useSaves } from "../saves/use-saves.hook"
-import { getQuestsOptions } from "@orbit/client"
+import { client, getQuestsOptions } from "@orbit/client"
 import { useQuery } from "@tanstack/react-query"
 import { PrivacyAwareText } from "@/components/privacy-aware-text.component"
 import { CachedItems } from "@/components/app-structure/cached-items.component"
+import { useState } from "react"
 
 const NAV_CARDS = [
 	{ label: "Quests", description: "Todos, events & dailies", icon: IconRocket, to: ROUTES.QUESTS, accent: "ocean-blue", shade: 4 },
@@ -177,11 +178,27 @@ function InsightCard({ label, value }: { label: string; value: number | string }
 	)
 }
 
+type BackfillResult = { updated: number; failed: number; skipped: number }
+
 export function HomeDashboard() {
 	const setCreateNewOpen = useOrbitAppStore((s) => s.actions.setCreateNewOpen)
 	const { mostRecentFiveSaves, mostRecentFiveSavesIsLoading } = useSaves()
 	const { dueToday, completedToday, overdue } = useDashboardStats()
 	const navigate = useNavigate()
+	const [isBackfilling, setIsBackfilling] = useState(false)
+	const [backfillResult, setBackfillResult] = useState<BackfillResult | null>(null)
+
+	async function runBackfill() {
+		setIsBackfilling(true)
+		setBackfillResult(null)
+		try {
+			const { data } = await client.post<BackfillResult>({ url: "/saves/backfill", throwOnError: false })
+			if (data) setBackfillResult(data)
+		} finally {
+			setIsBackfilling(false)
+		}
+	}
+
 	return (
 		<Stack gap="xl" pt="sm">
 			<Group justify="space-between" align="flex-end">
@@ -190,6 +207,18 @@ export function HomeDashboard() {
 					<Text size="sm" c="dimmed">Your personal command centre</Text>
 				</Stack>
 				<Group gap="xs">
+					{/* TEMP — remove after running once */}
+					<Button
+						size="sm"
+						variant="subtle"
+						color="orange"
+						loading={isBackfilling}
+						onClick={runBackfill}
+					>
+						{backfillResult
+							? `✓ ${backfillResult.updated} fixed, ${backfillResult.failed} failed`
+							: "Backfill saves"}
+					</Button>
 					<Button
 						leftSection={<IconChartBar size={14} />}
 						size="sm"

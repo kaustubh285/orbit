@@ -38,14 +38,39 @@ export async function scrapeYouTube(url: string): Promise<ProviderResult> {
 	})
 }
 
+interface RedditPost {
+	title: string
+	selftext: string
+	author: string
+	created_utc: number
+	thumbnail: string
+	preview?: { images?: Array<{ source: { url: string } }> }
+}
+
+const REDDIT_NON_IMAGE_THUMBNAILS = new Set(["self", "default", "nsfw", "spoiler", "image", ""])
+
 export async function scrapeReddit(url: string): Promise<ProviderResult> {
-	const oembedUrl = `https://www.reddit.com/oembed?url=${encodeURIComponent(url)}`
-	const data = await fetchJson<OEmbedResponse>(oembedUrl)
-	if (!data) return {}
+	const match = url.match(/reddit\.com\/r\/[^/]+\/comments\/([a-z0-9]+)/i)
+	if (!match) return {}
+
+	const postId = match[1]
+	const jsonUrl = `https://www.reddit.com/comments/${postId}.json?raw_json=1&limit=1`
+	const data = await fetchJson<[{ data: { children: Array<{ data: RedditPost }> } }]>(jsonUrl)
+	const post = data?.[0]?.data?.children?.[0]?.data
+	if (!post) return {}
+
+	// preview.images gives higher-res images than the `thumbnail` field
+	// Reddit HTML-encodes preview URLs, so decode & before using
+	const previewUrl = post.preview?.images?.[0]?.source?.url?.replace(/&amp;/g, "&") ?? null
+	const thumbnailUrl = previewUrl
+		?? (REDDIT_NON_IMAGE_THUMBNAILS.has(post.thumbnail ?? "") ? null : (post.thumbnail ?? null))
+
 	return sanitize({
-		title: data.title ?? null,
-		author: data.author_name ?? null,
-		thumbnailUrl: data.thumbnail_url ?? null,
+		title: post.title ?? null,
+		description: post.selftext?.trim() || null,
+		author: post.author ? `u/${post.author}` : null,
+		thumbnailUrl,
+		publishedAt: post.created_utc ? new Date(post.created_utc * 1000).toISOString() : null,
 	})
 }
 

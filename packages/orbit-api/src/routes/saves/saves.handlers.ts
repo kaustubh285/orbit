@@ -1,4 +1,4 @@
-import { and, desc, eq, getTableColumns, lt, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, inArray, lt, sql } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { db } from "../../db/db.js";
 import { savesTable } from "../../db/schemas/saves.schema.js";
@@ -7,6 +7,7 @@ import type { AppRouteHandler } from "@/lib/types.js";
 import { detectPlatform, scrapeUrl, type ScrapeResult } from "./scraper/index.js";
 import { toDate } from "@/lib/utils.js";
 import type {
+	BackfillRoute,
 	CreateRoute,
 	GetOneRoute,
 	ListRoute,
@@ -229,4 +230,72 @@ export const removeSave: AppRouteHandler<RemoveRoute> = async (c) => {
 		return c.json({ message: "Save not found" }, HttpStatusCodes.NOT_FOUND);
 	}
 	return c.body(null, HttpStatusCodes.NO_CONTENT);
+};
+
+// ─── Temp backfill ────────────────────────────────────────────────────────────
+// One-shot endpoint to fix existing instagram (thumbnail URL encoding) and
+// reddit (missing title/description) saves. Remove after running once.
+
+const BACKFILL_BATCH = 3;
+const BACKFILL_DELAY_MS = 400;
+
+export const backfillSaves: AppRouteHandler<BackfillRoute> = async (c) => {
+	const userId = c.var.userId;
+
+	const saves = await db
+		.select({ id: savesTable.id, sourcePlatform: savesTable.sourcePlatform, sourceUrl: savesTable.sourceUrl })
+		.from(savesTable)
+		.where(and(
+			eq(savesTable.userId, userId),
+			inArray(savesTable.sourcePlatform, ["instagram", "reddit"]),
+		));
+
+	type Detail = { id: string; platform: string; status: "updated" | "failed" | "skipped"; error?: string };
+	const details: Detail[] = [];
+
+	for (let i = 0; i < saves.length; i += BACKFILL_BATCH) {
+		const batch = saves.slice(i, i + BACKFILL_BATCH);
+
+		await Promise.all(batch.map(async (save) => {
+			try {
+				const scraped = await scrapeUrl(save.sourceUrl);
+
+				if (save.sourcePlatform === "instagram") {
+					if (!scraped.thumbnailUrl) {
+						details.push({ id: save.id, platform: "instagram", status: "skipped" });
+						return;
+					}
+					await db.update(savesTable)
+						.set({ thumbnailUrl: scraped.thumbnailUrl })
+						.where(eq(savesTable.id, save.id));
+					details.push({ id: save.id, platform: "instagram", status: "updated" });
+
+				} else if (save.sourcePlatform === "reddit") {
+					await db.update(savesTable)
+						.set({
+							title: scraped.title,
+							description: scraped.description,
+							thumbnailUrl: scraped.thumbnailUrl,
+							author: scraped.author,
+							publishedAt: scraped.publishedAt,
+						})
+						.where(eq(savesTable.id, save.id));
+					details.push({ id: save.id, platform: "reddit", status: "updated" });
+				}
+			} catch (err) {
+				details.push({ id: save.id, platform: save.sourcePlatform, status: "failed", error: String(err) });
+			}
+		}));
+
+		if (i + BACKFILL_BATCH < saves.length) {
+			await new Promise((r) => setTimeout(r, BACKFILL_DELAY_MS));
+		}
+	}
+
+	return c.json({
+		updated: details.filter((d) => d.status === "updated").length,
+		failed: details.filter((d) => d.status === "failed").length,
+		skipped: details.filter((d) => d.status === "skipped").length,
+		details,
+	}, HttpStatusCodes.OK);
 };
