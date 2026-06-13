@@ -271,6 +271,11 @@ export const backfillSaves: AppRouteHandler<BackfillRoute> = async (c) => {
 					details.push({ id: save.id, platform: "instagram", status: "updated" });
 
 				} else if (save.sourcePlatform === "reddit") {
+					// Skip if the scrape returned nothing — don't overwrite existing data with nulls
+					if (!scraped.title && !scraped.description) {
+						details.push({ id: save.id, platform: "reddit", status: "skipped", error: "scrape returned no data" });
+						return;
+					}
 					await db.update(savesTable)
 						.set({
 							title: scraped.title,

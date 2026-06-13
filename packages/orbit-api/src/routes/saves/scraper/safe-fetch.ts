@@ -99,9 +99,15 @@ async function readBoundedBody(res: Response): Promise<string | null> {
 
 export async function fetchJson<T>(url: string, init?: SafeFetchInit): Promise<T | null> {
 	const res = await safeFetch(url, init)
-	if (!res.ok) return null
+	if (!res.ok) {
+		console.warn("[fetchJson] non-ok response:", res.status, url)
+		return null
+	}
 	const contentType = res.headers.get("content-type") ?? ""
-	if (!contentType.includes("application/json")) return null
+	if (!contentType.includes("application/json")) {
+		console.warn("[fetchJson] unexpected content-type:", contentType, url)
+		return null
+	}
 	return (await res.json()) as T
 }
 

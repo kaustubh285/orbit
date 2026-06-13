@@ -193,9 +193,11 @@ function SaveCard({ save, onEdit }: { save: Save, onEdit: (save: Save) => void }
 				<Box
 					style={{
 						aspectRatio: THUMB_RATIO,
-						backgroundImage: save.thumbnailUrl ? `url(${save.thumbnailUrl})` : `linear-gradient(135deg, ${meta.color}55, ${meta.color}99)`,
-						backgroundSize: "cover",
+						backgroundImage: `url(${save.thumbnailUrl})`,
+						backgroundSize: save.sourcePlatform === "instagram" ? "contain" : "cover",
 						backgroundPosition: "center",
+						backgroundRepeat: "no-repeat",
+						backgroundColor: save.sourcePlatform === "instagram" ? `var(--mantine-color-${meta.color}-1)` : undefined,
 						position: "relative",
 					}}
 				>
@@ -350,9 +352,11 @@ function SaveCardCompact({ save, onEdit }: { save: Save, onEdit: (save: Save) =>
 							width: "35%",
 							flexShrink: 0,
 							alignSelf: "stretch",
-							backgroundImage: save.thumbnailUrl ? `url(${save.thumbnailUrl})` : `linear-gradient(135deg, ${meta.color}55, ${meta.color}99)`,
-							backgroundSize: "cover",
+							backgroundImage: `url(${save.thumbnailUrl})`,
+							backgroundSize: save.sourcePlatform === "instagram" ? "contain" : "cover",
 							backgroundPosition: "center",
+							backgroundRepeat: "no-repeat",
+							backgroundColor: save.sourcePlatform === "instagram" ? `var(--mantine-color-${meta.color}-1)` : undefined,
 							position: "relative",
 							minHeight: 80,
 						}}

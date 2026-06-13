@@ -55,7 +55,11 @@ export async function scrapeReddit(url: string): Promise<ProviderResult> {
 
 	const postId = match[1]
 	const jsonUrl = `https://www.reddit.com/comments/${postId}.json?raw_json=1&limit=1`
-	const data = await fetchJson<[{ data: { children: Array<{ data: RedditPost }> } }]>(jsonUrl)
+	const data = await fetchJson<[{ data: { children: Array<{ data: RedditPost }> } }]>(
+		jsonUrl,
+		{ headers: { Accept: "application/json" } },
+	)
+	console.log("[scrapeReddit] postId:", postId, "data:", data == null ? "null" : "ok")
 	const post = data?.[0]?.data?.children?.[0]?.data
 	if (!post) return {}
 

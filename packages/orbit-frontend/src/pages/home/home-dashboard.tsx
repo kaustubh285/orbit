@@ -60,7 +60,9 @@ function RecentSaveCard({ save }: { save: Save }) {
 				overflow: "hidden",
 				cursor: "pointer",
 				background: save.thumbnailUrl
-					? `url(${save.thumbnailUrl}) center/cover no-repeat`
+					? save.sourcePlatform === "instagram"
+						? `${meta.hex}33 url(${save.thumbnailUrl}) center/contain no-repeat`
+						: `url(${save.thumbnailUrl}) center/cover no-repeat`
 					: `linear-gradient(135deg, ${meta.hex}55, ${meta.hex}99)`,
 				border: "1px solid var(--mantine-color-dark-4)",
 			}}
@@ -209,6 +211,7 @@ export function HomeDashboard() {
 				<Group gap="xs">
 					{/* TEMP — remove after running once */}
 					<Button
+						disabled
 						size="sm"
 						variant="subtle"
 						color="orange"
