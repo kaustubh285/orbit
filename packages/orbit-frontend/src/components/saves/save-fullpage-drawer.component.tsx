@@ -29,6 +29,7 @@ import {
 	IconWorld,
 	IconX,
 	IconSparkles,
+	IconMapPin,
 } from "@tabler/icons-react"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
@@ -38,6 +39,31 @@ import { PrivacyAwareText } from "../privacy-aware-text.component"
 import { useMediaQuery } from "@mantine/hooks"
 
 dayjs.extend(relativeTime)
+
+type StructuredSummary = {
+	summary: string
+	category?: string
+	contentType?: string
+	attributes?: { difficulty: string | null; timeEstimate: string | null } | null
+	recipe?: { ingredients: string[]; steps: string[] | null; servings: string | null } | null
+	watchList?: string[] | null
+	keyPoints?: string[] | null
+	location?: { name: string; context: string } | null
+	timeSensitive?: boolean
+}
+
+function parseStructuredSummary(raw: string | null): StructuredSummary | null {
+	if (!raw) return null
+	try {
+		const parsed = JSON.parse(raw)
+		if (parsed && typeof parsed === "object" && typeof parsed.summary === "string") {
+			return parsed as StructuredSummary
+		}
+		return null
+	} catch {
+		return null
+	}
+}
 
 const PLATFORM_META: Record<Save["sourcePlatform"], { label: string; color: string; Icon: React.ElementType }> = {
 	youtube: { label: "YouTube", color: "red", Icon: IconBrandYoutube },
@@ -194,6 +220,7 @@ export const SaveDetailView = ({
 										width: 140,
 										flexShrink: 0,
 										aspectRatio: "1/1",
+										objectFit: "cover",
 										backgroundImage: `url(${save.thumbnailUrl})`,
 										backgroundSize: save.sourcePlatform === "instagram" ? "contain" : "cover",
 										backgroundPosition: "center",
@@ -267,21 +294,104 @@ export const SaveDetailView = ({
 									<Divider />
 								</>
 							)}
-							{aiSummary && (
-								<>
-									<Stack gap={2}>
-										<Group gap={6} align="center">
-											<IconSparkles size={13} style={{ color: "var(--mantine-color-violet-4)" }} />
-											<Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: "0.05em" }}>AI Summary</Text>
-											{save.aiEnrichedAt && (
-												<Text size="xs" c="dimmed" ml="auto">enriched {dayjs(save.aiEnrichedAt).fromNow()}</Text>
+							{aiSummary && (() => {
+								const structured = parseStructuredSummary(aiSummary)
+								return (
+									<>
+										<Stack gap="xs">
+											<Group gap={6} align="center">
+												<IconSparkles size={13} style={{ color: "var(--mantine-color-violet-4)" }} />
+												<Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: "0.05em" }}>AI Summary</Text>
+												{save.aiEnrichedAt && (
+													<Text size="xs" c="dimmed" ml="auto">enriched {dayjs(save.aiEnrichedAt).fromNow()}</Text>
+												)}
+											</Group>
+
+											{structured ? (
+												<Stack gap="sm">
+													<PrivacyAwareText size="sm" c="dimmed" fs="italic">{structured.summary}</PrivacyAwareText>
+
+													{(structured.category || structured.contentType || structured.timeSensitive) && (
+														<Group gap={4}>
+															{structured.category && <Badge size="xs" variant="light" color="violet">{structured.category}</Badge>}
+															{structured.contentType && <Badge size="xs" variant="light" color="blue">{structured.contentType}</Badge>}
+															{structured.timeSensitive && <Badge size="xs" variant="light" color="red">Time sensitive</Badge>}
+														</Group>
+													)}
+
+													{structured.attributes && (structured.attributes.difficulty || structured.attributes.timeEstimate) && (
+														<Group gap={4}>
+															{structured.attributes.difficulty && <Pill size="xs">{structured.attributes.difficulty}</Pill>}
+															{structured.attributes.timeEstimate && <Pill size="xs">{structured.attributes.timeEstimate}</Pill>}
+														</Group>
+													)}
+
+													{structured.keyPoints && structured.keyPoints.length > 0 && (
+														<Stack gap={4}>
+															<Text size="xs" c="dimmed" fw={600} tt="uppercase" style={{ letterSpacing: "0.05em" }}>Key points</Text>
+															{structured.keyPoints.map((point, i) => (
+																<Group key={i} gap={6} align="flex-start" wrap="nowrap">
+																	<Text size="sm" c="dimmed" style={{ flexShrink: 0 }}>·</Text>
+																	<PrivacyAwareText size="sm" c="dimmed">{point}</PrivacyAwareText>
+																</Group>
+															))}
+														</Stack>
+													)}
+
+													{structured.watchList && structured.watchList.length > 0 && (
+														<Stack gap={4}>
+															<Text size="xs" c="dimmed" fw={600} tt="uppercase" style={{ letterSpacing: "0.05em" }}>Watch list</Text>
+															{structured.watchList.map((item, i) => (
+																<Group key={i} gap={6} align="flex-start" wrap="nowrap">
+																	<Text size="sm" c="dimmed" style={{ flexShrink: 0 }}>·</Text>
+																	<PrivacyAwareText size="sm" c="dimmed">{item}</PrivacyAwareText>
+																</Group>
+															))}
+														</Stack>
+													)}
+
+													{structured.recipe && (
+														<Stack gap={4}>
+															<Text size="xs" c="dimmed" fw={600} tt="uppercase" style={{ letterSpacing: "0.05em" }}>
+																Ingredients{structured.recipe.servings ? ` — ${structured.recipe.servings}` : ""}
+															</Text>
+															{structured.recipe.ingredients.map((ing, i) => (
+																<Group key={i} gap={6} align="flex-start" wrap="nowrap">
+																	<Text size="sm" c="dimmed" style={{ flexShrink: 0 }}>·</Text>
+																	<PrivacyAwareText size="sm" c="dimmed">{ing}</PrivacyAwareText>
+																</Group>
+															))}
+															{structured.recipe.steps && structured.recipe.steps.length > 0 && (
+																<Stack gap={4} mt={4}>
+																	<Text size="xs" c="dimmed" fw={600} tt="uppercase" style={{ letterSpacing: "0.05em" }}>Steps</Text>
+																	{structured.recipe.steps.map((step, i) => (
+																		<Group key={i} gap={6} align="flex-start" wrap="nowrap">
+																			<Text size="sm" c="dimmed" style={{ flexShrink: 0, minWidth: 16 }}>{i + 1}.</Text>
+																			<PrivacyAwareText size="sm" c="dimmed">{step}</PrivacyAwareText>
+																		</Group>
+																	))}
+																</Stack>
+															)}
+														</Stack>
+													)}
+
+													{structured.location && (
+														<Group gap={4}>
+															<IconMapPin size={12} style={{ color: "var(--mantine-color-dimmed)", flexShrink: 0 }} />
+															<PrivacyAwareText size="xs" c="dimmed">
+																{structured.location.name}{structured.location.context ? ` — ${structured.location.context}` : ""}
+															</PrivacyAwareText>
+														</Group>
+													)}
+												</Stack>
+											) : (
+												<PrivacyAwareText size="sm" c="dimmed" fs="italic">{aiSummary}</PrivacyAwareText>
 											)}
-										</Group>
-										<PrivacyAwareText size="sm" c="dimmed" fs="italic">{aiSummary}</PrivacyAwareText>
-									</Stack>
-									<Divider />
-								</>
-							)}
+										</Stack>
+										<Divider />
+									</>
+								)
+							})()}
 							{note && (
 								<>
 									<Stack gap={2}>

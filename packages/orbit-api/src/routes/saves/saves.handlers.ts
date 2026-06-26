@@ -136,13 +136,14 @@ async function enrichSave(
 				.from(savesTable)
 				.where(eq(savesTable.id, saveId));
 
-			const mergedTags = [...new Set([...(current?.tags ?? []), ...ai.tags])];
+			const { ai_title, tags: _tags, list: _list, ...summaryData } = ai;
+			const mergedTags = [...new Set([...(current?.tags ?? []), ..._tags, ...(ai.category ?? [])])];
 
 			await db
 				.update(savesTable)
 				.set({
-					aiTitle: ai.ai_title,
-					aiSummary: JSON.stringify(ai),
+					aiTitle: ai_title,
+					aiSummary: JSON.stringify(summaryData),
 					tags: mergedTags,
 					locationName: ai.location?.name ?? null,
 					aiEnrichedAt: new Date(),
@@ -292,11 +293,12 @@ export const backfillSaves: AppRouteHandler<BackfillRoute> = async (c) => {
 				}
 
 				const mergedTags = [...new Set([...save.tags, ...ai.tags])];
+				const { ai_title, tags: _tags, list: _list, ...summaryData } = ai;
 
 				await db.update(savesTable)
 					.set({
-						aiTitle: ai.ai_title,
-						aiSummary: JSON.stringify(ai),
+						aiTitle: ai_title,
+						aiSummary: JSON.stringify(summaryData),
 						tags: mergedTags,
 						locationName: ai.location?.name ?? null,
 						aiEnrichedAt: new Date(),
