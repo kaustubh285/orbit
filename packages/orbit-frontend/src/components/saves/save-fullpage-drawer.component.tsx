@@ -35,6 +35,7 @@ import relativeTime from "dayjs/plugin/relativeTime"
 import { useEffect, useState } from "react"
 import { MultiSelectCreatable } from "../multi-select-creatable.component"
 import { PrivacyAwareText } from "../privacy-aware-text.component"
+import { useMediaQuery } from "@mantine/hooks"
 
 dayjs.extend(relativeTime)
 
@@ -64,7 +65,7 @@ export const SaveDetailView = ({
 	const [shouldAISummaries, setShouldAISummaries] = useState(save.shouldAISummaries ?? false)
 	const [aiSummary, setAiSummary] = useState(save.aiSummary ?? "")
 	const [editMode, setEditMode] = useState(false)
-
+	const isDesktop = useMediaQuery("(min-width: 48em)", false, { getInitialValueInEffect: false })
 	useEffect(() => {
 		setTitle(save.title ?? "")
 		setDescription(save.description ?? "")
@@ -94,7 +95,7 @@ export const SaveDetailView = ({
 
 	return (
 		<Drawer
-			position="bottom"
+			position={isDesktop ? "right" : "bottom"}
 			opened={opened}
 			onClose={onClose}
 			size="xl"
@@ -202,9 +203,6 @@ export const SaveDetailView = ({
 						)}
 
 						<Stack gap={6} style={{ flex: 1, minWidth: 0 }}>
-							<PrivacyAwareText fw={600} size="sm" style={{ lineHeight: 1.35 }}>
-								{title || "—"}
-							</PrivacyAwareText>
 
 							{(save.author || save.publishedAt) && (
 								<Group gap={4}>
@@ -219,12 +217,15 @@ export const SaveDetailView = ({
 							{tags.length > 0 && (
 								<Group gap={4} wrap="wrap" mt={2}>
 									{tags.map((tag) => (
-										<Pill key={tag} size="xs">{tag}</Pill>
+										<Pill key={tag} c="black" bg="white" size="xs">{tag}</Pill>
 									))}
 								</Group>
 							)}
 						</Stack>
 					</Group>
+					<PrivacyAwareText fw={600} size="sm" style={{ lineHeight: 1.35 }}>
+						{title || "—"}
+					</PrivacyAwareText>
 
 					{/* Source URL */}
 					<Group gap={6} align="center">
@@ -278,7 +279,7 @@ export const SaveDetailView = ({
 							{description && (
 								<Stack gap={2}>
 									<Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: "0.05em" }}>Description</Text>
-									<PrivacyAwareText component="pre" size="sm" c="dimmed" w="95vw" style={{
+									<PrivacyAwareText component="pre" size="sm" c="dimmed" w={"auto"} style={{
 										textWrap: "wrap"
 									}}>{description}</PrivacyAwareText>
 								</Stack>
@@ -291,7 +292,7 @@ export const SaveDetailView = ({
 										<Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: "0.05em" }}>Lists</Text>
 										<Group gap={4}>
 											{save.lists.map((list) => (
-												<Badge key={list} size="xs" variant="light" color="gray">{list}</Badge>
+												<Badge key={list} size="md" variant="light" color="gray">{list}</Badge>
 											))}
 										</Group>
 									</Stack>
