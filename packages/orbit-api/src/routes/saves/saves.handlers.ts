@@ -137,7 +137,7 @@ async function enrichSave(
 				.where(eq(savesTable.id, saveId));
 
 			const { ai_title, tags: _tags, list: _list, ...summaryData } = ai;
-			const mergedTags = [...new Set([...(current?.tags ?? []), ..._tags, ...(ai.category ?? [])])];
+			const mergedTags = [...new Set([...(current?.tags ?? []), ..._tags])];
 
 			await db
 				.update(savesTable)
