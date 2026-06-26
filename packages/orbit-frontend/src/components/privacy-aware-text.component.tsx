@@ -12,6 +12,7 @@ interface PrivacyAwareTextProps extends Omit<TextProps, "style"> {
 	rel?: string
 	justify?: string
 	style?: React.CSSProperties
+	onClick?: () => void
 }
 
 const isTouchDevice = () => window.matchMedia("(hover: none)").matches
@@ -46,7 +47,7 @@ export function PrivacyAwareText({ children, revealOnHover = true, style, ...pro
 	}
 
 	return (
-		<Text {...props as any} {...handlers} style={privacyStyle}>
+		<Text {...props as any} {...handlers} style={privacyStyle} onClick={props.onClick}>
 			{children}
 		</Text>
 	)

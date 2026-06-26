@@ -22,6 +22,8 @@ import { useQuery } from "@tanstack/react-query"
 import { PrivacyAwareText } from "@/components/privacy-aware-text.component"
 import { CachedItems } from "@/components/app-structure/cached-items.component"
 import { useState } from "react"
+import { useDisclosure } from "@mantine/hooks"
+import { SaveDetailView } from "@/components/saves/save-fullpage-drawer.component"
 
 const NAV_CARDS = [
 	{ label: "Quests", description: "Todos, events & dailies", icon: IconRocket, to: ROUTES.QUESTS, accent: "ocean-blue", shade: 4 },
@@ -38,7 +40,7 @@ const PLATFORM_META: Record<Save["sourcePlatform"], { color: string; hex: string
 	web: { color: "cyan", hex: "#0c8599", Icon: IconWorld },
 }
 
-function RecentSaveCard({ save }: { save: Save }) {
+function RecentSaveCard({ save, onClick }: { save: Save; onClick: () => void }) {
 	const navigate = useNavigate()
 	const { privacyMode } = useOrbitAppStore()
 	const meta = PLATFORM_META[privacyMode ? "web" : save.sourcePlatform]
@@ -47,8 +49,9 @@ function RecentSaveCard({ save }: { save: Save }) {
 
 	return (
 		<PrivacyAwareText
-			component="a"
-			href={save.sourceUrl}
+			component="button"
+			onClick={onClick}
+			// href={save.sourceUrl}
 			target="_blank"
 			rel="noopener noreferrer"
 			style={{
@@ -189,6 +192,13 @@ export function HomeDashboard() {
 	const navigate = useNavigate()
 	const [isBackfilling, setIsBackfilling] = useState(false)
 	const [backfillResult, setBackfillResult] = useState<BackfillResult | null>(null)
+	const [selectedSave, setSelectedSave] = useState<Save | null>(null)
+	const [opened, { open, close }] = useDisclosure(false);
+
+	const selectSave = (save: Save) => {
+		setSelectedSave(save)
+		open();
+	}
 
 	async function runBackfill() {
 		setIsBackfilling(true)
@@ -243,6 +253,7 @@ export function HomeDashboard() {
 
 			<CachedItems />
 
+			{selectedSave && <SaveDetailView save={selectedSave} opened={opened} onClose={close} />}
 
 			{/* Insights */}
 			<Stack gap="xs">
@@ -264,7 +275,7 @@ export function HomeDashboard() {
 						{mostRecentFiveSavesIsLoading
 							? [1, 2, 3, 4, 5].map((i) => <RecentSaveCardSkeleton key={i} />)
 							: (mostRecentFiveSaves ?? []).map((save) => (
-								<RecentSaveCard key={save.id} save={save} />
+								<RecentSaveCard key={save.id} save={save} onClick={() => selectSave(save)} />
 							))
 						}
 					</Group>

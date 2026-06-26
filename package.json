@@ -5,13 +5,20 @@
 		"packages/*"
 	],
 	"scripts": {
-		"export:spec": "bun --cwd packages/orbit-api run export:spec",
-		"generate": "bun --cwd packages/client run generate",
-		"dev:api": "bun --cwd packages/orbit-api run dev",
-		"dev:frontend": "bun --cwd packages/orbit-frontend run dev",
-		"build:api": "bun --cwd packages/orbit-api run build",
-		"build:client": "bun --cwd packages/client run build",
-		"build:frontend": "bun --cwd packages/orbit-frontend run build",
+		"dev": "concurrently --names \"studio,api,frontend\" --prefix-colors \"cyan,green,magenta\" \"cd packages/orbit-api && bun run db:studio\" \"cd packages/orbit-api && bun run dev\" \"cd packages/orbit-frontend && bun run dev\"",
+		"export:spec": "cd packages/orbit-api && bun run export:spec",
+		"generate": "cd packages/client && bun run generate",
+		"dev:api": "cd packages/orbit-api && bun run dev",
+		"dev:frontend": "cd packages/orbit-frontend && bun run dev",
+		"build:api": "cd packages/orbit-api && bun run build",
+		"build:client": "cd packages/client && bun run build",
+		"build:frontend": "cd packages/orbit-frontend && bun run build",
 		"typecheck": "bun --cwd packages/orbit-api run typecheck && bun --cwd packages/client run typecheck && bun --cwd packages/orbit-frontend run typecheck"
+	},
+	"devDependencies": {
+		"concurrently": "^10.0.3"
+	},
+	"dependencies": {
+		"dotenv": "^17.4.2"
 	}
 }

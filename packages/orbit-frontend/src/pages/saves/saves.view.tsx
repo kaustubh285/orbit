@@ -40,6 +40,7 @@ import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { useState } from "react"
 import { useSaves } from "./use-saves.hook"
+import { SaveDetailView } from "@/components/saves/save-fullpage-drawer.component"
 
 dayjs.extend(relativeTime)
 
@@ -570,7 +571,8 @@ export default function SavesView({
 
 	return (
 		<Stack gap="md">
-			{selectedSave && <UpdateSaveModal save={selectedSave} opened={opened} onClose={close} />}
+			{/*{selectedSave && <UpdateSaveModal save={selectedSave} opened={opened} onClose={close} />}*/}
+			{selectedSave && <SaveDetailView save={selectedSave} opened={opened} onClose={close} />}
 			<Group wrap="nowrap" gap="sm">
 				<TextInput
 					placeholder="Search title, description, notes, platform..."
@@ -676,14 +678,14 @@ export default function SavesView({
 
 			{isCompact ? (
 				<Stack gap="sm">
-					<AddSaveCardCompact onAdd={addSave} isAdding={isAdding} />
+					{/*<AddSaveCardCompact onAdd={addSave} isAdding={isAdding} />*/}
 					{isLoading
 						? [1, 2, 3, 4, 5].map((i) => <SaveCardSkeletonCompact key={i} />)
 						: filtered.map((save) => <SaveCardCompact key={save.id} save={save} onEdit={(s) => { setSelectedSave(s); open() }} />)}
 				</Stack>
 			) : (
 				<SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-					<AddSaveCard onAdd={addSave} isAdding={isAdding} />
+					{/*<AddSaveCard onAdd={addSave} isAdding={isAdding} />*/}
 					{isLoading
 						? [1, 2, 3, 4, 5].map((i) => <SaveCardSkeleton key={i} />)
 						: filtered.map((save) => <SaveCard key={save.id} save={save} onEdit={(s) => { setSelectedSave(s); open() }} />)}

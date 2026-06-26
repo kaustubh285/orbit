@@ -1,0 +1,7 @@
+[install]
+# Block packages published less than 3 days ago (reduces supply-chain attack window)
+minimumReleaseAge = 259200
+
+# Disable postinstall/lifecycle scripts globally.
+# Only packages explicitly listed in package.json "trustedDependencies" will run them.
+ignoreScripts = true

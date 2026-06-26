@@ -19,7 +19,7 @@ export default function createApp() {
 			if (!origin) return null
 			try {
 				const host = new URL(origin).hostname
-				if (host === "localhost" || host === "127.0.0.1") return origin
+				if (host === "localhost" || host === "127.0.0.1" || host === "100.113.195.68" || host === "100.116.98.81") return origin
 				if (host === "deshpande.page" || host.endsWith(".deshpande.page")) return origin
 			} catch { return null }
 			return null
