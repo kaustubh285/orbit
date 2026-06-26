@@ -46,4 +46,5 @@ export type Save = {
 	createdAt: string;
 	updatedAt: string;
 	lists?: string[];
+	aiTitle?: string;
 }

@@ -55,11 +55,13 @@ export const savesTable = pgTable(
 
 		// AI
 		shouldAISummaries: boolean("should_ai_summaries").notNull().default(false),
+		aiTitle: text("ai_title"),
 		aiSummary: text("ai_summary"),
 		locationName: text(""),
 		locationLat: text(""),
 		locationLng: text(""),
 		aiEnrichedAt: timestamp({ withTimezone: true }),
+
 	},
 	(table) => ({
 		userStatusIdx: index("saves_user_status_idx").on(

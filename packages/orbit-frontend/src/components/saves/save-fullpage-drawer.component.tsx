@@ -66,8 +66,9 @@ export const SaveDetailView = ({
 	const [aiSummary, setAiSummary] = useState(save.aiSummary ?? "")
 	const [editMode, setEditMode] = useState(false)
 	const isDesktop = useMediaQuery("(min-width: 48em)", false, { getInitialValueInEffect: false })
+	const [showOriginalTitle, setShowOriginalTitle] = useState(false)
 	useEffect(() => {
-		setTitle(save.title ?? "")
+		setTitle(save.aiTitle ?? save.title ?? "")
 		setDescription(save.description ?? "")
 		setNote(save.note ?? "")
 		setStatus(save.status)
@@ -123,6 +124,7 @@ export const SaveDetailView = ({
 			>
 
 
+
 				<Tooltip label="Retrigger AI summary">
 					<ActionIcon variant="subtle" color="gray" disabled>
 						<IconSparkles2 size={16} />
@@ -135,16 +137,8 @@ export const SaveDetailView = ({
 					</ActionIcon>
 				</Tooltip>
 
-				<Badge
-					size="sm"
-					color={meta.color}
-					variant="light"
-					leftSection={<PlatformIcon size={11} />}
-				>
-					{meta.label}
-				</Badge>
 
-				<Badge variant="dot" color={status === "active" ? "green" : "gray"} size="sm">
+				<Badge variant="dot" color={status === "active" ? "green" : "gray"} size="xs">
 					{status}
 				</Badge>
 
@@ -184,22 +178,35 @@ export const SaveDetailView = ({
 					{/* Thumbnail + hero metadata side by side */}
 					<Group gap="md" align="flex-start" wrap="nowrap">
 						{save.thumbnailUrl && (
-							<Box
-								style={{
-									width: 140,
-									flexShrink: 0,
-									aspectRatio: "1/1",
-									backgroundImage: `url(${save.thumbnailUrl})`,
-									backgroundSize: save.sourcePlatform === "instagram" ? "contain" : "cover",
-									backgroundPosition: "center",
-									backgroundRepeat: "no-repeat",
-									backgroundColor: save.sourcePlatform === "instagram"
-										? `var(--mantine-color-${meta.color}-1)`
-										: "var(--mantine-color-default-border)",
-									borderRadius: 8,
-									overflow: "hidden",
-								}}
-							/>
+							<Stack>
+
+								<Badge
+									size="xs"
+									color={meta.color}
+									variant="light"
+									leftSection={<PlatformIcon size={11} />}
+								>
+									{meta.label}
+								</Badge>
+
+								<Box
+									style={{
+										width: 140,
+										flexShrink: 0,
+										aspectRatio: "1/1",
+										backgroundImage: `url(${save.thumbnailUrl})`,
+										backgroundSize: save.sourcePlatform === "instagram" ? "contain" : "cover",
+										backgroundPosition: "center",
+										backgroundRepeat: "no-repeat",
+										backgroundColor: save.sourcePlatform === "instagram"
+											? `var(--mantine-color-${meta.color}-1)`
+											: "var(--mantine-color-default-border)",
+										borderRadius: 8,
+										overflow: "hidden",
+									}}
+								/>
+
+							</Stack>
 						)}
 
 						<Stack gap={6} style={{ flex: 1, minWidth: 0 }}>
@@ -251,6 +258,15 @@ export const SaveDetailView = ({
 					{/* View mode */}
 					{!editMode ? (
 						<Stack gap="md">
+							{save.title && (
+								<>
+									<Stack gap={2}>
+										<Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: "0.05em" }}>Original title</Text>
+										<PrivacyAwareText size="sm" fs="italic" c="blue.7">{save.title}</PrivacyAwareText>
+									</Stack>
+									<Divider />
+								</>
+							)}
 							{aiSummary && (
 								<>
 									<Stack gap={2}>

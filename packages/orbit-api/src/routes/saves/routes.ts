@@ -29,6 +29,7 @@ export const selectSaveSchema = z.object({
 	note: z.string().nullable(),
 	tags: z.array(z.string()),
 	status: z.enum(saveStatusEnum.enumValues),
+	aiTitle: z.string().nullable(),
 	aiSummary: z.string().nullable(),
 	aiEnrichedAt: z.string().datetime({ offset: true }).nullable(),
 	createdAt: z.string().datetime({ offset: true }),

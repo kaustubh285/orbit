@@ -70,6 +70,7 @@ function matchesSearch(save: Save, query: string): boolean {
 	const q = query.toLowerCase()
 	return (
 		(save.title?.toLowerCase().includes(q) ?? false) ||
+		(save.aiTitle?.toLowerCase().includes(q) ?? false) ||
 		(save.aiSummary?.toLowerCase().includes(q) ?? false) ||
 		(save.description?.toLowerCase().includes(q) ?? false) ||
 		(save.note?.toLowerCase().includes(q) ?? false) ||
@@ -219,7 +220,7 @@ function SaveCard({ save, onEdit }: { save: Save, onEdit: (save: Save) => void }
 							fz="h6"
 							style={{ color: "#fff", lineHeight: 1.3 }}
 						>
-							{save.title ?? save.sourceUrl}
+							{save.aiTitle ?? save.title ?? save.sourceUrl}
 						</PrivacyAwareText>
 					</Box>
 					<Badge
@@ -418,7 +419,7 @@ function SaveCardCompact({ save, onEdit }: { save: Save, onEdit: (save: Save) =>
 				<Stack gap={4} p="sm" style={{ flex: 1, minWidth: 0 }}>
 					<Group justify="space-between" align="flex-start" wrap="nowrap">
 						<PrivacyAwareText fw={600} size="sm" lineClamp={1} style={{ flex: 1 }}>
-							{save.title ?? save.sourceUrl}
+							{save.aiTitle ?? save.title ?? save.sourceUrl}
 						</PrivacyAwareText>
 						<Tooltip label="Open link">
 							<ActionIcon

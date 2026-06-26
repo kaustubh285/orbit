@@ -92,7 +92,7 @@ function RecentSaveCard({ save, onClick }: { save: Save; onClick: () => void }) 
 					lineClamp={2}
 					style={{ color: "#fff", lineHeight: 1.3, fontSize: 11 }}
 				>
-					{save.title ?? save.sourceUrl}
+					{save.aiTitle ?? save.title ?? save.sourceUrl}
 				</PrivacyAwareText>
 			</Box>
 		</PrivacyAwareText>
@@ -221,7 +221,7 @@ export function HomeDashboard() {
 				<Group gap="xs">
 					{/* TEMP — remove after running once */}
 					<Button
-						disabled
+
 						size="sm"
 						variant="subtle"
 						color="orange"

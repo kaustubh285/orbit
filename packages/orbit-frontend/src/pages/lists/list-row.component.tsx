@@ -45,7 +45,7 @@ export function ListRow({
 							<Group gap={4} wrap="nowrap">
 								<IconBookmark size={10} style={{ color: accent, flexShrink: 0 }} />
 								<PrivacyAwareText size="xs" c="dimmed" truncate>
-									{list.recentSave.title ?? list.recentSave.sourceUrl}
+									{list.recentSave.aiTitle ?? list.recentSave.title ?? list.recentSave.sourceUrl}
 								</PrivacyAwareText>
 							</Group>
 						) : list.description ? (

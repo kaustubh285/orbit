@@ -43,6 +43,13 @@
       "when": 1780828402377,
       "tag": "0005_pink_crusher_hogan",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1782500499101,
+      "tag": "0006_chemical_texas_twister",
+      "breakpoints": true
     }
   ]
 }

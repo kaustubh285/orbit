@@ -107,7 +107,7 @@ export function ListCard({
 						)}
 						<Stack gap={1} style={{ minWidth: 0, flex: 1 }}>
 							<PrivacyAwareText size="xs" fw={500} truncate>
-								{list.recentSave.title ?? list.recentSave.sourceUrl}
+								{list.recentSave.aiTitle ?? list.recentSave.title ?? list.recentSave.sourceUrl}
 							</PrivacyAwareText>
 							<PrivacyAwareText size="xs" c="dimmed">
 								{formatSaveDate(list.recentSave.createdAt)}

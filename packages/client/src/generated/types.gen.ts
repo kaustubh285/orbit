@@ -387,6 +387,7 @@ export type GetSavesResponses = {
         note: string | null;
         tags: Array<string>;
         status: 'active' | 'archived';
+        aiTitle: string | null;
         aiSummary: string | null;
         aiEnrichedAt: string | null;
         createdAt: string;
@@ -451,6 +452,7 @@ export type PostSavesResponses = {
         note: string | null;
         tags: Array<string>;
         status: 'active' | 'archived';
+        aiTitle: string | null;
         aiSummary: string | null;
         aiEnrichedAt: string | null;
         createdAt: string;
@@ -552,6 +554,7 @@ export type GetSavesByIdResponses = {
         note: string | null;
         tags: Array<string>;
         status: 'active' | 'archived';
+        aiTitle: string | null;
         aiSummary: string | null;
         aiEnrichedAt: string | null;
         createdAt: string;
@@ -623,6 +626,7 @@ export type PatchSavesByIdResponses = {
         note: string | null;
         tags: Array<string>;
         status: 'active' | 'archived';
+        aiTitle: string | null;
         aiSummary: string | null;
         aiEnrichedAt: string | null;
         createdAt: string;
@@ -674,6 +678,7 @@ export type GetListsResponses = {
             note: string | null;
             tags: Array<string>;
             status: 'active' | 'archived';
+            aiTitle: string | null;
             aiSummary: string | null;
             aiEnrichedAt: string | null;
             createdAt: string;
@@ -830,6 +835,7 @@ export type GetListsByIdResponses = {
                 note: string | null;
                 tags: Array<string>;
                 status: 'active' | 'archived';
+                aiTitle: string | null;
                 aiSummary: string | null;
                 aiEnrichedAt: string | null;
                 createdAt: string;
@@ -971,6 +977,7 @@ export type PostListsByIdItemsResponses = {
             note: string | null;
             tags: Array<string>;
             status: 'active' | 'archived';
+            aiTitle: string | null;
             aiSummary: string | null;
             aiEnrichedAt: string | null;
             createdAt: string;

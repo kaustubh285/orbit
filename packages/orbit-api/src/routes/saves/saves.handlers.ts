@@ -1,4 +1,4 @@
-import { and, desc, eq, getTableColumns, inArray, lt, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, inArray, isNull, lt, sql } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { db } from "../../db/db.js";
 import { savesTable } from "../../db/schemas/saves.schema.js";
@@ -97,7 +97,7 @@ async function enrichSave(
 				publishedAt: scraped.publishedAt,
 				tags: scraped.tags,
 			})
-			.where(eq(savesTable.id, saveId)).returning();
+			.where(eq(savesTable.id, saveId));
 
 		if (!shouldAISummaries) return;
 
@@ -123,6 +123,7 @@ async function enrichSave(
 		const ai = await aiOverview({
 			title: scraped.title || "",
 			description: scraped.description || "",
+			author: scraped.author,
 			note,
 			tags: existingTags,
 			lists: listNames,
@@ -140,11 +141,10 @@ async function enrichSave(
 			await db
 				.update(savesTable)
 				.set({
-					aiSummary: ai.summary,
+					aiTitle: ai.ai_title,
+					aiSummary: JSON.stringify(ai),
 					tags: mergedTags,
 					locationName: ai.location?.name ?? null,
-					locationLat: null,
-					locationLng: null,
 					aiEnrichedAt: new Date(),
 				})
 				.where(eq(savesTable.id, saveId));
@@ -213,6 +213,10 @@ export const updateSave: AppRouteHandler<UpdateRoute> = async (c) => {
 			.onConflictDoNothing();
 	}
 
+	if (updated.shouldAISummaries) {
+		enrichSave(updated.id, updated.sourceUrl, userId, c.var.logger, true, [], updated.note);
+	}
+
 	return c.json(updated, HttpStatusCodes.OK);
 };
 
@@ -232,23 +236,32 @@ export const removeSave: AppRouteHandler<RemoveRoute> = async (c) => {
 	return c.body(null, HttpStatusCodes.NO_CONTENT);
 };
 
-// ─── Temp backfill ────────────────────────────────────────────────────────────
-// One-shot endpoint to fix existing instagram (thumbnail URL encoding) and
-// reddit (missing title/description) saves. Remove after running once.
+// ─── AI enrichment backfill ───────────────────────────────────────────────────
+// Re-enriches all saves with the new structured prompt (ai_title + JSON summary).
+// Run once after deploying the prompt changes. No re-scrape — uses existing DB data.
 
 const BACKFILL_BATCH = 3;
-const BACKFILL_DELAY_MS = 400;
+const BACKFILL_DELAY_MS = 600;
 
 export const backfillSaves: AppRouteHandler<BackfillRoute> = async (c) => {
 	const userId = c.var.userId;
 
-	const saves = await db
-		.select({ id: savesTable.id, sourcePlatform: savesTable.sourcePlatform, sourceUrl: savesTable.sourceUrl })
-		.from(savesTable)
-		.where(and(
-			eq(savesTable.userId, userId),
-			inArray(savesTable.sourcePlatform, ["instagram", "reddit"]),
-		));
+	const [saves, userLists] = await Promise.all([
+		db.select({
+			id: savesTable.id,
+			sourcePlatform: savesTable.sourcePlatform,
+			title: savesTable.title,
+			description: savesTable.description,
+			author: savesTable.author,
+			note: savesTable.note,
+			tags: savesTable.tags,
+		}).from(savesTable).where(and(eq(savesTable.userId, userId), isNull(savesTable.aiTitle))),
+		db.select({ id: listsTable.id, name: listsTable.name, description: listsTable.description })
+			.from(listsTable).where(eq(listsTable.userId, userId)),
+	]);
+
+	const existingTags = [...new Set(saves.flatMap((s) => s.tags))];
+	const listNames = userLists.map((l) => l.name);
 
 	type Detail = { id: string; platform: string; status: "updated" | "failed" | "skipped"; error?: string };
 	const details: Detail[] = [];
@@ -256,41 +269,45 @@ export const backfillSaves: AppRouteHandler<BackfillRoute> = async (c) => {
 	for (let i = 0; i < saves.length; i += BACKFILL_BATCH) {
 		const batch = saves.slice(i, i + BACKFILL_BATCH);
 
-		await Promise.all(batch.map(async (save) => {
+		for (const save of batch) {
 			try {
-				const scraped = await scrapeUrl(save.sourceUrl);
-
-				if (save.sourcePlatform === "instagram") {
-					if (!scraped.thumbnailUrl) {
-						details.push({ id: save.id, platform: "instagram", status: "skipped" });
-						return;
-					}
-					await db.update(savesTable)
-						.set({ thumbnailUrl: scraped.thumbnailUrl })
-						.where(eq(savesTable.id, save.id));
-					details.push({ id: save.id, platform: "instagram", status: "updated" });
-
-				} else if (save.sourcePlatform === "reddit") {
-					// Skip if the scrape returned nothing — don't overwrite existing data with nulls
-					if (!scraped.title && !scraped.description) {
-						details.push({ id: save.id, platform: "reddit", status: "skipped", error: "scrape returned no data" });
-						return;
-					}
-					await db.update(savesTable)
-						.set({
-							title: scraped.title,
-							description: scraped.description,
-							thumbnailUrl: scraped.thumbnailUrl,
-							author: scraped.author,
-							publishedAt: scraped.publishedAt,
-						})
-						.where(eq(savesTable.id, save.id));
-					details.push({ id: save.id, platform: "reddit", status: "updated" });
+				if (!save.title && !save.description) {
+					details.push({ id: save.id, platform: save.sourcePlatform, status: "skipped", error: "no title or description" });
+					continue;
 				}
+
+				const ai = await aiOverview({
+					title: save.title || "",
+					description: save.description || "",
+					author: save.author,
+					note: save.note,
+					tags: existingTags,
+					lists: listNames,
+					selectedLists: [],
+				});
+
+				if (!ai) {
+					details.push({ id: save.id, platform: save.sourcePlatform, status: "failed", error: "AI returned null" });
+					continue;
+				}
+
+				const mergedTags = [...new Set([...save.tags, ...ai.tags])];
+
+				await db.update(savesTable)
+					.set({
+						aiTitle: ai.ai_title,
+						aiSummary: JSON.stringify(ai),
+						tags: mergedTags,
+						locationName: ai.location?.name ?? null,
+						aiEnrichedAt: new Date(),
+					})
+					.where(eq(savesTable.id, save.id));
+
+				details.push({ id: save.id, platform: save.sourcePlatform, status: "updated" });
 			} catch (err) {
 				details.push({ id: save.id, platform: save.sourcePlatform, status: "failed", error: String(err) });
 			}
-		}));
+		}
 
 		if (i + BACKFILL_BATCH < saves.length) {
 			await new Promise((r) => setTimeout(r, BACKFILL_DELAY_MS));
