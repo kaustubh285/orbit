@@ -4,15 +4,8 @@ import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { z } from "zod";
 
 export const backfillResultSchema = z.object({
-	updated: z.number(),
-	failed: z.number(),
-	skipped: z.number(),
-	details: z.array(z.object({
-		id: z.string(),
-		platform: z.string(),
-		status: z.enum(["updated", "failed", "skipped"]),
-		error: z.string().optional(),
-	})),
+	queued: z.number(),
+	message: z.string(),
 });
 import { savePlatformEnum, saveStatusEnum } from "../../db/schemas/saves.schema.js";
 

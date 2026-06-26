@@ -68,10 +68,12 @@ export const createSave: AppRouteHandler<CreateRoute> = async (c) => {
 	}
 
 	// fire-and-forget: scrape then enrich
-	enrichSave(save.id, insertRest.sourceUrl, userId, logger, insertRest.shouldAISummaries, listIds ?? [], insertRest.note ?? null);
+	enrichSave(save.id, insertRest.sourceUrl, userId, logger, insertRest.shouldAISummaries, listIds ?? [], insertRest.note ?? null, "new_save");
 
 	return c.json(save, HttpStatusCodes.CREATED);
 };
+
+const TEN_MINUTES_MS = 10 * 60 * 1000;
 
 async function enrichSave(
 	saveId: string,
@@ -81,6 +83,7 @@ async function enrichSave(
 	shouldAISummaries: boolean = true,
 	listIds: string[] = [],
 	note: string | null = null,
+	reason: "new_save" | "update_content_changed" = "new_save",
 ) {
 	try {
 		// step 1: scrape
@@ -101,7 +104,18 @@ async function enrichSave(
 
 		if (!shouldAISummaries) return;
 
-		// step 2: get existing tags + lists for AI context
+		// step 2: cooldown check — skip AI if enriched within the last 10 minutes
+		const [current] = await db
+			.select({ aiEnrichedAt: savesTable.aiEnrichedAt, tags: savesTable.tags })
+			.from(savesTable)
+			.where(eq(savesTable.id, saveId));
+
+		if (current?.aiEnrichedAt && Date.now() - current.aiEnrichedAt.getTime() < TEN_MINUTES_MS) {
+			console.log(`[ai] skip saveId=${saveId} reason=cooldown enriched_at=${current.aiEnrichedAt.toISOString()}`);
+			return;
+		}
+
+		// step 3: get existing tags + lists for AI context
 		const allSaves = await db
 			.select({ tags: savesTable.tags })
 			.from(savesTable)
@@ -119,7 +133,8 @@ async function enrichSave(
 			? userLists.filter((l) => listIds.includes(l.id)).map((l) => ({ name: l.name, description: l.description }))
 			: [];
 
-		// step 3: AI enrichment
+		// step 4: AI enrichment
+		console.log(`[ai] call saveId=${saveId} reason=${reason}`);
 		const ai = await aiOverview({
 			title: scraped.title || "",
 			description: scraped.description || "",
@@ -131,13 +146,8 @@ async function enrichSave(
 		});
 
 		if (ai) {
-			const [current] = await db
-				.select({ tags: savesTable.tags })
-				.from(savesTable)
-				.where(eq(savesTable.id, saveId));
-
-			const { ai_title, tags: _tags, list: _list, ...summaryData } = ai;
-			const mergedTags = [...new Set([...(current?.tags ?? []), ..._tags])];
+			const { ai_title, tags: aiTags, list: _list, ...summaryData } = ai;
+			const mergedTags = [...new Set([...(current?.tags ?? []), ...aiTags])];
 
 			await db
 				.update(savesTable)
@@ -198,6 +208,12 @@ export const updateSave: AppRouteHandler<UpdateRoute> = async (c) => {
 	const { id } = c.req.valid("param");
 	const { publishedAt, listId, ...rest } = c.req.valid("json");
 
+	// Pre-fetch to detect which enrichment-relevant fields actually changed
+	const [existing] = await db
+		.select({ title: savesTable.title, description: savesTable.description, note: savesTable.note, sourceUrl: savesTable.sourceUrl })
+		.from(savesTable)
+		.where(and(eq(savesTable.id, id), eq(savesTable.userId, userId)));
+
 	const [updated] = await db
 		.update(savesTable)
 		.set({ ...rest, publishedAt: toDate(publishedAt) })
@@ -214,8 +230,14 @@ export const updateSave: AppRouteHandler<UpdateRoute> = async (c) => {
 			.onConflictDoNothing();
 	}
 
-	if (updated.shouldAISummaries) {
-		enrichSave(updated.id, updated.sourceUrl, userId, c.var.logger, true, [], updated.note);
+	const enrichmentFieldChanged =
+		(rest.title !== undefined && rest.title !== existing?.title) ||
+		(rest.description !== undefined && rest.description !== existing?.description) ||
+		(rest.note !== undefined && rest.note !== existing?.note) ||
+		(rest.sourceUrl !== undefined && rest.sourceUrl !== existing?.sourceUrl);
+
+	if (updated.shouldAISummaries && enrichmentFieldChanged) {
+		enrichSave(updated.id, updated.sourceUrl, userId, c.var.logger, true, [], updated.note, "update_content_changed");
 	}
 
 	return c.json(updated, HttpStatusCodes.OK);
@@ -264,62 +286,64 @@ export const backfillSaves: AppRouteHandler<BackfillRoute> = async (c) => {
 	const existingTags = [...new Set(saves.flatMap((s) => s.tags))];
 	const listNames = userLists.map((l) => l.name);
 
-	type Detail = { id: string; platform: string; status: "updated" | "failed" | "skipped"; error?: string };
-	const details: Detail[] = [];
+	console.log(`[ai] backfill queued total=${saves.length}`);
 
-	for (let i = 0; i < saves.length; i += BACKFILL_BATCH) {
-		const batch = saves.slice(i, i + BACKFILL_BATCH);
+	// Fire-and-forget — respond immediately so the HTTP request never times out
+	(async () => {
+		for (let i = 0; i < saves.length; i += BACKFILL_BATCH) {
+			const batch = saves.slice(i, i + BACKFILL_BATCH);
 
-		for (const save of batch) {
-			try {
-				if (!save.title && !save.description) {
-					details.push({ id: save.id, platform: save.sourcePlatform, status: "skipped", error: "no title or description" });
-					continue;
+			for (const save of batch) {
+				try {
+					if (!save.title && !save.description) {
+						console.log(`[ai] skip saveId=${save.id} reason=no_content`);
+						continue;
+					}
+
+					console.log(`[ai] call saveId=${save.id} reason=backfill`);
+					const ai = await aiOverview({
+						title: save.title || "",
+						description: save.description || "",
+						author: save.author,
+						note: save.note,
+						tags: existingTags,
+						lists: listNames,
+						selectedLists: [],
+					});
+
+					if (!ai) {
+						console.error(`[ai] null saveId=${save.id} reason=backfill`);
+						continue;
+					}
+
+					const { ai_title, tags: aiTags, list: _list, ...summaryData } = ai;
+					const mergedTags = [...new Set([...save.tags, ...aiTags])];
+
+					await db.update(savesTable)
+						.set({
+							aiTitle: ai_title,
+							aiSummary: JSON.stringify(summaryData),
+							tags: mergedTags,
+							locationName: ai.location?.name ?? null,
+							aiEnrichedAt: new Date(),
+						})
+						.where(eq(savesTable.id, save.id));
+
+					console.log(`[ai] done saveId=${save.id} reason=backfill`);
+				} catch (err) {
+					console.error(`[ai] error saveId=${save.id} reason=backfill`, err);
 				}
+			}
 
-				const ai = await aiOverview({
-					title: save.title || "",
-					description: save.description || "",
-					author: save.author,
-					note: save.note,
-					tags: existingTags,
-					lists: listNames,
-					selectedLists: [],
-				});
-
-				if (!ai) {
-					details.push({ id: save.id, platform: save.sourcePlatform, status: "failed", error: "AI returned null" });
-					continue;
-				}
-
-				const mergedTags = [...new Set([...save.tags, ...ai.tags])];
-				const { ai_title, tags: _tags, list: _list, ...summaryData } = ai;
-
-				await db.update(savesTable)
-					.set({
-						aiTitle: ai_title,
-						aiSummary: JSON.stringify(summaryData),
-						tags: mergedTags,
-						locationName: ai.location?.name ?? null,
-						aiEnrichedAt: new Date(),
-					})
-					.where(eq(savesTable.id, save.id));
-
-				details.push({ id: save.id, platform: save.sourcePlatform, status: "updated" });
-			} catch (err) {
-				details.push({ id: save.id, platform: save.sourcePlatform, status: "failed", error: String(err) });
+			if (i + BACKFILL_BATCH < saves.length) {
+				await new Promise((r) => setTimeout(r, BACKFILL_DELAY_MS));
 			}
 		}
-
-		if (i + BACKFILL_BATCH < saves.length) {
-			await new Promise((r) => setTimeout(r, BACKFILL_DELAY_MS));
-		}
-	}
+		console.log(`[ai] backfill complete total=${saves.length}`);
+	})();
 
 	return c.json({
-		updated: details.filter((d) => d.status === "updated").length,
-		failed: details.filter((d) => d.status === "failed").length,
-		skipped: details.filter((d) => d.status === "skipped").length,
-		details,
+		queued: saves.length,
+		message: `Backfill started for ${saves.length} saves. Watch logs for [ai] progress.`,
 	}, HttpStatusCodes.OK);
 };
