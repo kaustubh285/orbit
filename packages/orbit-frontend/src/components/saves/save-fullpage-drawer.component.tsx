@@ -205,11 +205,12 @@ export const SaveDetailView = ({
 				<Stack gap="md" p="md">
 					{/* Thumbnail + hero metadata side by side */}
 					<Flex gap="md" align={isDesktop ? "stretch" : "center"} wrap="nowrap" direction={isDesktop ? "row" : "column"}>
-						{save.thumbnailUrl && (
-							<Stack style={{ width: isDesktop ? "40%" : "60%", flexShrink: 0 }}>
+						<Stack style={{ width: isDesktop ? "40%" : "60%", flexShrink: 0 }}>
+							{save.thumbnailUrl ? (
 								<img
 									src={save.thumbnailUrl}
 									alt=""
+									referrerPolicy="no-referrer"
 									style={{
 										display: "block",
 										width: "100%",
@@ -219,9 +220,25 @@ export const SaveDetailView = ({
 										boxShadow: "0px 0px 12px rgba(255, 255, 255, 0.15)"
 									}}
 								/>
-
-							</Stack>
-						)}
+							) : (
+								<Box
+									style={{
+										aspectRatio: "1 / 1",
+										borderRadius: "15px",
+										background: `var(--mantine-color-${meta.color}-9)`,
+										display: "flex",
+										flexDirection: "column",
+										alignItems: "center",
+										justifyContent: "center",
+										gap: 8,
+										padding: 12,
+										boxShadow: "0px 0px 12px rgba(255, 255, 255, 0.15)",
+									}}
+								>
+									<PlatformIcon size={36} color="rgba(255,255,255,0.6)" />
+								</Box>
+							)}
+						</Stack>
 
 						<Stack gap={6} style={{ flex: 1, minWidth: 0 }}  >
 
