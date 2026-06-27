@@ -3,16 +3,20 @@ import {
 	Accordion,
 	ActionIcon,
 	Box,
+	Grid,
 	Group,
 	Skeleton,
 	Stack,
+	Tabs,
 	Text,
 	Tooltip,
 } from '@mantine/core'
 import { Link } from '@tanstack/react-router'
 import {
 	IconArrowLeft,
+	IconBookmarkAi,
 	IconEdit,
+	IconRocket,
 	IconTrash,
 } from '@tabler/icons-react'
 import type { List, Quest, Save } from '@/types'
@@ -22,6 +26,7 @@ import { useState } from 'react'
 import { QuestRow, NewQuestRow } from '@/components/quests/list-quests.component'
 import SavesView from '@/pages/saves/saves.view'
 import { PrivacyAwareText } from '@/components/privacy-aware-text.component'
+import { useMediaQuery } from '@mantine/hooks'
 
 type ListWithItems = Extract<GetListsByIdResponse, { items: unknown[] }>
 
@@ -46,7 +51,7 @@ export function ListDetailView({
 }) {
 	const [editOpen, setEditOpen] = useState(false)
 	const accent = listAccentColor(list?.color ?? null)
-
+	const isDesktop = useMediaQuery("(min-width: 48em)", false, { getInitialValueInEffect: false })
 	const allItems = list?.items ?? []
 	const saveItems = allItems.filter((i) => i.save)
 	const questItems = allItems.filter((i) => i.quest)
@@ -111,74 +116,59 @@ export function ListDetailView({
 				<Text c="dimmed">List not found.</Text>
 			)}
 
-			{list && (
-				<Accordion
-					multiple
-					defaultValue={['saves', 'quests']}
-					variant="separated"
-					styles={{
-						item: { border: '1px solid var(--mantine-color-dark-4)', borderRadius: 8 },
-						control: { padding: '8px 10px' },
-						label: { padding: 0 },
-						content: { padding: '4px 8px 8px' },
-					}}
-				>
-					<Accordion.Item value="saves">
-						<Accordion.Control>
-							<Group gap={8} align="center">
-								<Box style={{ width: 3, height: 14, borderRadius: 2, background: accent, flexShrink: 0 }} />
-								<Text size="xs" fw={600} tt="uppercase" c="dimmed" style={{ letterSpacing: '0.05em' }}>
-									Saves ({saveItems.length})
-								</Text>
-							</Group>
-						</Accordion.Control>
-						<Accordion.Panel>
-							<SavesView
-								saves={saveItems.map((i) => i.save as Save)}
-								isLoading={false}
-							/>
-						</Accordion.Panel>
-					</Accordion.Item>
 
-					<Accordion.Item value="quests">
-						<Accordion.Control>
-							<Group gap={8} align="center">
-								<Box style={{ width: 3, height: 14, borderRadius: 2, background: accent, flexShrink: 0 }} />
-								<Text size="xs" fw={600} tt="uppercase" c="dimmed" style={{ letterSpacing: '0.05em' }}>
-									Quests ({questItems.length})
-								</Text>
+			<Tabs defaultValue="saves">
+				<Tabs.List>
+					<Tabs.Tab value="saves" leftSection={<IconBookmarkAi size={12} />}>
+						Saves
+					</Tabs.Tab>
+					<Tabs.Tab value="quests" leftSection={<IconRocket size={12} />}>
+						Quests
+					</Tabs.Tab>
+				</Tabs.List>
+
+				<Tabs.Panel value="saves">
+					<Box p="md">
+						<SavesView
+							saves={saveItems.map((i) => i.save as Save)}
+							isLoading={false}
+						/>
+					</Box>
+				</Tabs.Panel>
+
+				<Tabs.Panel value="quests">
+					<div style={{ borderBottom: '1px dotted var(--mantine-color-gray-4)' }}>
+						{questItems.map((item) => (
+							<Group key={item.id} wrap="nowrap" gap={0}>
+								<div style={{ flex: 1, minWidth: 0 }}>
+									<QuestRow
+										quest={item.quest as Quest}
+										onToggle={toggleQuest}
+										onOpen={onOpenQuest}
+									/>
+								</div>
+								<Tooltip label="Remove from list" withArrow>
+									<ActionIcon
+										variant="subtle"
+										color="gray"
+										size="sm"
+										style={{ flexShrink: 0, marginRight: 4 }}
+										onClick={() => onRemoveItem(item.id)}
+									>
+										<IconTrash size={13} />
+									</ActionIcon>
+								</Tooltip>
 							</Group>
-						</Accordion.Control>
-						<Accordion.Panel>
-							<div style={{ borderBottom: '1px dotted var(--mantine-color-gray-4)' }}>
-								{questItems.map((item) => (
-									<Group key={item.id} wrap="nowrap" gap={0}>
-										<div style={{ flex: 1, minWidth: 0 }}>
-											<QuestRow
-												quest={item.quest as Quest}
-												onToggle={toggleQuest}
-												onOpen={onOpenQuest}
-											/>
-										</div>
-										<Tooltip label="Remove from list" withArrow>
-											<ActionIcon
-												variant="subtle"
-												color="gray"
-												size="sm"
-												style={{ flexShrink: 0, marginRight: 4 }}
-												onClick={() => onRemoveItem(item.id)}
-											>
-												<IconTrash size={13} />
-											</ActionIcon>
-										</Tooltip>
-									</Group>
-								))}
-								<NewQuestRow onSubmit={submitQuest} />
-							</div>
-						</Accordion.Panel>
-					</Accordion.Item>
-				</Accordion>
-			)}
+						))}
+						<NewQuestRow onSubmit={submitQuest} />
+					</div>
+				</Tabs.Panel>
+
+			</Tabs>
+
+
+			{/*OLD UI*/}
+
 
 			{editInitial && (
 				<ListFormDrawer

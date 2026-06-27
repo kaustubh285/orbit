@@ -221,7 +221,7 @@ export function HomeDashboard() {
 				<Group gap="xs">
 					{/* TEMP — remove after running once */}
 					<Button
-
+						disabled
 						size="sm"
 						variant="subtle"
 						color="orange"

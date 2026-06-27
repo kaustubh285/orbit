@@ -32,6 +32,7 @@ const theme = createTheme({
 	colors: {
 		'ocean-blue': ['#7AD1DD', '#5FCCDB', '#44CADC', '#2AC9DE', '#1AC2D9', '#11B7CD', '#09ADC3', '#0E99AC', '#128797', '#147885'],
 		'amber': ['#fff8e1', '#ffecb3', '#ffe082', '#ffd54f', '#ffca28', '#ffc107', '#ffb300', '#ffa000', '#ff8f00', '#ff6f00'],
+		'dark': ['#c2c6e0', '#959bbf', '#6b7299', '#3d4468', '#282d45', '#1c2133', '#151929', '#101320', '#0c0e1a', '#08090f'],
 	},
 	primaryColor: 'ocean-blue',
 });

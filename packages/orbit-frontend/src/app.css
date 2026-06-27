@@ -1,6 +1,9 @@
 /* Prevent iOS Safari from zooming on input focus (triggered when font-size < 16px) */
 @media (max-width: 768px) {
-	input, textarea, select {
+
+	input,
+	textarea,
+	select {
 		font-size: 16px !important;
 	}
 }
@@ -32,4 +35,29 @@
 	font-size: 0.65em;
 	opacity: 0.5;
 	line-height: 1;
+}
+
+
+
+@media (max-width: 48em) {
+	.masonry {
+		columns: 2 100px;
+	}
+}
+
+@media (min-width: 48em) {
+	.masonry {
+		columns: 5 200px;
+		gap: 1rem;
+	}
+}
+
+.masonry-item {
+	break-inside: avoid;
+	margin-bottom: 1rem;
+	transition: scale 0.3s ease-in-out;
+}
+
+.masonry-item:hover {
+	scale: 1.03;
 }

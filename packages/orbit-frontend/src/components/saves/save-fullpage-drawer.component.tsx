@@ -7,6 +7,7 @@ import {
 	Button,
 	Divider,
 	Drawer,
+	Flex,
 	Group,
 	Pill,
 	ScrollArea,
@@ -93,6 +94,7 @@ export const SaveDetailView = ({
 	const [editMode, setEditMode] = useState(false)
 	const isDesktop = useMediaQuery("(min-width: 48em)", false, { getInitialValueInEffect: false })
 	const [showOriginalTitle, setShowOriginalTitle] = useState(false)
+
 	useEffect(() => {
 		setTitle(save.aiTitle ?? save.title ?? "")
 		setDescription(save.description ?? "")
@@ -202,41 +204,30 @@ export const SaveDetailView = ({
 			<ScrollArea style={{ flex: 1 }}>
 				<Stack gap="md" p="md">
 					{/* Thumbnail + hero metadata side by side */}
-					<Group gap="md" align="flex-start" wrap="nowrap">
+					<Flex gap="md" align={isDesktop ? "stretch" : "center"} wrap="nowrap" direction={isDesktop ? "row" : "column"}>
 						{save.thumbnailUrl && (
-							<Stack>
-
-								<Badge
-									size="xs"
-									color={meta.color}
-									variant="light"
-									leftSection={<PlatformIcon size={11} />}
-								>
-									{meta.label}
-								</Badge>
-
-								<Box
+							<Stack style={{ width: isDesktop ? "40%" : "60%", flexShrink: 0 }}>
+								<img
+									src={save.thumbnailUrl}
+									alt=""
 									style={{
-										width: 140,
-										flexShrink: 0,
-										aspectRatio: "1/1",
+										display: "block",
+										width: "100%",
+										height: "auto",
 										objectFit: "cover",
-										backgroundImage: `url(${save.thumbnailUrl})`,
-										backgroundSize: save.sourcePlatform === "instagram" ? "contain" : "cover",
-										backgroundPosition: "center",
-										backgroundRepeat: "no-repeat",
-										backgroundColor: save.sourcePlatform === "instagram"
-											? `var(--mantine-color-${meta.color}-1)`
-											: "var(--mantine-color-default-border)",
-										borderRadius: 8,
-										overflow: "hidden",
+										borderRadius: "15px",
+										boxShadow: "0px 0px 12px rgba(255, 255, 255, 0.15)"
 									}}
 								/>
 
 							</Stack>
 						)}
 
-						<Stack gap={6} style={{ flex: 1, minWidth: 0 }}>
+						<Stack gap={6} style={{ flex: 1, minWidth: 0 }}  >
+
+							<PrivacyAwareText fw={600} size="sm" style={{ lineHeight: 1.35 }}>
+								{title || "—"}
+							</PrivacyAwareText>
 
 							{(save.author || save.publishedAt) && (
 								<Group gap={4}>
@@ -248,6 +239,14 @@ export const SaveDetailView = ({
 
 							<PrivacyAwareText size="xs" c="dimmed">Saved {dayjs(save.createdAt).fromNow()}</PrivacyAwareText>
 
+							<Badge
+								size="xs"
+								color={meta.color}
+								variant="light"
+								leftSection={<PlatformIcon size={11} />}
+							>
+								{meta.label}
+							</Badge>
 							{tags.length > 0 && (
 								<Group gap={4} wrap="wrap" mt={2}>
 									{tags.map((tag) => (
@@ -256,10 +255,7 @@ export const SaveDetailView = ({
 								</Group>
 							)}
 						</Stack>
-					</Group>
-					<PrivacyAwareText fw={600} size="sm" style={{ lineHeight: 1.35 }}>
-						{title || "—"}
-					</PrivacyAwareText>
+					</Flex>
 
 					{/* Source URL */}
 					<Group gap={6} align="center">
