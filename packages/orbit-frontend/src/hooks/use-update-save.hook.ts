@@ -25,6 +25,7 @@ export const useUpdateSaveHook = () => {
 	function updateSave(
 		id: string,
 		data: {
+			sourceUrl: string
 			title?: string | null
 			description?: string | null
 			note?: string | null

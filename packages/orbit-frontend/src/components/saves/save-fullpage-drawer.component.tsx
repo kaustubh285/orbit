@@ -86,6 +86,7 @@ export const SaveDetailView = ({
 	const { updateSave, isUpdating, deleteSave } = useUpdateSaveHook()
 
 	const [title, setTitle] = useState(save.title ?? "")
+	const [url, setUrl] = useState(save.sourceUrl ?? "")
 	const [description, setDescription] = useState(save.description ?? "")
 	const [note, setNote] = useState(save.note ?? "")
 	const [status, setStatus] = useState<Save["status"]>(save.status)
@@ -100,6 +101,7 @@ export const SaveDetailView = ({
 
 	useEffect(() => {
 		setTitle(save.aiTitle ?? save.title ?? "")
+		setUrl(save.sourceUrl ?? "")
 		setDescription(save.description ?? "")
 		setNote(save.note ?? "")
 		setStatus(save.status)
@@ -118,6 +120,7 @@ export const SaveDetailView = ({
 		updateSave(
 			save.id,
 			{
+				sourceUrl: url.trim() || save.sourceUrl,
 				title: title.trim() || null,
 				description: description.trim() || null,
 				note: note.trim() || null,
@@ -459,6 +462,12 @@ export const SaveDetailView = ({
 					) : (
 						/* Edit mode */
 						<Stack gap="md">
+							<TextInput
+								label="URL"
+								value={url}
+								onChange={(e) => setUrl(e.currentTarget.value)}
+								placeholder="No title"
+							/>
 							<TextInput
 								label="Title"
 								value={title}
