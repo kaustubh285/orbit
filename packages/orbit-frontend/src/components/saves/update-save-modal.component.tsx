@@ -72,7 +72,7 @@ export const UpdateSaveModal = ({
 
 	function handleSave() {
 		updateSave(save.id, {
-			sourceUrl: url,
+			sourceUrl: save.sourceUrl,
 			title: title.trim() || null,
 			description: description.trim() || null,
 			note: note.trim() || null,
