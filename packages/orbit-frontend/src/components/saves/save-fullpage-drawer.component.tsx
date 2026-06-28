@@ -38,6 +38,7 @@ import { useEffect, useState } from "react"
 import { MultiSelectCreatable } from "../multi-select-creatable.component"
 import { PrivacyAwareText } from "../privacy-aware-text.component"
 import { useMediaQuery } from "@mantine/hooks"
+import { useOrbitAppStore } from "@/store/orbit-app.store"
 
 dayjs.extend(relativeTime)
 
@@ -82,18 +83,20 @@ export const SaveDetailView = ({
 	opened: boolean
 	onClose: () => void
 }) => {
-	const { updateSave, isUpdating } = useUpdateSaveHook()
+	const { updateSave, isUpdating, deleteSave } = useUpdateSaveHook()
 
 	const [title, setTitle] = useState(save.title ?? "")
 	const [description, setDescription] = useState(save.description ?? "")
 	const [note, setNote] = useState(save.note ?? "")
 	const [status, setStatus] = useState<Save["status"]>(save.status)
 	const [tags, setTags] = useState<string[]>(save.tags)
+	const [lists, setLists] = useState<string[]>(save.lists ?? [])
 	const [shouldAISummaries, setShouldAISummaries] = useState(save.shouldAISummaries ?? false)
 	const [aiSummary, setAiSummary] = useState(save.aiSummary ?? "")
 	const [editMode, setEditMode] = useState(false)
 	const isDesktop = useMediaQuery("(min-width: 48em)", false, { getInitialValueInEffect: false })
 	const [showOriginalTitle, setShowOriginalTitle] = useState(false)
+	const allLists = useOrbitAppStore((s) => s.currentLists)
 
 	useEffect(() => {
 		setTitle(save.aiTitle ?? save.title ?? "")
@@ -101,26 +104,41 @@ export const SaveDetailView = ({
 		setNote(save.note ?? "")
 		setStatus(save.status)
 		setTags(save.tags)
+		setLists(save.lists ?? [])
 		setShouldAISummaries(save.shouldAISummaries ?? false)
 		setAiSummary(save.aiSummary ?? "")
 		setEditMode(false)
 	}, [save.id])
 
 	function handleSave() {
-		updateSave(save.id, {
-			title: title.trim() || null,
-			description: description.trim() || null,
-			note: note.trim() || null,
-			tags,
-			status,
-			shouldAISummaries,
-			aiSummary: aiSummary.trim() || null,
-		})
-		setEditMode(false)
+		const listIds = lists
+			.map((name) => allLists.find((l) => l.name === name)?.id)
+			.filter((id): id is string => id !== undefined)
+
+		updateSave(
+			save.id,
+			{
+				title: title.trim() || null,
+				description: description.trim() || null,
+				note: note.trim() || null,
+				tags,
+				status,
+				shouldAISummaries,
+				aiSummary: aiSummary.trim() || null,
+				listIds,
+			},
+			onClose,
+		)
 	}
 
 	const meta = PLATFORM_META[save.sourcePlatform]
 	const PlatformIcon = meta.Icon
+
+	const deleteASave = () => {
+		if (confirm("Are you sure you want to delete this save?")) {
+			deleteSave(save.id, onClose)
+		}
+	}
 
 	return (
 		<Drawer
@@ -160,8 +178,8 @@ export const SaveDetailView = ({
 				</Tooltip>
 
 				<Tooltip label="Delete">
-					<ActionIcon variant="subtle" color="red" disabled>
-						<IconTrashFilled size={16} />
+					<ActionIcon variant="subtle" onClick={deleteASave} >
+						<IconTrashFilled size={16} color="red" />
 					</ActionIcon>
 				</Tooltip>
 
@@ -457,6 +475,13 @@ export const SaveDetailView = ({
 								minRows={2}
 								maxRows={5}
 							/>
+							<MultiSelectCreatable
+								options={allLists.map((list) => list.name)}
+								value={lists}
+								onChange={(lists) => setLists(lists)}
+								placeholder="Add lists"
+							/>
+
 
 							<Divider />
 

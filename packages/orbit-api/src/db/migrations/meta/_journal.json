@@ -50,6 +50,13 @@
       "when": 1782500499101,
       "tag": "0006_chemical_texas_twister",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1782662601225,
+      "tag": "0007_numerous_captain_cross",
+      "breakpoints": true
     }
   ]
 }

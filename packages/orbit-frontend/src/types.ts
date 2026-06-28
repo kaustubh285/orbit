@@ -45,6 +45,6 @@ export type Save = {
 	aiEnrichedAt: string | null;
 	createdAt: string;
 	updatedAt: string;
-	lists?: string[];
+	lists: string[];
 	aiTitle: string | null;
 }

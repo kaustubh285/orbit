@@ -1598,51 +1598,16 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "updated": {
+                    "queued": {
                       "type": "number"
                     },
-                    "failed": {
-                      "type": "number"
-                    },
-                    "skipped": {
-                      "type": "number"
-                    },
-                    "details": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "platform": {
-                            "type": "string"
-                          },
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "updated",
-                              "failed",
-                              "skipped"
-                            ]
-                          },
-                          "error": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "platform",
-                          "status"
-                        ]
-                      }
+                    "message": {
+                      "type": "string"
                     }
                   },
                   "required": [
-                    "updated",
-                    "failed",
-                    "skipped",
-                    "details"
+                    "queued",
+                    "message"
                   ]
                 }
               }

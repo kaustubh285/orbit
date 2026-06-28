@@ -1,4 +1,4 @@
-import { and, desc, eq, getTableColumns, inArray, isNull, lt, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, inArray, isNotNull, isNull, lt, sql } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { db } from "../../db/db.js";
 import { savesTable } from "../../db/schemas/saves.schema.js";
@@ -13,6 +13,7 @@ import type {
 	ListRoute,
 	RemoveRoute,
 	UpdateRoute,
+	UpdateSaveListRoute,
 } from "./routes.js";
 import { aiOverview } from "@/lib/ai-overviews.js";
 
@@ -32,7 +33,7 @@ export const listSaves: AppRouteHandler<ListRoute> = async (c) => {
 			lists: sql<string[]>`ARRAY_REMOVE(ARRAY_AGG(${listsTable.name}), NULL)`,
 		})
 		.from(savesTable)
-		.leftJoin(listItemsTable, eq(listItemsTable.saveId, savesTable.id))
+		.leftJoin(listItemsTable, and(eq(listItemsTable.saveId, savesTable.id), isNull(listItemsTable.deletedAt)))
 		.leftJoin(listsTable, eq(listsTable.id, listItemsTable.listId))
 		.where(and(...conditions))
 		.groupBy(savesTable.id)
@@ -206,7 +207,7 @@ export const getOneSave: AppRouteHandler<GetOneRoute> = async (c) => {
 export const updateSave: AppRouteHandler<UpdateRoute> = async (c) => {
 	const userId = c.var.userId;
 	const { id } = c.req.valid("param");
-	const { publishedAt, listId, ...rest } = c.req.valid("json");
+	const { publishedAt, listIds, ...rest } = c.req.valid("json");
 
 	// Pre-fetch to detect which enrichment-relevant fields actually changed
 	const [existing] = await db
@@ -224,10 +225,8 @@ export const updateSave: AppRouteHandler<UpdateRoute> = async (c) => {
 		return c.json({ message: "Save not found" }, HttpStatusCodes.NOT_FOUND);
 	}
 
-	if (listId) {
-		await db.insert(listItemsTable)
-			.values({ listId, saveId: updated.id, questId: null })
-			.onConflictDoNothing();
+	if (listIds) {
+		await updateSaveList(listIds, updated.id, userId);
 	}
 
 	const enrichmentFieldChanged =
@@ -243,15 +242,83 @@ export const updateSave: AppRouteHandler<UpdateRoute> = async (c) => {
 	return c.json(updated, HttpStatusCodes.OK);
 };
 
+export const updateSaveList = async (listIds: string[], id: string, userId: string) => {
+	console.log(`[updateSaveList] start saveId=${id} requestedLists=${JSON.stringify(listIds)}`);
+
+	const [saveBelongsToUser] = await db
+		.select()
+		.from(savesTable)
+		.where(and(eq(savesTable.id, id), eq(savesTable.userId, userId)));
+
+	if (!saveBelongsToUser) {
+		console.log(`[updateSaveList] abort: save not found or not owned saveId=${id} userId=${userId}`);
+		return;
+	}
+
+	const existingListItems = await db
+		.select()
+		.from(listItemsTable)
+		.where(and(eq(listItemsTable.saveId, id), isNull(listItemsTable.deletedAt)));
+
+	console.log(`[updateSaveList] existingLists=${JSON.stringify(existingListItems.map((i) => i.listId))}`);
+
+	await db.transaction(async (tx) => {
+		if (!listIds?.length) {
+			console.log(`[updateSaveList] clearing all lists for saveId=${id}`);
+			await tx
+				.update(listItemsTable)
+				.set({ deletedAt: new Date() })
+				.where(eq(listItemsTable.saveId, id));
+		} else {
+			const newLists = listIds.filter((listId) => !existingListItems.some((item) => item.listId === listId));
+			console.log(`[updateSaveList] toAdd=${JSON.stringify(newLists)}`);
+			if (newLists.length > 0) {
+				await tx
+					.insert(listItemsTable)
+					.values(newLists.map((listId) => ({ listId, saveId: id })))
+					.onConflictDoUpdate({
+						target: [listItemsTable.listId, listItemsTable.saveId],
+						targetWhere: isNotNull(listItemsTable.saveId),
+						set: { deletedAt: null },
+					});
+			}
+			const removedFromLists = existingListItems.filter((item) => !listIds.includes(item.listId));
+			console.log(`[updateSaveList] toRemove=${JSON.stringify(removedFromLists.map((i) => i.listId))}`);
+			if (removedFromLists.length > 0) {
+				await tx
+					.update(listItemsTable)
+					.set({ deletedAt: new Date() })
+					.where(and(
+						eq(listItemsTable.saveId, id),
+						inArray(listItemsTable.listId, removedFromLists.map((item) => item.listId)),
+					));
+			}
+		}
+	});
+
+	console.log(`[updateSaveList] done saveId=${id}`);
+};
+
 export const removeSave: AppRouteHandler<RemoveRoute> = async (c) => {
 	const userId = c.var.userId;
 	const { id } = c.req.valid("param");
 
-	const [archived] = await db
-		.update(savesTable)
-		.set({ status: "archived" })
-		.where(and(eq(savesTable.id, id), eq(savesTable.userId, userId)))
-		.returning();
+	const archived = await db.transaction(async (tx) => {
+		const [save] = await tx
+			.update(savesTable)
+			.set({ deletedAt: new Date() })
+			.where(and(eq(savesTable.id, id), eq(savesTable.userId, userId)))
+			.returning();
+
+		if (!save) return null;
+
+		await tx
+			.update(listItemsTable)
+			.set({ deletedAt: new Date() })
+			.where(eq(listItemsTable.saveId, id));
+
+		return save;
+	});
 
 	if (!archived) {
 		return c.json({ message: "Save not found" }, HttpStatusCodes.NOT_FOUND);

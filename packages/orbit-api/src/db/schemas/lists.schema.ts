@@ -6,7 +6,7 @@ import {
 	uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
-import { id, createdAt, updatedAt } from "../schema.helper";
+import { id, createdAt, updatedAt, deletedAt } from "../schema.helper";
 import { usersTable } from "./users.schema";
 import { questsTable } from "./quests.schema";
 import { savesTable } from "./saves.schema"; // wired in when saves lands
@@ -16,6 +16,7 @@ export const listsTable = pgTable("lists", {
 	id: id.primaryKey(),
 	createdAt,
 	updatedAt,
+	deletedAt,
 
 	userId: uuid("user_id")
 		.notNull()
@@ -35,7 +36,7 @@ export const listItemsTable = pgTable(
 	{
 		id: id.primaryKey(),
 		createdAt,
-
+		deletedAt,
 		listId: uuid("list_id")
 			.notNull()
 			.references(() => listsTable.id, { onDelete: "cascade" }),

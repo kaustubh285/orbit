@@ -45,6 +45,11 @@ export const insertSaveSchema = z.object({
 	shouldAISummaries: z.boolean().optional().default(true),
 });
 
+export const updateListSchema = z.object({
+	id: z.string().uuid(),
+	listIds: z.array(z.string().uuid()).optional(),
+});
+
 export const patchSaveSchema = insertSaveSchema.partial();
 
 const idParamsSchema = z.object({ id: z.string().uuid() });
@@ -132,9 +137,22 @@ export const remove = createRoute({
 	},
 });
 
+export const updateSaveList = createRoute({
+	path: "/save/list/",
+	method: "post",
+	tags: ["Saves", "ListsItem"],
+	request: { params: idParamsSchema, body: jsonContentRequired(updateListSchema, "List IDs to update") },
+	responses: {
+		[HttpStatusCodes.NO_CONTENT]: { description: "Save updated" },
+		[HttpStatusCodes.NOT_FOUND]: jsonContent(notFoundSchema, "Save not found"),
+	},
+});
+
+
 export type BackfillRoute = typeof backfill;
 export type ListRoute = typeof list;
 export type CreateRoute = typeof create;
 export type GetOneRoute = typeof getOne;
 export type UpdateRoute = typeof update;
 export type RemoveRoute = typeof remove;
+export type UpdateSaveListRoute = typeof updateSaveList;

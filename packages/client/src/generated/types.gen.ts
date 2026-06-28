@@ -474,15 +474,8 @@ export type PostSavesBackfillResponses = {
      * Backfill result
      */
     200: {
-        updated: number;
-        failed: number;
-        skipped: number;
-        details: Array<{
-            id: string;
-            platform: string;
-            status: 'updated' | 'failed' | 'skipped';
-            error?: string;
-        }>;
+        queued: number;
+        message: string;
     };
 };
 

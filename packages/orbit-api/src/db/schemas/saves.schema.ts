@@ -7,7 +7,7 @@ import {
 	boolean,
 	index,
 } from "drizzle-orm/pg-core";
-import { id, createdAt, updatedAt } from "../schema.helper";
+import { id, createdAt, updatedAt, deletedAt } from "../schema.helper";
 import { usersTable } from "./users.schema";
 
 
@@ -29,7 +29,7 @@ export const savesTable = pgTable(
 		id: id.primaryKey(),
 		createdAt,
 		updatedAt,
-
+		deletedAt,
 		userId: uuid("user_id")
 			.notNull()
 			.references(() => usersTable.id, { onDelete: "cascade" }),

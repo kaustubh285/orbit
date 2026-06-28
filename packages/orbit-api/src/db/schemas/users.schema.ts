@@ -1,11 +1,11 @@
 import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
-import { createdAt, id, updatedAt } from "../schema.helper";
+import { createdAt, id, updatedAt, deletedAt } from "../schema.helper";
 
 export const usersTable = pgTable("users", {
 	id: id.primaryKey(),
 	createdAt,
 	updatedAt,
-
+	deletedAt,
 	// personal
 	name: text("name").notNull(),
 	displayName: text("display_name"),

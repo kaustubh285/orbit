@@ -4,7 +4,7 @@ import { MiniCalendar } from "@mantine/dates"
 import dayjs from "dayjs"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useQuestsStore } from "@/store/quests.store"
-import { CachedItems } from "./app-structure/cached-items.component"
+// import { CachedItems } from "./app-structure/cached-items.component"
 import { useOrbitAppStore } from "@/store/orbit-app.store"
 import { MassiveCalendar } from "./calendars/massive-calendar.component"
 import { IconCalendar } from "@tabler/icons-react"
@@ -86,7 +86,7 @@ export default function CalendarScroll() {
 			</div>
 			<Flex px={8} gap={8} justify="space-between" align="center">
 				<Flex gap={8} align="center">
-					<CachedItems />
+					{/*<CachedItems />*/}
 					<ActionIcon size="compact-sm" variant="subtle" color="gray" onClick={openCalendar} aria-label="Open calendar">
 						<IconCalendar size={14} />
 					</ActionIcon>

@@ -50,6 +50,7 @@ export default function SaveGrid({
 						) : (
 							<Box
 								style={{
+									width: "100%",
 									aspectRatio: "1 / 1",
 									borderRadius: "15px",
 									background: meta.color,

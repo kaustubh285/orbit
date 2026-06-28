@@ -1,4 +1,4 @@
-import { and, desc, eq, isNotNull } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, isNotNull, isNull, sql } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { db } from "../../db/db.js";
 import { listsTable, listItemsTable } from "../../db/schemas/lists.schema.js";
@@ -34,7 +34,7 @@ export const listLists: AppRouteHandler<ListRoute> = async (c) => {
 		.from(listsTable)
 		.leftJoin(
 			listItemsTable,
-			and(eq(listItemsTable.listId, listsTable.id), isNotNull(listItemsTable.saveId)),
+			and(eq(listItemsTable.listId, listsTable.id), isNotNull(listItemsTable.saveId), isNull(listItemsTable.deletedAt)),
 		)
 		.leftJoin(savesTable, eq(savesTable.id, listItemsTable.saveId))
 		.where(eq(listsTable.userId, userId))
@@ -80,12 +80,21 @@ export const getOneList: AppRouteHandler<GetOneRoute> = async (c) => {
 			saveId: listItemsTable.saveId,
 			createdAt: listItemsTable.createdAt,
 			quest: questsTable,
-			save: savesTable,
+			save: {
+				...getTableColumns(savesTable),
+				lists: sql<string[]>`(
+					SELECT ARRAY_REMOVE(ARRAY_AGG(l2.name), NULL)
+					FROM list_items li2
+					INNER JOIN lists l2 ON l2.id = li2.list_id
+					WHERE li2.save_id = ${savesTable.id}
+					AND li2."deletedAt" IS NULL
+				)`,
+			},
 		})
 		.from(listItemsTable)
 		.leftJoin(questsTable, eq(listItemsTable.questId, questsTable.id))
 		.leftJoin(savesTable, eq(listItemsTable.saveId, savesTable.id))
-		.where(eq(listItemsTable.listId, id));
+		.where(and(eq(listItemsTable.listId, id), isNull(listItemsTable.deletedAt)));
 
 	return c.json({ ...list, items }, HttpStatusCodes.OK);
 };
