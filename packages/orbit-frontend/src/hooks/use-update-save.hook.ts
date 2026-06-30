@@ -15,11 +15,13 @@ export const useUpdateSaveHook = () => {
 
 	const deleteMutation = useMutation({
 		...deleteSavesByIdMutation(),
-		onSuccess: () => Promise.all([
-			queryClient.invalidateQueries({ queryKey: getSavesQueryKey() }),
-			queryClient.invalidateQueries({ queryKey: getListsQueryKey() }),
+		onSuccess: async () => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: getSavesQueryKey() }),
+				queryClient.invalidateQueries({ queryKey: getListsQueryKey() }),
+			])
 			window.location.reload()
-		]),
+		},
 	})
 
 	function updateSave(
