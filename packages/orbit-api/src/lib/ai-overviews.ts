@@ -30,6 +30,10 @@ const enrichmentSchema = z.object({
 
 export type EnrichmentResult = z.infer<typeof enrichmentSchema>;
 
+const DESC_MAX_CHARS = 600;
+const TAGS_MAX = 15;
+const LISTS_MAX = 20;
+
 export async function aiOverview({ title, description, author, note, tags, lists, selectedLists }: {
 	title: string,
 	description: string,
@@ -40,10 +44,14 @@ export async function aiOverview({ title, description, author, note, tags, lists
 	selectedLists?: { name: string; description: string | null }[],
 }): Promise<EnrichmentResult | null> {
 
+	const trimmedDesc = description ? description.slice(0, DESC_MAX_CHARS) : "None";
+	const trimmedTags = tags.slice(0, TAGS_MAX);
+	const trimmedLists = lists.slice(0, LISTS_MAX);
+
 	const hasSelected = selectedLists && selectedLists.length > 0;
 	const listContextLine = hasSelected
 		? `LISTS SAVED TO: ${selectedLists!.map((l) => `"${l.name}"${l.description ? ` — ${l.description.slice(0, 60)}` : ""}`).join("; ")}`
-		: `USER'S LISTS: ${lists.length ? lists.join(", ") : "none"} (pick best fit or invent a 2-3 word name)`;
+		: `USER'S LISTS: ${trimmedLists.length ? trimmedLists.join(", ") : "none"} (pick best fit or invent a 2-3 word name)`;
 
 	const intentLine = note ? `\nINTENT (user's note — drive summary & tags from this): ${note}` : "";
 	const authorLine = author ? `\nAUTHOR: ${author}` : "";
@@ -53,9 +61,9 @@ export async function aiOverview({ title, description, author, note, tags, lists
 	const prompt = `Extract structured data from a saved item. JSON only, no markdown fences.
 
 TITLE: ${title || "Unknown"}
-DESC: ${description || "None"}${authorLine}${intentLine}
+DESC: ${trimmedDesc}${authorLine}${intentLine}
 ${listContextLine}
-EXISTING TAGS (reuse relevant ones, add new): ${tags.length ? tags.join(", ") : "none"}
+EXISTING TAGS (reuse relevant ones, add new): ${trimmedTags.length ? trimmedTags.join(", ") : "none"}
 
 Rules:
 - ai_title: clean, descriptive title (~60 chars max). Strip hashtags and raw captions.
@@ -76,7 +84,7 @@ Rules:
 	try {
 		const response = await client.messages.create({
 			model: "claude-haiku-4-5-20251001",
-			max_tokens: 1200,
+			max_tokens: 800,
 			messages: [{ role: "user", content: prompt }],
 		});
 
