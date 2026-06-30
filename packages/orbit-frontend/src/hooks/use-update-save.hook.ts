@@ -22,7 +22,7 @@ export const useUpdateSaveHook = () => {
 			])
 			window.location.reload()
 		},
-	})
+	})	
 
 	function updateSave(
 		id: string,
