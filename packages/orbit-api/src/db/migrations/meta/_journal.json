@@ -57,6 +57,13 @@
       "when": 1782662601225,
       "tag": "0007_numerous_captain_cross",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1782843466950,
+      "tag": "0008_lying_morgan_stark",
+      "breakpoints": true
     }
   ]
 }

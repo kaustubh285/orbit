@@ -1065,6 +1065,81 @@ export type GetReportInAppResponses = {
 
 export type GetReportInAppResponse = GetReportInAppResponses[keyof GetReportInAppResponses];
 
+export type GetUsersMeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/users/me';
+};
+
+export type GetUsersMeErrors = {
+    /**
+     * User not found
+     */
+    404: {
+        message: string;
+    };
+};
+
+export type GetUsersMeError = GetUsersMeErrors[keyof GetUsersMeErrors];
+
+export type GetUsersMeResponses = {
+    /**
+     * Current user
+     */
+    200: {
+        id: string;
+        name: string;
+        displayName: string | null;
+        email: string;
+        avatar: string | null;
+        aiModel: 'none' | 'sarvam' | 'haiku';
+    };
+};
+
+export type GetUsersMeResponse = GetUsersMeResponses[keyof GetUsersMeResponses];
+
+export type PatchUsersMeData = {
+    /**
+     * User fields to update
+     */
+    body: {
+        aiModel?: 'none' | 'sarvam' | 'haiku';
+        displayName?: string | null;
+        bio?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/users/me';
+};
+
+export type PatchUsersMeErrors = {
+    /**
+     * User not found
+     */
+    404: {
+        message: string;
+    };
+};
+
+export type PatchUsersMeError = PatchUsersMeErrors[keyof PatchUsersMeErrors];
+
+export type PatchUsersMeResponses = {
+    /**
+     * Updated user
+     */
+    200: {
+        id: string;
+        name: string;
+        displayName: string | null;
+        email: string;
+        avatar: string | null;
+        aiModel: 'none' | 'sarvam' | 'haiku';
+    };
+};
+
+export type PatchUsersMeResponse = PatchUsersMeResponses[keyof PatchUsersMeResponses];
+
 export type ClientOptions = {
     baseUrl: 'http://localhost:9999' | (string & {});
 };

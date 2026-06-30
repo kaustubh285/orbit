@@ -1,5 +1,7 @@
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { createdAt, id, updatedAt, deletedAt } from "../schema.helper";
+
+export const aiModelEnum = pgEnum("ai_model", ["none", "sarvam", "haiku"]);
 
 export const usersTable = pgTable("users", {
 	id: id.primaryKey(),
@@ -18,4 +20,7 @@ export const usersTable = pgTable("users", {
 	timezone: text("timezone"),
 	clerkUUID: text("clerk_uuid").notNull().unique(),
 	lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
+
+	// preferences
+	aiModel: aiModelEnum("ai_model").notNull().default("sarvam"),
 });

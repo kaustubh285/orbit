@@ -15,7 +15,8 @@ import type {
 	UpdateRoute,
 	UpdateSaveListRoute,
 } from "./routes.js";
-import { aiOverview } from "@/lib/ai-overviews.js";
+import { aiOverview, type AiModel } from "@/lib/ai-overviews.js";
+import { usersTable } from "@/db/schema";
 
 export const listSaves: AppRouteHandler<ListRoute> = async (c) => {
 	const userId = c.var.userId;
@@ -70,6 +71,7 @@ export const createSave: AppRouteHandler<CreateRoute> = async (c) => {
 
 	// fire-and-forget: scrape then enrich
 	enrichSave(save.id, insertRest.sourceUrl, userId, logger, insertRest.shouldAISummaries, listIds ?? [], insertRest.note ?? null, "new_save");
+
 
 	return c.json(save, HttpStatusCodes.CREATED);
 };
@@ -134,8 +136,15 @@ async function enrichSave(
 			? userLists.filter((l) => listIds.includes(l.id)).map((l) => ({ name: l.name, description: l.description }))
 			: [];
 
-		// step 4: AI enrichment
-		console.log(`[ai] call saveId=${saveId} reason=${reason}`);
+		// step 4: fetch user's AI model preference
+		const [userRow] = await db
+			.select({ aiModel: usersTable.aiModel })
+			.from(usersTable)
+			.where(eq(usersTable.id, userId));
+		const aiModel = (userRow?.aiModel ?? "sarvam") as AiModel;
+
+		// step 5: AI enrichment
+		console.log(`[ai] call saveId=${saveId} model=${aiModel} reason=${reason}`);
 		const ai = await aiOverview({
 			title: scraped.title || "",
 			description: scraped.description || "",
@@ -144,6 +153,7 @@ async function enrichSave(
 			tags: existingTags,
 			lists: listNames,
 			selectedLists,
+			model: aiModel,
 		});
 
 		if (ai) {

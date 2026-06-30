@@ -1,7 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
+import { sarvamClient } from "./sarvam-ai.js";
 
-const client = new Anthropic();
+const anthropicClient = new Anthropic();
 
 const enrichmentSchema = z.object({
 	ai_title: z.string(),
@@ -29,12 +30,13 @@ const enrichmentSchema = z.object({
 });
 
 export type EnrichmentResult = z.infer<typeof enrichmentSchema>;
+export type AiModel = "none" | "sarvam" | "haiku";
 
 const DESC_MAX_CHARS = 600;
 const TAGS_MAX = 15;
 const LISTS_MAX = 20;
 
-export async function aiOverview({ title, description, author, note, tags, lists, selectedLists }: {
+export async function aiOverview({ title, description, author, note, tags, lists, selectedLists, model = "sarvam" }: {
 	title: string,
 	description: string,
 	author?: string | null,
@@ -42,7 +44,10 @@ export async function aiOverview({ title, description, author, note, tags, lists
 	tags: string[],
 	lists: string[],
 	selectedLists?: { name: string; description: string | null }[],
+	model?: AiModel,
 }): Promise<EnrichmentResult | null> {
+
+	if (model === "none") return null;
 
 	const trimmedDesc = description ? description.slice(0, DESC_MAX_CHARS) : "None";
 	const trimmedTags = tags.slice(0, TAGS_MAX);
@@ -66,6 +71,7 @@ ${listContextLine}
 EXISTING TAGS (reuse relevant ones, add new): ${trimmedTags.length ? trimmedTags.join(", ") : "none"}
 
 Rules:
+- STRICT: Only use information explicitly present in the title/description above. Do not infer, invent, or pad with plausible-sounding details that are not mentioned.
 - ai_title: clean, descriptive title (~60 chars max). Strip hashtags and raw captions.
 - summary: describe what the content CONTAINS and TEACHES (e.g. "a 4-step checklist covering X, Y, Z"), NOT what the poster DID. Answer "what will I get from this?" in 2-3 sentences.
 - tags: 3-7 subject-matter tags. NEVER include: platform names, "post"/"video"/"reel"/"content", the author's name, hashtag fragments.
@@ -82,18 +88,32 @@ Rules:
 {"ai_title":"...","summary":"...","tags":["..."],"list":"${listPlaceholder}","category":"other","contentType":"other","attributes":null,"recipe":null,"watchList":null,"keyPoints":null,"location":null,"timeSensitive":false}`;
 
 	try {
-		const response = await client.messages.create({
-			model: "claude-haiku-4-5-20251001",
-			max_tokens: 800,
-			messages: [{ role: "user", content: prompt }],
-		});
+		let rawText: string;
 
-		const rawText = response.content
-			.filter((block) => block.type === "text")
-			.map((block) => block.text)
-			.join("");
-
-		console.log("[aiOverview] tokens used — input:", response.usage.input_tokens, "output:", response.usage.output_tokens);
+		if (model === "haiku") {
+			const response = await anthropicClient.messages.create({
+				model: "claude-haiku-4-5-20251001",
+				max_tokens: 800,
+				system: "You are a structured data extractor. Output valid JSON only, no markdown fences.",
+				messages: [{ role: "user", content: prompt }],
+			});
+			rawText = response.content
+				.filter((b) => b.type === "text")
+				.map((b) => b.text)
+				.join("");
+			console.log("[aiOverview] model=haiku tokens — input:", response.usage.input_tokens, "output:", response.usage.output_tokens);
+		} else {
+			const response = await sarvamClient.chat.completions({
+				model: "sarvam-105b",
+				temperature: 0.1,
+				messages: [
+					{ role: "system", content: "You are a structured data extractor. Output valid JSON only, no markdown fences. Never invent details not explicitly present in the source content." },
+					{ role: "user", content: prompt },
+				],
+			});
+			rawText = response?.choices[0]?.message?.content ?? "";
+			console.log("[aiOverview] model=sarvam tokens — input:", response?.usage?.prompt_tokens, "output:", response.usage?.completion_tokens, "total:", response.usage?.total_tokens);
+		}
 
 		const text = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
 
@@ -111,10 +131,10 @@ Rules:
 			return null;
 		}
 
-		console.log("[aiOverview] parsed ok — ai_title:", result.data.ai_title, "category:", result.data.category, "tags:", result.data.tags);
+		console.log("[aiOverview] parsed ok — model:", model, "ai_title:", result.data.ai_title, "category:", result.data.category, "tags:", result.data.tags);
 		return result.data;
 	} catch (err) {
-		console.error("[aiOverview] failed — title:", title, "error:", err);
+		console.error("[aiOverview] failed — model:", model, "title:", title, "error:", err);
 		return null;
 	}
 }
