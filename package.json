@@ -19,7 +19,6 @@
 		"concurrently": "^10.0.3"
 	},
 	"dependencies": {
-		"dotenv": "^17.4.2",
-		"sarvamai": "^1.1.7"
+		"dotenv": "^17.4.2"
 	}
 }
