@@ -7,10 +7,10 @@ export const useUpdateSaveHook = () => {
 
 	const mutation = useMutation({
 		...patchSavesByIdMutation(),
-		onSuccess: () => Promise.all([
-			queryClient.invalidateQueries({ queryKey: getSavesQueryKey() }),
-			queryClient.invalidateQueries({ queryKey: getListsQueryKey() }),
-		]),
+		onSuccess: async () => {
+			await queryClient.invalidateQueries({ queryKey: getSavesQueryKey() })
+			await queryClient.invalidateQueries({ queryKey: getListsQueryKey() })
+		},
 	})
 
 	const deleteMutation = useMutation({
