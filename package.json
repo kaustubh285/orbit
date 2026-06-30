@@ -16,9 +16,9 @@
 		"typecheck": "bun --cwd packages/orbit-api run typecheck && bun --cwd packages/client run typecheck && bun --cwd packages/orbit-frontend run typecheck"
 	},
 	"devDependencies": {
-		"concurrently": "^10.0.3"
+		"concurrently": "10.0.3"
 	},
 	"dependencies": {
-		"dotenv": "^17.4.2"
+		"dotenv": "17.4.2"
 	}
 }
