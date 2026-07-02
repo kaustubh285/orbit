@@ -1,4 +1,4 @@
-import { deleteSavesById, deleteSavesByIdMutation, getListsByIdQueryKey, getListsQueryKey, getSavesQueryKey, patchSavesByIdMutation } from "@orbit/client"
+import { deleteSavesById, deleteSavesByIdMutation, getListsQueryKey, getSavesQueryKey, patchSavesByIdMutation } from "@orbit/client"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 
@@ -19,10 +19,10 @@ export const useUpdateSaveHook = () => {
 			await Promise.all([
 				queryClient.invalidateQueries({ queryKey: getSavesQueryKey() }),
 				queryClient.invalidateQueries({ queryKey: getListsQueryKey() }),
-				queryClient.invalidateQueries({ queryKey: getListsByIdQueryKey() }),
+				queryClient.invalidateQueries({ queryKey: [{ _id: "getListsById" }] }),
 			])
 		},
-	})	
+	})
 
 	function updateSave(
 		id: string,
