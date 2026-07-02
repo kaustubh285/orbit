@@ -20,7 +20,7 @@ import { useSaves } from "../saves/use-saves.hook"
 import { client, getQuestsOptions } from "@orbit/client"
 import { useQuery } from "@tanstack/react-query"
 import { PrivacyAwareText } from "@/components/privacy-aware-text.component"
-import { CachedItems } from "@/components/app-structure/cached-items.component"
+
 import { useState } from "react"
 import { useDisclosure } from "@mantine/hooks"
 import { SaveDetailView } from "@/components/saves/save-fullpage-drawer.component"
@@ -251,9 +251,7 @@ export function HomeDashboard() {
 				</Group>
 			</Group>
 
-			<CachedItems />
-
-			{selectedSave && <SaveDetailView save={selectedSave} opened={opened} onClose={close} />}
+		{selectedSave && <SaveDetailView save={selectedSave} opened={opened} onClose={close} />}
 
 			{/* Insights */}
 			<Stack gap="xs">

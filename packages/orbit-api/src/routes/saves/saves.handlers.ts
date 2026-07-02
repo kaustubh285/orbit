@@ -22,7 +22,7 @@ export const listSaves: AppRouteHandler<ListRoute> = async (c) => {
 	const userId = c.var.userId;
 	const { platform, status, tag, limit, cursor } = c.req.valid("query");
 
-	const conditions = [eq(savesTable.userId, userId)];
+	const conditions = [eq(savesTable.userId, userId), isNull(savesTable.deletedAt)];
 	if (platform) conditions.push(eq(savesTable.sourcePlatform, platform));
 	if (status) conditions.push(eq(savesTable.status, status));
 	if (tag) conditions.push(sql`${tag} = ANY(${savesTable.tags})`);
@@ -34,7 +34,7 @@ export const listSaves: AppRouteHandler<ListRoute> = async (c) => {
 			lists: sql<string[]>`ARRAY_REMOVE(ARRAY_AGG(${listsTable.name}), NULL)`,
 		})
 		.from(savesTable)
-		.leftJoin(listItemsTable, and(eq(listItemsTable.saveId, savesTable.id), isNull(savesTable.deletedAt)))
+		.leftJoin(listItemsTable, and(eq(listItemsTable.saveId, savesTable.id), isNull(listItemsTable.deletedAt)))
 		.leftJoin(listsTable, eq(listsTable.id, listItemsTable.listId))
 		.where(and(...conditions))
 		.groupBy(savesTable.id)

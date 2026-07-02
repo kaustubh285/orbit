@@ -229,6 +229,7 @@ export const SaveDetailView = ({
 						<Stack style={{ width: isDesktop ? "40%" : "60%", flexShrink: 0 }}>
 							{save.thumbnailUrl ? (
 								<img
+									onClick={() => window.open(save.sourceUrl, "_blank")}
 									src={save.thumbnailUrl}
 									alt=""
 									referrerPolicy="no-referrer"
@@ -238,7 +239,8 @@ export const SaveDetailView = ({
 										height: "auto",
 										objectFit: "cover",
 										borderRadius: "15px",
-										boxShadow: "0px 0px 12px rgba(255, 255, 255, 0.15)"
+										boxShadow: "0px 0px 12px rgba(255, 255, 255, 0.15)",
+										cursor: "pointer"
 									}}
 								/>
 							) : (

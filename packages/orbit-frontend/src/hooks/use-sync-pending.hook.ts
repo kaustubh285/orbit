@@ -1,12 +1,14 @@
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { getQuestsQueryKey, getSavesQueryKey, postQuestsMutation, postSavesMutation } from "@orbit/client"
 import { useOrbitAppStore } from "@/store/orbit-app.store"
 
+// Module-level flag — persists across component remounts so concurrent syncs can't double-submit
+let isSyncing = false
+
 export function useSyncPending() {
 	const queryClient = useQueryClient()
 	const removePendingSubmission = useOrbitAppStore((s) => s.actions.removePendingSubmission)
-	const isSyncing = useRef(false)
 
 	const createQuest = useMutation({
 		...postQuestsMutation(),
@@ -19,11 +21,11 @@ export function useSyncPending() {
 	})
 
 	const sync = useCallback(async () => {
-		if (isSyncing.current) return
+		if (isSyncing) return
 		const { pendingSubmissions } = useOrbitAppStore.getState()
 		if (pendingSubmissions.length === 0) return
 
-		isSyncing.current = true
+		isSyncing = true
 		try {
 			for (const submission of pendingSubmissions) {
 				try {
@@ -38,7 +40,7 @@ export function useSyncPending() {
 				}
 			}
 		} finally {
-			isSyncing.current = false
+			isSyncing = false
 		}
 	}, [createQuest, createSave, removePendingSubmission])
 

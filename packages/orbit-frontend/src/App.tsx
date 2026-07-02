@@ -7,7 +7,6 @@ import { AppHeader } from "./components/app-structure/app-header.component"
 import { AppFooter } from "./components/app-structure/app-footer.component"
 import { AppNavbar } from "./components/app-structure/app-navbar.component"
 import { CreateNewComponent } from "./components/create-new-floater/create-new.component"
-import { useSyncPending } from "./hooks/use-sync-pending.hook"
 import { useOrbitAppStore } from "./store/orbit-app.store"
 import { useEffect, useState } from "react"
 import '@gfazioli/mantine-picker/styles.css';
@@ -19,8 +18,6 @@ export function App() {
 	const setLastSignedIn = useOrbitAppStore((s) => s.actions.setLastSignedIn)
 	const [offlineFallback, setOfflineFallback] = useState(false)
 	const { location } = useRouterState()
-	// useSyncPending()
-
 	// Keep lastSignedIn in sync with Clerk's auth state
 	useEffect(() => {
 		if (isLoaded) setLastSignedIn(!!isSignedIn)
