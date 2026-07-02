@@ -34,7 +34,7 @@ export const listSaves: AppRouteHandler<ListRoute> = async (c) => {
 			lists: sql<string[]>`ARRAY_REMOVE(ARRAY_AGG(${listsTable.name}), NULL)`,
 		})
 		.from(savesTable)
-		.leftJoin(listItemsTable, and(eq(listItemsTable.saveId, savesTable.id), isNull(listItemsTable.deletedAt)))
+		.leftJoin(listItemsTable, and(eq(listItemsTable.saveId, savesTable.id), isNull(savesTable.deletedAt)))
 		.leftJoin(listsTable, eq(listsTable.id, listItemsTable.listId))
 		.where(and(...conditions))
 		.groupBy(savesTable.id)
