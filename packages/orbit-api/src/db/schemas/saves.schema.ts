@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
 	pgTable,
 	pgEnum,
@@ -6,6 +7,7 @@ import {
 	timestamp,
 	boolean,
 	index,
+	uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { id, createdAt, updatedAt, deletedAt } from "../schema.helper";
 import { usersTable } from "./users.schema";
@@ -36,6 +38,7 @@ export const savesTable = pgTable(
 
 		// captured from share + baseline OG/oEmbed scrape
 		sourceUrl: text("source_url").notNull(),
+		normalizedUrl: text("normalized_url"),
 		sourcePlatform: savePlatformEnum("source_platform")
 			.notNull()
 			.default("web"),
@@ -73,5 +76,10 @@ export const savesTable = pgTable(
 			table.sourcePlatform,
 		),
 		createdAtIdx: index("saves_created_at_idx").on(table.createdAt),
+		// partial unique: closes the check-then-insert race on dupe detection,
+		// while still allowing re-saves of soft-deleted items
+		userNormalizedUrlUniq: uniqueIndex("saves_user_normalized_url_uniq")
+			.on(table.userId, table.normalizedUrl)
+			.where(sql`${table.deletedAt} is null`),
 	}),
 );

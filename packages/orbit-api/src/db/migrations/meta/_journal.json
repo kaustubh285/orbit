@@ -64,6 +64,20 @@
       "when": 1782843466950,
       "tag": "0008_lying_morgan_stark",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1783357198094,
+      "tag": "0009_gifted_magus",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1783381090804,
+      "tag": "0010_confused_microbe",
+      "breakpoints": true
     }
   ]
 }

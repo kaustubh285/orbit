@@ -87,6 +87,12 @@ export const list = createRoute({
 	},
 });
 
+export const duplicateSaveSchema = z.object({
+	duplicate: z.literal(true),
+	previouslySavedAt: z.string().datetime({ offset: true }),
+	save: selectSaveSchema,
+});
+
 export const create = createRoute({
 	path: "/saves",
 	method: "post",
@@ -96,6 +102,7 @@ export const create = createRoute({
 	},
 	responses: {
 		[HttpStatusCodes.CREATED]: jsonContent(selectSaveSchema, "Created save"),
+		[HttpStatusCodes.OK]: jsonContent(duplicateSaveSchema, "Duplicate — save already exists"),
 		[HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(validationErrorSchema, "Validation error"),
 	},
 });

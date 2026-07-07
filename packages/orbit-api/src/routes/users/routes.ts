@@ -43,5 +43,27 @@ export const updateMe = createRoute({
 	},
 });
 
+export const captureTokenSchema = z.object({
+	captureToken: z.string(),
+});
+
+export const captureTokenBodySchema = z.object({
+	rotate: z.boolean().optional(),
+});
+
+export const getCaptureToken = createRoute({
+	path: "/users/me/capture-token",
+	method: "post",
+	tags: ["Users"],
+	request: {
+		body: jsonContentRequired(captureTokenBodySchema, "Capture token options"),
+	},
+	responses: {
+		[HttpStatusCodes.OK]: jsonContent(captureTokenSchema, "Capture token"),
+		[HttpStatusCodes.NOT_FOUND]: jsonContent(notFoundSchema, "User not found"),
+	},
+});
+
 export type GetMeRoute = typeof getMe;
 export type UpdateMeRoute = typeof updateMe;
+export type GetCaptureTokenRoute = typeof getCaptureToken;

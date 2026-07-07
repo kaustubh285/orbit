@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
-	ActionIcon, Button, Chip, Drawer, Group,
+	ActionIcon, Alert, Button, Chip, Drawer, Group,
 	MultiSelect, Stack, Switch, Text, Textarea, TextInput,
 } from '@mantine/core'
 import { DateTimePicker } from '@mantine/dates'
@@ -176,7 +176,7 @@ export function CreateNewComponent() {
 	const [shouldAISummaries, setShouldAISummaries] = useState(true)
 	const [listIds, setListIds] = useState<string[]>([])
 
-	const { lists, onSubmit, isPending, refetchLists, isRefetchingLists } = useCreateNew()
+	const { lists, onSubmit, isPending, refetchLists, isRefetchingLists, duplicateNotice, clearDuplicateNotice } = useCreateNew()
 	const navigate = useNavigate()
 	const isDesktop = useMediaQuery("(min-width: 48em)", false, { getInitialValueInEffect: false })
 
@@ -206,6 +206,7 @@ export function CreateNewComponent() {
 	function handleClose() {
 		setOpened(false)
 		reset()
+		clearDuplicateNotice()
 	}
 
 	function handleTypeChange(t: UiType) {
@@ -316,6 +317,12 @@ export function CreateNewComponent() {
 
 
 					</Stack>
+
+					{duplicateNotice && (
+						<Alert color="yellow" withCloseButton onClose={clearDuplicateNotice}>
+							You saved this on {new Date(duplicateNotice).toLocaleDateString()} — that&apos;s twice now. Maybe it matters?
+						</Alert>
+					)}
 
 					<Stack gap="xs">
 						<Button fullWidth onClick={handleSubmit} disabled={!title.trim() || isPending} loading={isPending}>

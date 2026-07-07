@@ -1452,6 +1452,137 @@
           }
         },
         "responses": {
+          "200": {
+            "description": "Duplicate — save already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "duplicate": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "previouslySavedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "save": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "userId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "sourceUrl": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "sourcePlatform": {
+                          "type": "string",
+                          "enum": [
+                            "youtube",
+                            "reddit",
+                            "instagram",
+                            "web"
+                          ]
+                        },
+                        "title": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "description": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "thumbnailUrl": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "author": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "publishedAt": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "date-time"
+                        },
+                        "note": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "tags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "active",
+                            "archived"
+                          ]
+                        },
+                        "aiTitle": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "aiSummary": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "aiEnrichedAt": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "date-time"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "userId",
+                        "sourceUrl",
+                        "sourcePlatform",
+                        "title",
+                        "description",
+                        "thumbnailUrl",
+                        "author",
+                        "publishedAt",
+                        "note",
+                        "tags",
+                        "status",
+                        "aiTitle",
+                        "aiSummary",
+                        "aiEnrichedAt",
+                        "createdAt",
+                        "updatedAt"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "duplicate",
+                    "previouslySavedAt",
+                    "save"
+                  ]
+                }
+              }
+            }
+          },
           "201": {
             "description": "Created save",
             "content": {
@@ -3608,6 +3739,67 @@
                     "email",
                     "avatar",
                     "aiModel"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me/capture-token": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "description": "Capture token options",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rotate": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Capture token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "captureToken": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "captureToken"
                   ]
                 }
               }

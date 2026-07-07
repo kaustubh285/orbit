@@ -6,6 +6,7 @@ import { listItemsTable, listsTable } from "../../db/schemas/lists.schema.js";
 import type { AppRouteHandler } from "@/lib/types.js";
 import { detectPlatform, scrapeUrl, type ScrapeResult } from "./scraper/index.js";
 import { toDate } from "@/lib/utils.js";
+import { normalizeUrl } from "@/lib/normalize-url.js";
 import type {
 	BackfillRoute,
 	CreateRoute,
@@ -44,6 +45,13 @@ export const listSaves: AppRouteHandler<ListRoute> = async (c) => {
 	return c.json(saves, HttpStatusCodes.OK);
 };
 
+function isUniqueViolation(err: unknown): boolean {
+	for (let e = err; e instanceof Error; e = e.cause) {
+		if ((e as { code?: string }).code === "23505") return true;
+	}
+	return false;
+}
+
 export const createSave: AppRouteHandler<CreateRoute> = async (c) => {
 	const userId = c.var.userId;
 	const { publishedAt, ...rest } = c.req.valid("json");
@@ -51,16 +59,56 @@ export const createSave: AppRouteHandler<CreateRoute> = async (c) => {
 
 	const { listIds, ...insertRest } = rest;
 
-	const [save] = await db
-		.insert(savesTable)
-		.values({
-			sourcePlatform: detectPlatform(insertRest.sourceUrl),
-			...insertRest,
-			tags: insertRest.tags ?? undefined,
-			userId,
-			...(publishedAt !== undefined ? { publishedAt: toDate(publishedAt) } : {}),
-		})
-		.returning();
+	const normalizedUrl = normalizeUrl(insertRest.sourceUrl);
+
+	const findExisting = () =>
+		db
+			.select()
+			.from(savesTable)
+			.where(and(
+				eq(savesTable.userId, userId),
+				eq(savesTable.normalizedUrl, normalizedUrl),
+				isNull(savesTable.deletedAt),
+			))
+			.limit(1);
+
+	// Dupe check — resurface instead of silently dropping
+	const [existing] = await findExisting();
+
+	if (existing) {
+		return c.json(
+			{ duplicate: true as const, previouslySavedAt: existing.createdAt.toISOString(), save: existing },
+			HttpStatusCodes.OK,
+		);
+	}
+
+	let save: typeof savesTable.$inferSelect;
+	try {
+		[save] = await db
+			.insert(savesTable)
+			.values({
+				sourcePlatform: detectPlatform(insertRest.sourceUrl),
+				...insertRest,
+				normalizedUrl,
+				tags: insertRest.tags ?? undefined,
+				userId,
+				...(publishedAt !== undefined ? { publishedAt: toDate(publishedAt) } : {}),
+			})
+			.returning();
+	} catch (err) {
+		// concurrent request (e.g. Shortcut double-fire) won the race on the
+		// (userId, normalizedUrl) partial unique index
+		if (isUniqueViolation(err)) {
+			const [raced] = await findExisting();
+			if (raced) {
+				return c.json(
+					{ duplicate: true as const, previouslySavedAt: raced.createdAt.toISOString(), save: raced },
+					HttpStatusCodes.OK,
+				);
+			}
+		}
+		throw err;
+	}
 
 	if (listIds?.length) {
 		await db
@@ -71,7 +119,6 @@ export const createSave: AppRouteHandler<CreateRoute> = async (c) => {
 
 	// fire-and-forget: scrape then enrich
 	enrichSave(save.id, insertRest.sourceUrl, userId, logger, insertRest.shouldAISummaries, listIds ?? [], insertRest.note ?? null, "new_save");
-
 
 	return c.json(save, HttpStatusCodes.CREATED);
 };
