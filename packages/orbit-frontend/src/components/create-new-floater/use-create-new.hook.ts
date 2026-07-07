@@ -27,6 +27,7 @@ export function useCreateNew() {
 	const { addPendingSubmission, removePendingSubmission, setCurrentLists } = useOrbitAppStore((s) => s.actions)
 	const lists = useOrbitAppStore((s) => s.currentLists)
 	const [isRefetchingLists, setIsRefetchingLists] = useState(false)
+	const [duplicateNotice, setDuplicateNotice] = useState<string | null>(null)
 
 	async function refetchLists() {
 		setIsRefetchingLists(true)
@@ -59,7 +60,14 @@ export function useCreateNew() {
 		addPendingSubmission({ id: pendingId, createdAt: new Date().toISOString(), apiCallKey: 'postSave', payload })
 		createSave.mutate(
 			{ body: payload } as Parameters<typeof createSave.mutate>[0],
-			{ onSuccess: () => removePendingSubmission(pendingId) },
+			{
+				onSuccess: (data) => {
+					removePendingSubmission(pendingId)
+					if (data && 'duplicate' in data && data.duplicate) {
+						setDuplicateNotice(data.previouslySavedAt)
+					}
+				},
+			},
 		)
 	}
 
@@ -118,5 +126,7 @@ export function useCreateNew() {
 		isPending: createQuest.isPending || createSave.isPending,
 		refetchLists,
 		isRefetchingLists,
+		duplicateNotice,
+		clearDuplicateNotice: () => setDuplicateNotice(null),
 	}
 }

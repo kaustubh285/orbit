@@ -10,6 +10,7 @@
 		"start": "bun src/index.ts",
 		"build": "bun build src/index.ts --outdir dist --target bun",
 		"typecheck": "tsc --noEmit",
+		"test": "bun test src",
 		"api:spec": "bun scripts/export-spec.ts",
 		"spec-client": "bun run api:spec && cd ../client && bun run generate && cd ../orbit-api",
 		"db:generate": "npx drizzle-kit generate --config=drizzle.config.mjs",

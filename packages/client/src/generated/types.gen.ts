@@ -437,6 +437,32 @@ export type PostSavesError = PostSavesErrors[keyof PostSavesErrors];
 
 export type PostSavesResponses = {
     /**
+     * Duplicate — save already exists
+     */
+    200: {
+        duplicate: true;
+        previouslySavedAt: string;
+        save: {
+            id: string;
+            userId: string;
+            sourceUrl: string;
+            sourcePlatform: 'youtube' | 'reddit' | 'instagram' | 'web';
+            title: string | null;
+            description: string | null;
+            thumbnailUrl: string | null;
+            author: string | null;
+            publishedAt: string | null;
+            note: string | null;
+            tags: Array<string>;
+            status: 'active' | 'archived';
+            aiTitle: string | null;
+            aiSummary: string | null;
+            aiEnrichedAt: string | null;
+            createdAt: string;
+            updatedAt: string;
+        };
+    };
+    /**
      * Created save
      */
     201: {
@@ -1139,6 +1165,40 @@ export type PatchUsersMeResponses = {
 };
 
 export type PatchUsersMeResponse = PatchUsersMeResponses[keyof PatchUsersMeResponses];
+
+export type PostUsersMeCaptureTokenData = {
+    /**
+     * Capture token options
+     */
+    body: {
+        rotate?: boolean;
+    };
+    path?: never;
+    query?: never;
+    url: '/users/me/capture-token';
+};
+
+export type PostUsersMeCaptureTokenErrors = {
+    /**
+     * User not found
+     */
+    404: {
+        message: string;
+    };
+};
+
+export type PostUsersMeCaptureTokenError = PostUsersMeCaptureTokenErrors[keyof PostUsersMeCaptureTokenErrors];
+
+export type PostUsersMeCaptureTokenResponses = {
+    /**
+     * Capture token
+     */
+    200: {
+        captureToken: string;
+    };
+};
+
+export type PostUsersMeCaptureTokenResponse = PostUsersMeCaptureTokenResponses[keyof PostUsersMeCaptureTokenResponses];
 
 export type ClientOptions = {
     baseUrl: 'http://localhost:9999' | (string & {});

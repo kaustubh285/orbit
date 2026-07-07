@@ -9,6 +9,7 @@ router.use("*", resolveUser);
 
 router
 	.openapi(routes.getMe, handlers.getMe)
-	.openapi(routes.updateMe, handlers.updateMe);
+	.openapi(routes.updateMe, handlers.updateMe)
+	.openapi(routes.getCaptureToken, handlers.getCaptureToken);
 
 export default router;

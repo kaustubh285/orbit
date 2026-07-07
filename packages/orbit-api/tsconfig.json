@@ -7,7 +7,7 @@
 		"rootDir": "src",
 		"jsx": "react-jsx",
 		"jsxImportSource": "hono/jsx",
-		"types": ["node"],
+		"types": ["node", "bun"],
 		"paths": {
 			"@/*": ["./src/*"]
 		}

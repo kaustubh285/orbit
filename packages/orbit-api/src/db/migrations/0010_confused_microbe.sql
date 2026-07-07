@@ -1,0 +1,2 @@
+DROP INDEX "saves_user_normalized_url_idx";--> statement-breakpoint
+CREATE UNIQUE INDEX "saves_user_normalized_url_uniq" ON "saves" USING btree ("user_id","normalized_url") WHERE "saves"."deletedAt" is null;

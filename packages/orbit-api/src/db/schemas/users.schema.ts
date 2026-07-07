@@ -23,4 +23,7 @@ export const usersTable = pgTable("users", {
 
 	// preferences
 	aiModel: aiModelEnum("ai_model").notNull().default("sarvam"),
+
+	// static credential for iOS Shortcut / Pi capture (generated on demand)
+	captureToken: text("capture_token").unique(),
 });
