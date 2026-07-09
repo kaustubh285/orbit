@@ -1,5 +1,5 @@
 import type { List } from '@/types'
-import { ActionIcon, Button, ColorInput, Drawer, Group, Stack, Text, Textarea, TextInput } from '@mantine/core'
+import { ActionIcon, Button, ColorInput, Drawer, Group, Stack, Switch, Text, Textarea, TextInput } from '@mantine/core'
 import { useState } from 'react'
 
 // Hex equivalents of Mantine default theme shade-6 for each preset color
@@ -25,14 +25,15 @@ export function ListFormDrawer({
 }: {
 	opened: boolean
 	onClose: () => void
-	onSubmit: (name: string, description?: string, color?: string, icon?: string) => void
+	onSubmit: (name: string, description?: string, color?: string, icon?: string, includeInResurface?: boolean) => void
 	isPending: boolean
-	initial?: Pick<List, 'name' | 'description' | 'color' | 'icon'>
+	initial?: Pick<List, 'name' | 'description' | 'color' | 'icon' | 'includeInResurface'>
 }) {
 	const [name, setName] = useState(initial?.name ?? '')
 	const [description, setDescription] = useState(initial?.description ?? '')
 	const [color, setColor] = useState(initial?.color ?? '')
 	const [icon, setIcon] = useState(initial?.icon ?? DEFAULT_LIST_ICON)
+	const [includeInResurface, setIncludeInResurface] = useState(initial?.includeInResurface ?? false)
 
 	const isEdit = !!initial
 
@@ -42,7 +43,7 @@ export function ListFormDrawer({
 
 	function handleSubmit() {
 		if (!name.trim()) return
-		onSubmit(name.trim(), description.trim() || undefined, color || undefined, icon)
+		onSubmit(name.trim(), description.trim() || undefined, color || undefined, icon, includeInResurface)
 		handleClose()
 	}
 
@@ -116,6 +117,13 @@ export function ListFormDrawer({
 					swatches={COLOR_SWATCHES}
 					swatchesPerRow={10}
 					closeOnColorSwatchClick
+				/>
+
+				<Switch
+					label="Include in Resurface"
+					description="Saves from this list may bubble back up on your Resurface page"
+					checked={includeInResurface}
+					onChange={(e) => setIncludeInResurface(e.currentTarget.checked)}
 				/>
 
 				<Stack gap="xs" mt="auto">

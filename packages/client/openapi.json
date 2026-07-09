@@ -2367,6 +2367,9 @@
                       "icon": {
                         "type": "string"
                       },
+                      "includeInResurface": {
+                        "type": "boolean"
+                      },
                       "createdAt": {
                         "type": "string",
                         "format": "date-time"
@@ -2488,6 +2491,7 @@
                       "description",
                       "color",
                       "icon",
+                      "includeInResurface",
                       "createdAt",
                       "updatedAt",
                       "recentSave"
@@ -2526,6 +2530,9 @@
                   },
                   "icon": {
                     "type": "string"
+                  },
+                  "includeInResurface": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -2565,6 +2572,9 @@
                     "icon": {
                       "type": "string"
                     },
+                    "includeInResurface": {
+                      "type": "boolean"
+                    },
                     "createdAt": {
                       "type": "string",
                       "format": "date-time"
@@ -2581,6 +2591,7 @@
                     "description",
                     "color",
                     "icon",
+                    "includeInResurface",
                     "createdAt",
                     "updatedAt"
                   ]
@@ -2655,6 +2666,9 @@
                     },
                     "icon": {
                       "type": "string"
+                    },
+                    "includeInResurface": {
+                      "type": "boolean"
                     },
                     "createdAt": {
                       "type": "string",
@@ -2929,6 +2943,7 @@
                     "description",
                     "color",
                     "icon",
+                    "includeInResurface",
                     "createdAt",
                     "updatedAt",
                     "items"
@@ -2995,6 +3010,9 @@
                   },
                   "icon": {
                     "type": "string"
+                  },
+                  "includeInResurface": {
+                    "type": "boolean"
                   }
                 }
               }
@@ -3031,6 +3049,9 @@
                     "icon": {
                       "type": "string"
                     },
+                    "includeInResurface": {
+                      "type": "boolean"
+                    },
                     "createdAt": {
                       "type": "string",
                       "format": "date-time"
@@ -3047,6 +3068,7 @@
                     "description",
                     "color",
                     "icon",
+                    "includeInResurface",
                     "createdAt",
                     "updatedAt"
                   ]

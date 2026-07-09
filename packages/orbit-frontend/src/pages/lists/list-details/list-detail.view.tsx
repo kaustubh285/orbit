@@ -42,7 +42,7 @@ export function ListDetailView({
 }: {
 	list: ListWithItems | undefined
 	isLoading: boolean
-	onUpdate: (name: string, description?: string, color?: string, icon?: string) => void
+	onUpdate: (name: string, description?: string, color?: string, icon?: string, includeInResurface?: boolean) => void
 	onRemoveItem: (itemId: string) => void
 	submitQuest: (title: string, type: Quest["type"]) => void
 	toggleQuest: (quest: Quest) => void
@@ -56,13 +56,13 @@ export function ListDetailView({
 	const saveItems = allItems.filter((i) => i.save)
 	const questItems = allItems.filter((i) => i.quest)
 
-	function handleEditSubmit(name: string, description?: string, color?: string, icon?: string) {
-		onUpdate(name, description, color, icon)
+	function handleEditSubmit(name: string, description?: string, color?: string, icon?: string, includeInResurface?: boolean) {
+		onUpdate(name, description, color, icon, includeInResurface)
 		setEditOpen(false)
 	}
 
 	const editInitial: List | undefined = list
-		? { id: list.id, userId: list.userId, name: list.name, description: list.description, color: list.color, icon: list.icon, createdAt: list.createdAt, updatedAt: list.updatedAt, recentSave: null }
+		? { id: list.id, userId: list.userId, name: list.name, description: list.description, color: list.color, icon: list.icon, includeInResurface: list.includeInResurface, createdAt: list.createdAt, updatedAt: list.updatedAt, recentSave: null }
 		: undefined
 
 	return (

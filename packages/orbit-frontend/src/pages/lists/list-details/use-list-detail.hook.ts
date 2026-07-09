@@ -22,10 +22,10 @@ export function useListDetail(id: string) {
 	const createQuest = useMutation({ ...postQuestsMutation() })
 	const patchQuest = useMutation({ ...patchQuestsByIdMutation(), onSuccess: invalidate })
 
-	function onUpdate(name: string, description?: string, color?: string, icon?: string) {
+	function onUpdate(name: string, description?: string, color?: string, icon?: string, includeInResurface?: boolean) {
 		updateList.mutate({
 			path: { id },
-			body: { name, description: description ?? null, color: color ?? null, icon },
+			body: { name, description: description ?? null, color: color ?? null, icon, includeInResurface },
 		} as Parameters<typeof updateList.mutate>[0])
 	}
 

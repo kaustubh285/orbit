@@ -22,6 +22,7 @@ export type List = {
 	description: string | null
 	color: string | null
 	icon: string
+	includeInResurface: boolean
 	createdAt: string
 	updatedAt: string
 	recentSave?: Save | null

@@ -720,6 +720,7 @@ export type GetListsResponses = {
         description: string | null;
         color: string | null;
         icon: string;
+        includeInResurface: boolean;
         createdAt: string;
         updatedAt: string;
         recentSave: {
@@ -755,6 +756,7 @@ export type PostListsData = {
         description?: string | null;
         color?: string | null;
         icon?: string;
+        includeInResurface?: boolean;
     };
     path?: never;
     query?: never;
@@ -785,6 +787,7 @@ export type PostListsResponses = {
         description: string | null;
         color: string | null;
         icon: string;
+        includeInResurface: boolean;
         createdAt: string;
         updatedAt: string;
     };
@@ -852,6 +855,7 @@ export type GetListsByIdResponses = {
         description: string | null;
         color: string | null;
         icon: string;
+        includeInResurface: boolean;
         createdAt: string;
         updatedAt: string;
         items: Array<{
@@ -913,6 +917,7 @@ export type PatchListsByIdData = {
         description?: string | null;
         color?: string | null;
         icon?: string;
+        includeInResurface?: boolean;
     };
     path: {
         id: string;
@@ -951,6 +956,7 @@ export type PatchListsByIdResponses = {
         description: string | null;
         color: string | null;
         icon: string;
+        includeInResurface: boolean;
         createdAt: string;
         updatedAt: string;
     };

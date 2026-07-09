@@ -27,6 +27,7 @@ export const listLists: AppRouteHandler<ListRoute> = async (c) => {
 			description: listsTable.description,
 			color: listsTable.color,
 			icon: listsTable.icon,
+			includeInResurface: listsTable.includeInResurface,
 			createdAt: listsTable.createdAt,
 			updatedAt: listsTable.updatedAt,
 			recentSave: savesTable,

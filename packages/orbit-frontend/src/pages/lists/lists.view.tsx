@@ -17,8 +17,8 @@ export function ListsView({
 }: {
 	lists: List[]
 	isLoading: boolean
-	onCreate: (name: string, description?: string, color?: string, icon?: string) => void
-	onUpdate: (id: string, name: string, description?: string, color?: string, icon?: string) => void
+	onCreate: (name: string, description?: string, color?: string, icon?: string, includeInResurface?: boolean) => void
+	onUpdate: (id: string, name: string, description?: string, color?: string, icon?: string, includeInResurface?: boolean) => void
 	onDelete: (id: string) => void
 	isCreating: boolean
 }) {
@@ -49,9 +49,9 @@ export function ListsView({
 			return sortDir === 'asc' ? cmp : -cmp
 		})
 
-	function handleEditSubmit(name: string, description?: string, color?: string, icon?: string) {
+	function handleEditSubmit(name: string, description?: string, color?: string, icon?: string, includeInResurface?: boolean) {
 		if (!editTarget) return
-		onUpdate(editTarget.id, name, description, color, icon)
+		onUpdate(editTarget.id, name, description, color, icon, includeInResurface)
 		setEditTarget(null)
 	}
 
