@@ -1,9 +1,10 @@
-import { ActionIcon, Badge, Box, Group, Pill, Stack, Text, Tooltip, CloseButton } from "@mantine/core";
+import { ActionIcon, Badge, Box, CloseButton, Group, Pill, Stack, Text, Tooltip } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import { DepthSelect } from "@gfazioli/mantine-depth-select";
 import type { DepthSelectItem } from "@gfazioli/mantine-depth-select";
 import {
 	IconBrandYoutube, IconBrandReddit, IconBrandInstagram, IconWorld,
-	IconSparkles, IconMapPin, IconLayersIntersect, IconRefresh,
+	IconSparkles, IconMapPin, IconLayersIntersect, IconRefresh, IconNote,
 } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -38,17 +39,17 @@ function parseStructuredSummary(raw: string | null): StructuredSummary | null {
 }
 
 const PLATFORM_META: Record<ResurfacedSave["sourcePlatform"], { label: string; color: string; hex: string; Icon: React.ElementType }> = {
-	youtube:   { label: "YouTube",   color: "red",    hex: "#e03131", Icon: IconBrandYoutube },
-	reddit:    { label: "Reddit",    color: "orange",  hex: "#e8590c", Icon: IconBrandReddit },
-	instagram: { label: "Instagram", color: "grape",   hex: "#9c36b5", Icon: IconBrandInstagram },
-	web:       { label: "Web",       color: "cyan",    hex: "#0c8599", Icon: IconWorld },
+	youtube: { label: "YouTube", color: "red", hex: "#e03131", Icon: IconBrandYoutube },
+	reddit: { label: "Reddit", color: "orange", hex: "#e8590c", Icon: IconBrandReddit },
+	instagram: { label: "Instagram", color: "grape", hex: "#9c36b5", Icon: IconBrandInstagram },
+	web: { label: "Web", color: "cyan", hex: "#0c8599", Icon: IconWorld },
 };
 
-function ResurfaceCardSkeleton() {
+function ResurfaceCardSkeleton({ isDesktop }: { isDesktop: boolean }) {
 	return (
 		<Box
 			style={{
-				height: 280,
+				height: isDesktop ? 280 : 380,
 				borderRadius: 12,
 				background: "var(--mantine-color-dark-6)",
 				border: "1px solid var(--mantine-color-dark-4)",
@@ -58,7 +59,7 @@ function ResurfaceCardSkeleton() {
 	);
 }
 
-function ResurfaceCard({ save, onUncache }: { save: ResurfacedSave; onUncache: () => void }) {
+function ResurfaceCard({ save, onUncache, isDesktop }: { save: ResurfacedSave; onUncache: () => void; isDesktop: boolean }) {
 	const ai = parseStructuredSummary(save?.aiSummary);
 	const meta = PLATFORM_META[save?.sourcePlatform];
 	if (!save || !meta) return null;
@@ -66,67 +67,165 @@ function ResurfaceCard({ save, onUncache }: { save: ResurfacedSave; onUncache: (
 	const PlatformIcon = meta.Icon;
 	const title = save.aiTitle ?? save.title ?? save.sourceUrl;
 
+	if (isDesktop) {
+		return (
+			<Box
+				style={{
+					height: 280,
+					borderRadius: 12,
+					border: "1px solid var(--mantine-color-dark-4)",
+					background: "var(--mantine-color-dark-7)",
+					overflow: "hidden",
+					display: "flex",
+					flexDirection: "row",
+				}}
+			>
+				{/* Thumbnail */}
+				{save.thumbnailUrl ? (
+					<Box w={400} style={{ flexShrink: 0, position: "relative" }}>
+						<img
+							src={save.thumbnailUrl}
+							alt=""
+							referrerPolicy="no-referrer"
+							style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+						/>
+						<Box style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, transparent 60%, var(--mantine-color-dark-7))" }} />
+					</Box>
+				) : (
+					<Box w={200} style={{ flexShrink: 0, background: `linear-gradient(135deg, ${meta.hex}33, ${meta.hex}66)`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+						<PlatformIcon size={48} color={`${meta.hex}99`} />
+					</Box>
+				)}
+
+				<Stack p="lg" gap="xs" style={{ flex: 1, overflow: "hidden", minWidth: 0 }}>
+					<Group gap={6} justify="space-between">
+						<Group gap={6}>
+							<Badge size="xs" color={meta.color} variant="light" leftSection={<PlatformIcon size={10} />}>{meta.label}</Badge>
+							{ai?.category && <Badge size="xs" variant="light" color="violet">{ai.category}</Badge>}
+							{ai?.contentType && <Badge size="xs" variant="light" color="blue">{ai.contentType}</Badge>}
+							{ai?.timeSensitive && <Badge size="xs" color="orange" variant="light">Time sensitive</Badge>}
+						</Group>
+						<Tooltip label="Remove from resurface queue">
+							<CloseButton size="sm" variant="subtle" color="gray" onClick={onUncache} />
+						</Tooltip>
+					</Group>
+
+					<Text fw={700} size="md" lineClamp={2} style={{ lineHeight: 1.3 }}>{title}</Text>
+
+					{(save.author || save.publishedAt) && (
+						<Group gap={4}>
+							{save.author && <Text size="xs" c="dimmed">{save.author}</Text>}
+							{save.author && save.publishedAt && <Text size="xs" c="dimmed">·</Text>}
+							{save.publishedAt && <Text size="xs" c="dimmed">{dayjs(save.publishedAt).fromNow()}</Text>}
+						</Group>
+					)}
+
+					<Group gap={4}>
+						<Text size="xs" c="dimmed">Saved {dayjs(save.createdAt).fromNow()}</Text>
+						{dayjs(save.updatedAt).diff(dayjs(save.createdAt), "day") >= 1 && (
+							<>
+								<Text size="xs" c="dimmed">·</Text>
+								<Text size="xs" c="dimmed">Updated {dayjs(save.updatedAt).fromNow()}</Text>
+							</>
+						)}
+					</Group>
+
+					{save.note && (
+						<Group gap={6} align="flex-start" wrap="nowrap">
+							<IconNote size={12} style={{ color: "var(--mantine-color-yellow-5)", flexShrink: 0, marginTop: 2 }} />
+							<Text size="xs" c="yellow.4" lineClamp={2}>{save.note}</Text>
+						</Group>
+					)}
+
+					{ai?.summary && (
+						<Group gap={6} align="flex-start" wrap="nowrap">
+							<IconSparkles size={12} style={{ color: "var(--mantine-color-violet-4)", flexShrink: 0, marginTop: 2 }} />
+							<Text size="xs" c="dimmed" fs="italic" lineClamp={3}>{ai.summary}</Text>
+						</Group>
+					)}
+
+					{ai?.keyPoints && ai.keyPoints.length > 0 && (
+						<Stack gap={2}>
+							{ai.keyPoints.slice(0, 2).map((point, i) => (
+								<Group key={i} gap={6} wrap="nowrap">
+									<Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>·</Text>
+									<Text size="xs" c="dimmed" lineClamp={1}>{point}</Text>
+								</Group>
+							))}
+						</Stack>
+					)}
+
+					{ai?.location && (
+						<Group gap={4}>
+							<IconMapPin size={11} style={{ color: "var(--mantine-color-dimmed)", flexShrink: 0 }} />
+							<Text size="xs" c="dimmed" lineClamp={1}>{ai.location.name}{ai.location.context ? ` — ${ai.location.context}` : ""}</Text>
+						</Group>
+					)}
+
+					{save.tags.length > 0 && (
+						<Group gap={4} mt="auto">
+							{save.tags.slice(0, 5).map((tag) => <Pill key={tag} size="xs">{tag}</Pill>)}
+						</Group>
+					)}
+				</Stack>
+			</Box>
+		);
+	}
+
+	// Mobile: portrait layout — thumbnail on top, content below
 	return (
 		<Box
 			style={{
-				height: 280,
 				borderRadius: 12,
 				border: "1px solid var(--mantine-color-dark-4)",
 				background: "var(--mantine-color-dark-7)",
 				overflow: "hidden",
-				display: "flex",
-				flexDirection: "row",
 			}}
 		>
 			{/* Thumbnail */}
-			{save.thumbnailUrl ? (
-				<Box w={200} style={{ flexShrink: 0, position: "relative" }}>
-					<img
-						src={save.thumbnailUrl}
-						alt=""
-						referrerPolicy="no-referrer"
-						style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-					/>
-					<Box style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, transparent 60%, var(--mantine-color-dark-7))" }} />
+			<Box style={{ position: "relative", height: 160 }}>
+				{save.thumbnailUrl ? (
+					<>
+						<img
+							src={save.thumbnailUrl}
+							alt=""
+							referrerPolicy="no-referrer"
+							style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+						/>
+						<Box style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, var(--mantine-color-dark-7))" }} />
+					</>
+				) : (
+					<Box
+						style={{
+							width: "100%",
+							height: "100%",
+							background: `linear-gradient(135deg, ${meta.hex}33, ${meta.hex}66)`,
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+						}}
+					>
+						<PlatformIcon size={48} color={`${meta.hex}99`} />
+					</Box>
+				)}
+				<Box style={{ position: "absolute", top: 8, right: 8 }}>
+					<Tooltip label="Remove from resurface queue">
+						<CloseButton size="sm" variant="filled" color="dark" onClick={onUncache} />
+					</Tooltip>
 				</Box>
-			) : (
-				<Box
-					w={200}
-					style={{
-						flexShrink: 0,
-						background: `linear-gradient(135deg, ${meta.hex}33, ${meta.hex}66)`,
-						display: "flex",
-						alignItems: "center",
-						justifyContent: "center",
-					}}
-				>
-					<PlatformIcon size={48} color={`${meta.hex}99`} />
-				</Box>
-			)}
+			</Box>
 
 			{/* Content */}
-			<Stack p="lg" gap="xs" style={{ flex: 1, overflow: "hidden", minWidth: 0 }}>
-				{/* Badges */}
-				<Group gap={6} justify="space-between">
-					<Group gap={6}>
-						<Badge size="xs" color={meta.color} variant="light" leftSection={<PlatformIcon size={10} />}>
-							{meta.label}
-						</Badge>
-						{ai?.category && <Badge size="xs" variant="light" color="violet">{ai.category}</Badge>}
-						{ai?.contentType && <Badge size="xs" variant="light" color="blue">{ai.contentType}</Badge>}
-						{ai?.timeSensitive && <Badge size="xs" color="orange" variant="light">Time sensitive</Badge>}
-					</Group>
-					<Tooltip label="Remove from resurface queue">
-						<CloseButton size="sm" variant="subtle" color="gray" onClick={onUncache} />
-					</Tooltip>
+			<Stack p="md" gap="xs">
+				<Group gap={6} wrap="wrap">
+					<Badge size="xs" color={meta.color} variant="light" leftSection={<PlatformIcon size={10} />}>{meta.label}</Badge>
+					{ai?.category && <Badge size="xs" variant="light" color="violet">{ai.category}</Badge>}
+					{ai?.contentType && <Badge size="xs" variant="light" color="blue">{ai.contentType}</Badge>}
+					{ai?.timeSensitive && <Badge size="xs" color="orange" variant="light">Time sensitive</Badge>}
 				</Group>
 
-				{/* Title */}
-				<Text fw={700} size="md" lineClamp={2} style={{ lineHeight: 1.3 }}>
-					{title}
-				</Text>
+				<Text fw={700} size="sm" lineClamp={2} style={{ lineHeight: 1.3 }}>{title}</Text>
 
-				{/* Author + date */}
 				{(save.author || save.publishedAt) && (
 					<Group gap={4}>
 						{save.author && <Text size="xs" c="dimmed">{save.author}</Text>}
@@ -135,7 +234,23 @@ function ResurfaceCard({ save, onUncache }: { save: ResurfacedSave; onUncache: (
 					</Group>
 				)}
 
-				{/* AI summary */}
+				<Group gap={4}>
+					<Text size="xs" c="dimmed">Saved {dayjs(save.createdAt).fromNow()}</Text>
+					{dayjs(save.updatedAt).diff(dayjs(save.createdAt), "day") >= 1 && (
+						<>
+							<Text size="xs" c="dimmed">·</Text>
+							<Text size="xs" c="dimmed">Updated {dayjs(save.updatedAt).fromNow()}</Text>
+						</>
+					)}
+				</Group>
+
+				{save.note && (
+					<Group gap={6} align="flex-start" wrap="nowrap">
+						<IconNote size={12} style={{ color: "var(--mantine-color-yellow-5)", flexShrink: 0, marginTop: 2 }} />
+						<Text size="xs" c="yellow.4" lineClamp={3}>{save.note}</Text>
+					</Group>
+				)}
+
 				{ai?.summary && (
 					<Group gap={6} align="flex-start" wrap="nowrap">
 						<IconSparkles size={12} style={{ color: "var(--mantine-color-violet-4)", flexShrink: 0, marginTop: 2 }} />
@@ -143,7 +258,6 @@ function ResurfaceCard({ save, onUncache }: { save: ResurfacedSave; onUncache: (
 					</Group>
 				)}
 
-				{/* Key points */}
 				{ai?.keyPoints && ai.keyPoints.length > 0 && (
 					<Stack gap={2}>
 						{ai.keyPoints.slice(0, 2).map((point, i) => (
@@ -155,22 +269,9 @@ function ResurfaceCard({ save, onUncache }: { save: ResurfacedSave; onUncache: (
 					</Stack>
 				)}
 
-				{/* Location */}
-				{ai?.location && (
-					<Group gap={4}>
-						<IconMapPin size={11} style={{ color: "var(--mantine-color-dimmed)", flexShrink: 0 }} />
-						<Text size="xs" c="dimmed" lineClamp={1}>
-							{ai.location.name}{ai.location.context ? ` — ${ai.location.context}` : ""}
-						</Text>
-					</Group>
-				)}
-
-				{/* Tags */}
 				{save.tags.length > 0 && (
-					<Group gap={4} mt="auto">
-						{save.tags.slice(0, 5).map((tag) => (
-							<Pill key={tag} size="xs">{tag}</Pill>
-						))}
+					<Group gap={4}>
+						{save.tags.slice(0, 4).map((tag) => <Pill key={tag} size="xs">{tag}</Pill>)}
 					</Group>
 				)}
 			</Stack>
@@ -194,6 +295,7 @@ function EmptyState() {
 
 export function ResurfacePage() {
 	const { saves, fetchIfStale, resurface, uncache, isPending, isError } = useResurface();
+	const isDesktop = useMediaQuery("(min-width: 48em)", true, { getInitialValueInEffect: false });
 
 	useEffect(() => {
 		fetchIfStale();
@@ -201,8 +303,10 @@ export function ResurfacePage() {
 
 	const items: DepthSelectItem[] = saves.map((save, idx) => ({
 		value: idx,
-		view: <ResurfaceCard save={save} onUncache={() => uncache(save.id)} />,
+		view: <ResurfaceCard save={save} onUncache={() => uncache(save.id)} isDesktop={isDesktop ?? true} />,
 	}));
+
+	const cardHeight = isDesktop ? 280 : 380;
 
 	return (
 		<Stack gap="xl" pt="sm">
@@ -223,27 +327,27 @@ export function ResurfacePage() {
 				</Group>
 			</Group>
 
-			{isError && (
-				<Text size="sm" c="red">Something went wrong loading resurfaces.</Text>
-			)}
+			{isError && <Text size="sm" c="red">Something went wrong loading resurfaces.</Text>}
 
-			{isPending && items.length === 0 && <ResurfaceCardSkeleton />}
+			{isPending && items.length === 0 && <ResurfaceCardSkeleton isDesktop={isDesktop ?? true} />}
 
 			{!isPending && items.length === 0 && !isError && <EmptyState />}
 
 			{items.length > 0 && (
-				<Stack pt={60} pb={60}>
-					<DepthSelect
-						visibleCards={5}
-						translateYStep={40}
-						blurStep={1.5}
-						data={items}
-						loop
-						controlsProps={{ labelFormatter: (item) => String(Number(item.value) + 1) }}
-						w="50vw"
-						h={280}
-					/>
-				</Stack>
+				<Box style={{ overflow: "hidden" }}>
+					<Stack pt={60} pb={60}>
+						<DepthSelect
+							visibleCards={5}
+							translateYStep={40}
+							blurStep={1.5}
+							data={items}
+							loop
+							controlsProps={{ labelFormatter: (item) => String(Number(item.value) + 1) }}
+							w={isDesktop ? "50vw" : "100%"}
+							h={cardHeight}
+						/>
+					</Stack>
+				</Box>
 			)}
 		</Stack>
 	);

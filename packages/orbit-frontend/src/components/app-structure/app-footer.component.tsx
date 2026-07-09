@@ -1,6 +1,6 @@
 import ROUTES from "@/routes"
 import { AppShell, ActionIcon, Group, Text, UnstyledButton } from "@mantine/core"
-import { IconBookmark, IconFileText, IconHome2, IconList, IconPlus, IconRocket, IconTimeline } from "@tabler/icons-react"
+import { IconBookmark, IconCards, IconFileText, IconHome2, IconList, IconPlus, IconRocket, IconTimeline } from "@tabler/icons-react"
 import { useLocation, useNavigate } from "@tanstack/react-router"
 import { useOrbitAppStore } from "@/store/orbit-app.store"
 
@@ -8,6 +8,7 @@ const NAV_ITEMS = [
 	{ label: "Notes", icon: IconFileText, to: ROUTES.NOTES, accent: "gray", shade: 4 },
 	{ label: "Timeline", icon: IconTimeline, to: ROUTES.TIMELINE, accent: "pink", shade: 4 },
 	{ label: "Saves", icon: IconBookmark, to: ROUTES.SAVES, accent: "amber", shade: 5 },
+	{ label: "Re", icon: IconCards, to: ROUTES.RESURFACE, accent: "orange", shade: 5 },
 	{ label: "Lists", icon: IconList, to: ROUTES.LISTS, accent: "violet", shade: 5 },
 	{ label: "Quests", icon: IconRocket, to: ROUTES.QUESTS, accent: "ocean-blue", shade: 4 },
 	{ label: "Home", icon: IconHome2, to: ROUTES.HOME, accent: "teal", shade: 4 },

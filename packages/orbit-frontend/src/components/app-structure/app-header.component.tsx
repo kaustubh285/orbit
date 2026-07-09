@@ -2,7 +2,7 @@ import ROUTES from "@/routes";
 import { ActionIcon, AppShell, Avatar, Button, Flex, Group, Text, Tooltip } from "@mantine/core";
 import { useNavigate } from "@tanstack/react-router";
 import { Show, UserButton } from '@clerk/react'
-import { IconEye, IconEyeClosed } from "@tabler/icons-react";
+import { IconCards, IconEye, IconEyeClosed } from "@tabler/icons-react";
 import { useOrbitAppStore } from "@/store/orbit-app.store";
 import { useQuery } from "@tanstack/react-query";
 import { getUsersMeOptions } from "@orbit/client";
@@ -26,6 +26,7 @@ export function AppHeader() {
 			<Flex h="100%" px="md" justify="space-between" align="center" style={{ paddingTop: "env(safe-area-inset-top)" }}>
 				<Text onClick={() => navigate({ to: "/" })} fw={700} size="lg">Orbit</Text>
 				<Group gap="xs">
+					<IconCards size={18} />
 					<CachedItems />
 					<ActionIcon variant="subtle" onClick={actions.togglePrivacyMode} aria-label="Toggle privacy mode">
 						{privacyMode ? <IconEyeClosed size={18} /> : <IconEye size={18} />}
