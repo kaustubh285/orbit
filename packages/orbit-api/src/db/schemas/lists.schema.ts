@@ -1,5 +1,6 @@
 import {
 	pgTable,
+	boolean,
 	text,
 	uuid,
 	check,
@@ -26,6 +27,7 @@ export const listsTable = pgTable("lists", {
 	description: text("description"),
 	color: text("color"), // hex or token, for UI distinction
 	icon: text("icon").notNull().default("📋"),
+	includeInResurface: boolean("include_in_resurface").notNull().default(false),
 });
 
 // Cross-domain junction: a row links a list to EITHER a quest OR a save.

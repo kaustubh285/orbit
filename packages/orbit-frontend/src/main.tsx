@@ -8,6 +8,7 @@ import { createTheme, MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import '@mantine/tiptap/styles.css';
+import '@gfazioli/mantine-depth-select/styles.css';
 import { ClerkProvider, useAuth } from "@clerk/react"
 import { client } from "@orbit/client"
 

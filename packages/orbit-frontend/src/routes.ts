@@ -10,6 +10,7 @@ const ROUTES = {
 	TIMELINE: "/timeline",
 	REPORT: "/report",
 	LOGIN: "/sign-in",
+	RESURFACE: "/resurface",
 } as const
 
 export default ROUTES

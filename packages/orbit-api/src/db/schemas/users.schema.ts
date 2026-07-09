@@ -1,4 +1,4 @@
-import { pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { integer, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { createdAt, id, updatedAt, deletedAt } from "../schema.helper";
 
 export const aiModelEnum = pgEnum("ai_model", ["none", "sarvam", "haiku"]);

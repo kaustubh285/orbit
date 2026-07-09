@@ -13,11 +13,13 @@ import type {
 	GetOneRoute,
 	ListRoute,
 	RemoveRoute,
+	ResurfaceSavesRoute,
 	UpdateRoute,
 	UpdateSaveListRoute,
 } from "./routes.js";
 import { aiOverview, type AiModel } from "@/lib/ai-overviews.js";
 import { usersTable } from "@/db/schema";
+import { resurfaceLogic } from "@/lib/resurface.js";
 
 export const listSaves: AppRouteHandler<ListRoute> = async (c) => {
 	const userId = c.var.userId;
@@ -203,6 +205,10 @@ async function enrichSave(
 			model: aiModel,
 		});
 
+		if (!ai) {
+			logger.warn({ saveId }, "[ai] enrichment returned null — skipping DB update");
+			return;
+		}
 		if (ai) {
 			const { ai_title, tags: aiTags, list: _list, ...summaryData } = ai;
 			const mergedTags = [...new Set([...(current?.tags ?? []), ...aiTags])];
@@ -381,6 +387,18 @@ export const removeSave: AppRouteHandler<RemoveRoute> = async (c) => {
 		return c.json({ message: "Save not found" }, HttpStatusCodes.NOT_FOUND);
 	}
 	return c.body(null, HttpStatusCodes.NO_CONTENT);
+};
+
+export const resurfaceSaves: AppRouteHandler<ResurfaceSavesRoute> = async (c) => {
+	const userId = c.var.userId;
+
+	const resurfacedSave = await resurfaceLogic({ userId });
+
+	if (!resurfacedSave) {
+		return c.body(null, HttpStatusCodes.NO_CONTENT);
+	}
+
+	return c.json(resurfacedSave, HttpStatusCodes.OK);
 };
 
 // ─── AI enrichment backfill ───────────────────────────────────────────────────

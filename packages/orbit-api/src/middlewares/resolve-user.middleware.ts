@@ -64,7 +64,7 @@ export const resolveUser: MiddlewareHandler<AppBindings> = async (c, next) => {
 
 	let clerkUserId: string;
 	try {
-		const payload = await verifyToken(token, { secretKey: env.CLERK_SECRET_KEY });
+		const payload = await verifyToken(token, { secretKey: env.CLERK_SECRET_KEY, clockSkewInMs: 5000 });
 		clerkUserId = payload.sub;
 	} catch (e) {
 		c.var.logger.warn({ err: e }, "Token verification failed");

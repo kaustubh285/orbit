@@ -156,6 +156,16 @@ export const updateSaveList = createRoute({
 });
 
 
+export const resurfaceSaves = createRoute({
+	path: "/saves/resurface",
+	method: "post",
+	tags: ["Saves"],
+	responses: {
+		[HttpStatusCodes.OK]: jsonContent(selectSaveSchema, "Resurface result"),
+		[HttpStatusCodes.NO_CONTENT]: { description: "No saves to resurface" },
+	},
+});
+
 export type BackfillRoute = typeof backfill;
 export type ListRoute = typeof list;
 export type CreateRoute = typeof create;
@@ -163,3 +173,4 @@ export type GetOneRoute = typeof getOne;
 export type UpdateRoute = typeof update;
 export type RemoveRoute = typeof remove;
 export type UpdateSaveListRoute = typeof updateSaveList;
+export type ResurfaceSavesRoute = typeof resurfaceSaves;

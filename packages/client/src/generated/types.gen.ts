@@ -655,6 +655,44 @@ export type PatchSavesByIdResponses = {
 
 export type PatchSavesByIdResponse = PatchSavesByIdResponses[keyof PatchSavesByIdResponses];
 
+export type PostSavesResurfaceData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/saves/resurface';
+};
+
+export type PostSavesResurfaceResponses = {
+    /**
+     * Resurface result
+     */
+    200: {
+        id: string;
+        userId: string;
+        sourceUrl: string;
+        sourcePlatform: 'youtube' | 'reddit' | 'instagram' | 'web';
+        title: string | null;
+        description: string | null;
+        thumbnailUrl: string | null;
+        author: string | null;
+        publishedAt: string | null;
+        note: string | null;
+        tags: Array<string>;
+        status: 'active' | 'archived';
+        aiTitle: string | null;
+        aiSummary: string | null;
+        aiEnrichedAt: string | null;
+        createdAt: string;
+        updatedAt: string;
+    };
+    /**
+     * No saves to resurface
+     */
+    204: void;
+};
+
+export type PostSavesResurfaceResponse = PostSavesResurfaceResponses[keyof PostSavesResurfaceResponses];
+
 export type GetListsData = {
     body?: never;
     path?: never;

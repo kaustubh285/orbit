@@ -8,6 +8,7 @@ import {
 	boolean,
 	index,
 	uniqueIndex,
+	integer,
 } from "drizzle-orm/pg-core";
 import { id, createdAt, updatedAt, deletedAt } from "../schema.helper";
 import { usersTable } from "./users.schema";
@@ -55,6 +56,10 @@ export const savesTable = pgTable(
 
 		status: saveStatusEnum("status").notNull().default("active"),
 
+		// resurface tracking
+		lastSurfacedAt: timestamp("last_surfaced_at", { withTimezone: true }),
+		resurfaceCount: integer("resurface_count").notNull().default(0),
+		lastInteractedAt: timestamp("last_interacted_at", { withTimezone: true }),
 
 		// AI
 		shouldAISummaries: boolean("should_ai_summaries").notNull().default(false),
