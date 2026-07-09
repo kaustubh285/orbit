@@ -40,5 +40,12 @@ export const useResurface = () => {
 
 	const resurface = () => mutation.mutate({});
 
-	return { saves, fetchIfStale, resurface, isPending: mutation.isPending, isError: mutation.isError };
+	const uncache = (saveId: string) => {
+		const current = getStore();
+		const updated = current.saves.filter(s => s.id !== saveId);
+		setStore({ ...current, saves: updated });
+		setSaves(updated);
+	};
+
+	return { saves, fetchIfStale, resurface, uncache, isPending: mutation.isPending, isError: mutation.isError };
 };

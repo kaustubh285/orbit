@@ -1,4 +1,4 @@
-import { ActionIcon, Badge, Box, Group, Pill, Stack, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Badge, Box, Group, Pill, Stack, Text, Tooltip, CloseButton } from "@mantine/core";
 import { DepthSelect } from "@gfazioli/mantine-depth-select";
 import type { DepthSelectItem } from "@gfazioli/mantine-depth-select";
 import {
@@ -58,7 +58,7 @@ function ResurfaceCardSkeleton() {
 	);
 }
 
-function ResurfaceCard({ save }: { save: ResurfacedSave }) {
+function ResurfaceCard({ save, onUncache }: { save: ResurfacedSave; onUncache: () => void }) {
 	const ai = parseStructuredSummary(save?.aiSummary);
 	const meta = PLATFORM_META[save?.sourcePlatform];
 	if (!save || !meta) return null;
@@ -107,13 +107,18 @@ function ResurfaceCard({ save }: { save: ResurfacedSave }) {
 			{/* Content */}
 			<Stack p="lg" gap="xs" style={{ flex: 1, overflow: "hidden", minWidth: 0 }}>
 				{/* Badges */}
-				<Group gap={6}>
-					<Badge size="xs" color={meta.color} variant="light" leftSection={<PlatformIcon size={10} />}>
-						{meta.label}
-					</Badge>
-					{ai?.category && <Badge size="xs" variant="light" color="violet">{ai.category}</Badge>}
-					{ai?.contentType && <Badge size="xs" variant="light" color="blue">{ai.contentType}</Badge>}
-					{ai?.timeSensitive && <Badge size="xs" color="orange" variant="light">Time sensitive</Badge>}
+				<Group gap={6} justify="space-between">
+					<Group gap={6}>
+						<Badge size="xs" color={meta.color} variant="light" leftSection={<PlatformIcon size={10} />}>
+							{meta.label}
+						</Badge>
+						{ai?.category && <Badge size="xs" variant="light" color="violet">{ai.category}</Badge>}
+						{ai?.contentType && <Badge size="xs" variant="light" color="blue">{ai.contentType}</Badge>}
+						{ai?.timeSensitive && <Badge size="xs" color="orange" variant="light">Time sensitive</Badge>}
+					</Group>
+					<Tooltip label="Remove from resurface queue">
+						<CloseButton size="sm" variant="subtle" color="gray" onClick={onUncache} />
+					</Tooltip>
 				</Group>
 
 				{/* Title */}
@@ -188,7 +193,7 @@ function EmptyState() {
 }
 
 export function ResurfacePage() {
-	const { saves, fetchIfStale, resurface, isPending, isError } = useResurface();
+	const { saves, fetchIfStale, resurface, uncache, isPending, isError } = useResurface();
 
 	useEffect(() => {
 		fetchIfStale();
@@ -196,7 +201,7 @@ export function ResurfacePage() {
 
 	const items: DepthSelectItem[] = saves.map((save, idx) => ({
 		value: idx,
-		view: <ResurfaceCard save={save} />,
+		view: <ResurfaceCard save={save} onUncache={() => uncache(save.id)} />,
 	}));
 
 	return (
