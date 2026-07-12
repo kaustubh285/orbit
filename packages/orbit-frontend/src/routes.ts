@@ -11,6 +11,7 @@ const ROUTES = {
 	REPORT: "/report",
 	LOGIN: "/sign-in",
 	RESURFACE: "/resurface",
+	ADMIN: "/admin",
 } as const
 
 export default ROUTES

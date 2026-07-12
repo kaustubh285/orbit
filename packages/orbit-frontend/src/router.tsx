@@ -20,6 +20,8 @@ import { NoteDetailPage } from "./pages/notes/note-detail.page"
 import { TimelinePage } from "./pages/timeline/timeline.page"
 import { ReportPage } from "./pages/report/report.page"
 import { ResurfacePage } from "./pages/resurface/resurface.page"
+import AdminDashboardPage from "./pages/admin/admin-dashboard.page"
+
 
 type AuthContext = {
 	isLoaded: boolean
@@ -118,6 +120,13 @@ const resurfaceRoute = createRoute({
 	component: ResurfacePage,
 })
 
+const adminRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: ROUTES.ADMIN,
+	beforeLoad: requireAuth,
+	component: AdminDashboardPage,
+})
+
 const loginRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: ROUTES.LOGIN,
@@ -136,6 +145,7 @@ const routeTree = rootRoute.addChildren([
 	timelineRoute,
 	reportRoute,
 	resurfaceRoute,
+	adminRoute,
 	loginRoute,
 ])
 

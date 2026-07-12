@@ -32,9 +32,9 @@ import { useReport, type ReportData } from "./use-report.hook"
 // ---------------------------------------------------------------------------
 // Preset ranges
 // ---------------------------------------------------------------------------
-type RangeKey = "7d" | "30d" | "thisWeek" | "thisMonth" | "lastMonth"
+export type RangeKey = "7d" | "30d" | "thisWeek" | "thisMonth" | "lastMonth"
 
-function getRangeDates(key: RangeKey): { start: string; end: string } {
+export function getRangeDates(key: RangeKey): { start: string; end: string } {
 	const now = dayjs()
 	switch (key) {
 		case "7d":
@@ -52,7 +52,7 @@ function getRangeDates(key: RangeKey): { start: string; end: string } {
 	}
 }
 
-const RANGE_OPTIONS: { value: RangeKey; label: string }[] = [
+export const RANGE_OPTIONS: { value: RangeKey; label: string }[] = [
 	{ value: "7d", label: "Last 7 days" },
 	{ value: "30d", label: "Last 30 days" },
 	{ value: "thisWeek", label: "This week" },
@@ -165,7 +165,7 @@ function PlatformBreakdown({ savesByPlatform }: { savesByPlatform: ReportData["s
 // ---------------------------------------------------------------------------
 // Report content
 // ---------------------------------------------------------------------------
-function ReportContent({ data, range }: { data: ReportData; range: RangeKey }) {
+export function ReportContent({ data, range }: { data: ReportData; range: RangeKey }) {
 	const totalQuestActivity = data.questsCompleted + data.questsIncomplete
 
 	return (
@@ -352,7 +352,7 @@ function ReportContent({ data, range }: { data: ReportData; range: RangeKey }) {
 // ---------------------------------------------------------------------------
 // Skeletons
 // ---------------------------------------------------------------------------
-function ReportSkeleton() {
+export function ReportSkeleton() {
 	return (
 		<Stack gap="xl">
 			<Stack gap="xs">

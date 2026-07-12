@@ -1,6 +1,6 @@
 import ROUTES from "@/routes"
 import { AppShell, NavLink, Stack } from "@mantine/core"
-import { IconBookmark, IconCards, IconFileText, IconHome2, IconList, IconPlus, IconRocket, IconTimeline } from "@tabler/icons-react"
+import { IconBookmark, IconCards, IconFileText, IconHome2, IconLayoutDashboardFilled, IconList, IconPlus, IconRocket, IconTimeline } from "@tabler/icons-react"
 import { useLocation, useNavigate } from "@tanstack/react-router"
 import { useOrbitAppStore } from "@/store/orbit-app.store"
 
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
 	{ label: "Saves", icon: IconBookmark, to: ROUTES.SAVES, accent: "amber", shade: 9 },
 	{ label: "Timeline", icon: IconTimeline, to: ROUTES.TIMELINE, accent: "pink", shade: 9 },
 	{ label: "Notes", icon: IconFileText, to: ROUTES.NOTES, accent: "gray", shade: 8 },
+	{ label: "Admin", icon: IconLayoutDashboardFilled, to: ROUTES.ADMIN, accent: "blue", shade: 8 },
 ]
 
 export function AppNavbar() {
