@@ -24,9 +24,11 @@ export function AppHeader() {
 	return (
 		<AppShell.Header>
 			<Flex h="100%" px="md" justify="space-between" align="center" style={{ paddingTop: "env(safe-area-inset-top)" }}>
-				<Text onClick={() => navigate({ to: "/" })} fw={700} size="lg">Orbit</Text>
+				<Text onClick={() => navigate({ to: ROUTES.HOME })} fw={700} size="lg">Orbit</Text>
 				<Group gap="xs">
-					<IconCards size={18} />
+					<ActionIcon variant="subtle" c="amber" onClick={() => navigate({ to: ROUTES.RESURFACE })} aria-label="Resurface Page">
+						<IconCards size={18} />
+					</ActionIcon>
 					<CachedItems />
 					<ActionIcon variant="subtle" onClick={actions.togglePrivacyMode} aria-label="Toggle privacy mode">
 						{privacyMode ? <IconEyeClosed size={18} /> : <IconEye size={18} />}

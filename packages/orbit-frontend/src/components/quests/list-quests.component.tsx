@@ -73,6 +73,7 @@ export function QuestRow({
 				td={isCompleted ? "line-through" : undefined}
 				c={isCompleted ? "dimmed" : undefined}
 				style={{ flex: 1 }}
+				onClick={() => onOpen(quest)}
 			>
 				{quest.title}
 			</PrivacyAwareText>

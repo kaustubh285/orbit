@@ -30,8 +30,10 @@ function toDate(val: string | null | undefined): Date | null {
 	return val ? new Date(val) : null
 }
 
-function toISO(val: Date | null): string | null {
-	return val ? val.toISOString() : null
+function toISO(val: Date | string | null): string | null {
+	if (!val) return null
+	if (typeof val === "string") return val
+	return val.toISOString()
 }
 
 function isToday(date: Date | null) {
@@ -75,11 +77,11 @@ type FormValues = {
 	type: Quest["type"]
 	status: Quest["status"]
 	priority: Quest["priority"]
-	dueAt: Date | null
-	startAt: Date | null
-	endAt: Date | null
+	dueAt: Date | string | null
+	startAt: Date | string | null
+	endAt: Date | string | null
 	location: string
-	lastCompletedAt: Date | null
+	lastCompletedAt: Date | string | null
 }
 
 function QuestForm({

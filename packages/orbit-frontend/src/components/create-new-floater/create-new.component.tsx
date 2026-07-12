@@ -238,7 +238,7 @@ export function CreateNewComponent() {
 	return (
 		<>
 			<Drawer
-				position={isDesktop ? "right" : "bottom"}
+				position={isDesktop ? "left" : "bottom"}
 				size={isDesktop ? "md" : "85%"}
 				opened={opened}
 				onClose={handleClose}
