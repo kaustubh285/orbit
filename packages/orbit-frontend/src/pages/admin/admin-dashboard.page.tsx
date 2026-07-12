@@ -329,7 +329,7 @@ function SavesTab() {
 									) : <Text size="xs" c="dimmed">—</Text>}
 								</Table.Td>
 								<Table.Td><Text size="xs">{fmt(s.createdAt)}</Text></Table.Td>
-								<Table.Td><Text size="xs">{s.aiSummary ? <IconSquareRoundedCheckFilled c="green"  /> : <IconMinus c="dimmed" />}</Text></Table.Td>
+								<Table.Td><Text size="xs" c={s.aiSummary ? "teal" : "dimmed"}>{s.aiSummary ? "Yes" : "—"}</Text></Table.Td>
 							</Table.Tr>
 						))}
 					</Table.Tbody>

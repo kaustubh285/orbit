@@ -123,7 +123,7 @@ export function useGetCaptureToken() {
 				throwOnError: false,
 			})
 			if (error) throw error
-			return (data as { captureToken: string }).captureToken
+			return (data as unknown as { captureToken: string }).captureToken
 		},
 	})
 }

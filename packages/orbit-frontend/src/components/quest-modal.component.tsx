@@ -32,7 +32,7 @@ function toDate(val: string | null | undefined): Date | null {
 
 function toISO(val: Date | string | null): string | null {
 	if (!val) return null
-	if (typeof val === "string") return val
+	if (typeof val === "string") return new Date(val).toISOString()
 	return val.toISOString()
 }
 
@@ -77,11 +77,11 @@ type FormValues = {
 	type: Quest["type"]
 	status: Quest["status"]
 	priority: Quest["priority"]
-	dueAt: Date | string | null
-	startAt: Date | string | null
-	endAt: Date | string | null
+	dueAt: Date | null
+	startAt: Date | null
+	endAt: Date | null
 	location: string
-	lastCompletedAt: Date | string | null
+	lastCompletedAt: Date | null
 }
 
 function QuestForm({
