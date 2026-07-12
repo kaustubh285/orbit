@@ -23,6 +23,7 @@ client.interceptors.request.use(async (request) => {
 		const token = await _getToken()
 		if (token) request.headers.set("Authorization", `Bearer ${token}`)
 	}
+	request.headers.set("X-Timezone", Intl.DateTimeFormat().resolvedOptions().timeZone)
 	return request
 })
 

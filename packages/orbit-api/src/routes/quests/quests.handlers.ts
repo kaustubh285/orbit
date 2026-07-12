@@ -14,6 +14,7 @@ import type {
 	RemoveRoute,
 	UpdateRoute,
 } from "./routes.js";
+import { parseQuest } from "@/lib/parse-quest.js";
 
 export const countQuests: AppRouteHandler<CountRoute> = async (c) => {
 	const userId = c.var.userId;
@@ -28,7 +29,7 @@ export const countQuests: AppRouteHandler<CountRoute> = async (c) => {
 		.select({
 			date: sql<string>`${dateExpr}::date::text`,
 			count: sql<number>`count(DISTINCT ${questsTable.type})::int`,
-			types: sql<(typeof questTypeEnum.enumValues[number])[]>`array_agg(DISTINCT ${questsTable.type})`,
+			types: sql<(typeof questTypeEnum.enumValues[number])[]>`COALESCE(json_agg(DISTINCT ${questsTable.type}) FILTER (WHERE ${questsTable.type} IS NOT NULL), '[]'::json)`,
 		})
 		.from(questsTable)
 		.where(
@@ -143,6 +144,11 @@ export const createQuest: AppRouteHandler<CreateRoute> = async (c) => {
 		await db.insert(listItemsTable)
 			.values({ listId, questId: quest.id, saveId: null })
 			.onConflictDoNothing();
+	}
+
+	if (quest.type === "todo") {
+		const timezone = c.req.header("x-timezone") ?? "UTC"
+		await parseQuest({ title: quest.title, body: quest.body, id: quest.id, timezone })
 	}
 
 	return c.json(quest, HttpStatusCodes.CREATED);
