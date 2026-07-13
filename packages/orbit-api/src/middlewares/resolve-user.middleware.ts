@@ -15,8 +15,9 @@ const CACHE_TTL_MS = 60_000;
 // Endpoints a capture token may call. Kept as an explicit allowlist so widening
 // the token's power is always a deliberate edit here, never a side effect.
 const CAPTURE_TOKEN_ALLOWLIST: ReadonlyArray<{ method: string; path: string }> = [
-	{ method: "POST", path: "/saves" }, // Shortcut: create save
-	{ method: "GET", path: "/lists" }, // Shortcut: fetch lists for a picker menu
+	{ method: "POST", path: "/saves" },
+	{ method: "GET", path: "/lists" },
+	{ method: "POST", path: "/saves/resurface" },
 ];
 
 // Called on token rotation so the old token stops working immediately
