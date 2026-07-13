@@ -18,6 +18,7 @@ const CAPTURE_TOKEN_ALLOWLIST: ReadonlyArray<{ method: string; path: string }> =
 	{ method: "POST", path: "/saves" },
 	{ method: "GET", path: "/lists" },
 	{ method: "POST", path: "/saves/resurface" },
+	{ method: "GET", path: "/quests" },
 ];
 
 // Called on token rotation so the old token stops working immediately
