@@ -13,7 +13,7 @@ export const resurfaceLogic = async ({ userId }: { userId: string }) => {
 	let allLists = await db
 		.select()
 		.from(listsTable)
-		.where(eq(listsTable.userId, userId));
+		.where(and(eq(listsTable.userId, userId), isNull(listsTable.deletedAt)));
 
 	const oneMonthAgo = new Date();
 	oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
