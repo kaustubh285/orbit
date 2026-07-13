@@ -27,8 +27,8 @@ export const resurfaceLogic = async ({ userId }: { userId: string }) => {
 			listId: listItemsTable.listId,
 		})
 		.from(savesTable)
-		.leftJoin(listItemsTable, eq(listItemsTable.saveId, savesTable.id))
-		.where(and(eq(savesTable.userId, userId), gte(savesTable.lastSurfacedAt, startOfToday)));
+		.leftJoin(listItemsTable, and(eq(listItemsTable.saveId, savesTable.id), isNull(listItemsTable.deletedAt)))
+		.where(and(eq(savesTable.userId, userId), isNull(savesTable.deletedAt), gte(savesTable.lastSurfacedAt, startOfToday)));
 
 	allLists = allLists.filter(list => list.includeInResurface && !resurfacedSaves.some(save => save.listId === list.id));
 
@@ -72,6 +72,8 @@ const queryListSaves = (listId: string, oneMonthAgo: Date) =>
 		.innerJoin(savesTable, eq(savesTable.id, listItemsTable.saveId))
 		.where(and(
 			eq(listItemsTable.listId, listId),
+			isNull(listItemsTable.deletedAt),
+			isNull(savesTable.deletedAt),
 			or(isNull(savesTable.lastSurfacedAt), lte(savesTable.lastSurfacedAt, oneMonthAgo)),
 			or(isNull(savesTable.lastInteractedAt), lte(savesTable.lastInteractedAt, oneMonthAgo)),
 		));
