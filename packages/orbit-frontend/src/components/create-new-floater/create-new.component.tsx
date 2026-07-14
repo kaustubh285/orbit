@@ -219,7 +219,8 @@ export function CreateNewComponent() {
 
 	async function handleSubmit() {
 		const result = await onSubmit(effectiveType, title, fields, saveNote, listIds, shouldAISummaries)
-		handleClose()
+		if (!duplicateNotice)
+			handleClose()
 		if (result?.id && effectiveType === 'note') {
 			navigate({ to: ROUTES.NOTE_DETAIL, params: { noteId: result.id } })
 		}
