@@ -12,6 +12,7 @@ type Props = {
 };
 
 const aiParsedQuestSchema = z.object({
+	title: z.string(),
 	body: z.string(),
 	dueAt: z.string().optional(),
 	location: z.string().optional(),
@@ -44,6 +45,7 @@ TITLE: ${title || ""}
 DESC: ${body || ""}
 
 Output a JSON object with these fields:
+- title (string): the task title with the date/time expression removed — but ONLY the part that was used to populate dueAt. Do not reword, shorten, or change anything else. If no date/time was extracted (dueAt is omitted), return the title exactly as given. Example: "Water plants tomorrow at 10am" → "Water plants". If a date/time appears in the title but is part of the topic rather than a scheduling cue (e.g. "Book tickets for New Year's Eve"), keep it.
 - body (string): if a description is provided, use it as-is. If empty or missing, write one short sentence describing what the task is and why someone would do it, inferred only from the title.
 - dueAt (string, optional): ISO 8601 datetime in UTC (e.g. "2025-06-01T09:00:00Z"). Interpret times as being in the user's timezone (${timezone}), then convert to UTC. Resolve relative expressions like "tomorrow 9am" or "next Monday" using CURRENT TIME above. Omit if no date is mentioned.
 - location (string, optional): physical place explicitly mentioned (e.g. "Hyde Park", "New York", "the office"). Omit if none.
