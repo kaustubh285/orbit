@@ -36,6 +36,27 @@ const DESC_MAX_CHARS = 600;
 const TAGS_MAX = 15;
 const LISTS_MAX = 20;
 
+const HAIKU_SYSTEM = `You are a structured data extractor. Output valid JSON only, no markdown fences. Never invent details not explicitly present in the source content.
+
+Extract structured data from a saved item. Return a single JSON object.
+
+Rules:
+- STRICT: Only use information explicitly present in the title/description above. Do not infer, invent, or pad with plausible-sounding details that are not mentioned.
+- ai_title: clean, descriptive title (~60 chars max). Strip hashtags and raw captions.
+- summary: describe what the content CONTAINS and TEACHES (e.g. "a 4-step checklist covering X, Y, Z"), NOT what the poster DID. Answer "what will I get from this?" in 2-3 sentences.
+- tags: 3-7 subject-matter tags. NEVER include: platform names, "post"/"video"/"reel"/"content", the author's name, hashtag fragments.
+- list: return one best-fit list name from the lists above
+- category: one of cooking|tech|travel|fitness|entertainment|finance|learning|personal|other
+- contentType: one of tutorial|review|opinion|inspiration|news|reference|entertainment|other
+- attributes: include difficulty + timeEstimate if relevant (e.g. for tutorials/recipes), otherwise null
+- recipe: only for cooking/food content with extractable ingredients, otherwise null
+- watchList: only for "X movies/shows/books to watch" style content, otherwise null
+- keyPoints: the actual takeaways/steps for educational content, otherwise null
+- location: if a specific named place is featured, otherwise null
+- timeSensitive: true only if there's a real deadline or time-bound event
+
+Output: {"ai_title":"...","summary":"...","tags":["..."],"list":"...","category":"other","contentType":"other","attributes":null,"recipe":null,"watchList":null,"keyPoints":null,"location":null,"timeSensitive":false}`;
+
 export async function aiOverview({ title, description, author, note, tags, lists, selectedLists, model = "sarvam" }: {
 	title: string,
 	description: string,
@@ -61,9 +82,15 @@ export async function aiOverview({ title, description, author, note, tags, lists
 	const intentLine = note ? `\nINTENT (user's note — drive summary & tags from this): ${note}` : "";
 	const authorLine = author ? `\nAUTHOR: ${author}` : "";
 
-	const listPlaceholder = hasSelected ? selectedLists![0].name : "...";
+	// Dynamic-only user message; static rules live in HAIKU_SYSTEM for prompt caching
+	const userMessage = `TITLE: ${title || "Unknown"}
+DESC: ${trimmedDesc}${authorLine}${intentLine}
+${listContextLine}
+EXISTING TAGS (reuse relevant ones, add new): ${trimmedTags.length ? trimmedTags.join(", ") : "none"}`;
 
-	const prompt = `Extract structured data from a saved item. JSON only, no markdown fences.
+	// Sarvam still uses the full combined prompt
+	const listPlaceholder = hasSelected ? selectedLists![0].name : "...";
+	const sarvamPrompt = `Extract structured data from a saved item. JSON only, no markdown fences.
 
 TITLE: ${title || "Unknown"}
 DESC: ${trimmedDesc}${authorLine}${intentLine}
@@ -94,21 +121,22 @@ Rules:
 			const response = await anthropicClient.messages.create({
 				model: "claude-haiku-4-5-20251001",
 				max_tokens: 800,
-				system: "You are a structured data extractor. Output valid JSON only, no markdown fences.",
-				messages: [{ role: "user", content: prompt }],
+				system: [{ type: "text", text: HAIKU_SYSTEM, cache_control: { type: "ephemeral" } }],
+				messages: [{ role: "user", content: userMessage }],
 			});
 			rawText = response.content
 				.filter((b) => b.type === "text")
 				.map((b) => b.text)
 				.join("");
-			console.log("[aiOverview] model=haiku tokens — input:", response.usage.input_tokens, "output:", response.usage.output_tokens);
+			const usage = response.usage as typeof response.usage & { cache_creation_input_tokens?: number; cache_read_input_tokens?: number };
+			console.log("[aiOverview] model=haiku tokens — input:", usage.input_tokens, "output:", usage.output_tokens, "cache_created:", usage.cache_creation_input_tokens ?? 0, "cache_read:", usage.cache_read_input_tokens ?? 0);
 		} else {
 			const response = await sarvamClient.chat.completions({
 				model: "sarvam-105b",
 				temperature: 0.1,
 				messages: [
 					{ role: "system", content: "You are a structured data extractor. Output valid JSON only, no markdown fences. Never invent details not explicitly present in the source content." },
-					{ role: "user", content: prompt },
+					{ role: "user", content: sarvamPrompt },
 				],
 			});
 			rawText = response?.choices[0]?.message?.content ?? "";

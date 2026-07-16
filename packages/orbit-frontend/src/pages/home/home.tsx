@@ -8,12 +8,14 @@ import { useHome } from "./use-home.hook"
 import { useAuth } from "@clerk/react"
 import { useNavigate } from "@tanstack/react-router"
 import ROUTES from "@/routes"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
+import { Scene } from '@gfazioli/mantine-scene';
+
 
 export function HomePage() {
 	const modalQuest = useQuestsStore((state) => state.modalQuest)
 	const { openModal, closeModal } = useQuestsStore((state) => state.actions)
-	const { quests, questsData, isFromCache, submitQuest, toggleQuest, editQuest, incompleteQuests, moveQuestsToToday } = useHome()
+	const { quests, questsData, isFromCache, submitQuest, toggleQuest, editQuest, incompleteQuests, moveQuestsToToday, bursts, setBursts } = useHome()
 	const [confirmOpened, { open: openConfirm, close: closeConfirm }] = useDisclosure(false)
 	const hasPrompted = useRef(false)
 
@@ -35,6 +37,22 @@ export function HomePage() {
 			{isFromCache && (
 				<Text size="xs" c="dimmed" ta="center">Showing cached data — you appear to be offline</Text>
 			)}
+
+		{bursts > 0 && (
+			<Scene fullscreen zIndex={9999} style={{ pointerEvents: 'none' }}>
+				<Scene.Confetti
+					key={bursts}
+					count={150}
+					burst
+					origin="bottom"
+					rise={1000}
+					duration={4}
+					seed={bursts}
+					shapes={['rectangle', 'triangle', 'circle']}
+					onComplete={() => setBursts(0)}
+				/>
+			</Scene>
+		)}
 			<ListQuestsComponent
 				quests={questsData}
 				isLoading={quests.isLoading}

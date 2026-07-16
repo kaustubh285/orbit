@@ -10,6 +10,7 @@ import { CreateNewComponent } from "./components/create-new-floater/create-new.c
 import { useOrbitAppStore } from "./store/orbit-app.store"
 import { useEffect, useState } from "react"
 import '@gfazioli/mantine-picker/styles.css';
+import '@gfazioli/mantine-scene/styles.css';
 import ROUTES from "./routes"
 
 export function App() {

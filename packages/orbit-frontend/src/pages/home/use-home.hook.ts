@@ -3,7 +3,7 @@ import { getQuestsCountOptions, getQuestsOptions, getQuestsQueryKey, patchQuests
 import type { Quest } from "@/types"
 import { useQuestsStore } from "@/store/quests.store"
 import { useOrbitAppStore } from "@/store/orbit-app.store"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 const today = new Date().toISOString().split("T")[0]
 
@@ -13,7 +13,7 @@ export function useHome() {
 	const { setCachedQuests } = useQuestsStore((state) => state.actions)
 	const queryClient = useQueryClient()
 	const { addPendingSubmission, removePendingSubmission } = useOrbitAppStore((s) => s.actions)
-
+	const [bursts, setBursts] = useState(0);
 	const incompleteQuests = useQuery(getQuestsOptions({ query: { status: "active" } }))?.data
 		?.filter((q) => q.type !== "note" && q.type !== "event")
 		.filter((q) => !!q.dueAt && q.dueAt.split("T")[0] < today)
@@ -32,11 +32,20 @@ export function useHome() {
 	const questsData = (quests.isError
 		? (questsCache[selectedDate] ?? [])
 		: (quests.data ?? [])
-	).filter((q) => q.type !== "note")
+	).filter((q) => q.type !== "note").sort((a, b) => {
+		const statusOrder = { active: 0, completed: 1 }
+		const statusDiff = (statusOrder[a.status as keyof typeof statusOrder] ?? 0) - (statusOrder[b.status as keyof typeof statusOrder] ?? 0)
+		if (statusDiff !== 0) return statusDiff
+		if (!a.dueAt && !b.dueAt) return 0
+		if (!a.dueAt) return 1
+		if (!b.dueAt) return -1
+		return a.dueAt.localeCompare(b.dueAt)
+	})
 
 	const createQuest = useMutation({
 		...postQuestsMutation(),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: getQuestsQueryKey() }),
+
 	})
 
 	const updateQuest = useMutation({
@@ -65,6 +74,15 @@ export function useHome() {
 				completedAt: newStatus === "completed" ? new Date().toISOString() : null,
 			},
 		} as Parameters<typeof updateQuest.mutate>[0])
+		if (newStatus === "completed") {
+			setBursts(b => b + 1)
+			try{
+				navigator.vibrate([100, 30, 100])
+			}
+			catch(e) {
+				console.log(e)
+			}
+		}
 	}
 
 	function editQuest(id: string, body: Partial<Omit<Quest, "id">>) {
@@ -99,7 +117,7 @@ export function useHome() {
 
 	const isFromCache = quests.isError && !!questsCache[selectedDate]
 
-	return { quests, questsData, isFromCache, submitQuest, toggleQuest, editQuest, incompleteQuests, moveQuestsToToday }
+	return { quests, questsData, isFromCache, submitQuest, toggleQuest, editQuest, incompleteQuests, moveQuestsToToday, bursts, setBursts }
 }
 
 export function useQuestCounts(start: string, end: string) {

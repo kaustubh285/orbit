@@ -141,24 +141,35 @@ async function enrichSave(
 		// step 1: scrape
 		const scraped = await scrapeUrl(sourceUrl);
 
+		// Only overwrite DB fields the scraper actually returned — never clobber
+		// user-provided content with null (Instagram and other blocked platforms
+		// return empty, which would wipe the title/description the user submitted).
 		await db
 			.update(savesTable)
 			.set({
 				sourcePlatform: scraped.sourcePlatform,
-				title: scraped.title,
-				description: scraped.description,
-				thumbnailUrl: scraped.thumbnailUrl,
-				author: scraped.author,
-				publishedAt: scraped.publishedAt,
+				...(scraped.title != null && { title: scraped.title }),
+				...(scraped.description != null && { description: scraped.description }),
+				...(scraped.thumbnailUrl != null && { thumbnailUrl: scraped.thumbnailUrl }),
+				...(scraped.author != null && { author: scraped.author }),
+				...(scraped.publishedAt != null && { publishedAt: scraped.publishedAt }),
 				tags: scraped.tags,
 			})
 			.where(eq(savesTable.id, saveId));
 
 		if (!shouldAISummaries) return;
 
-		// step 2: cooldown check — skip AI if enriched within the last 10 minutes
+		// step 2: cooldown check — skip AI if enriched within the last 10 minutes.
+		// Also read back title/description/author so AI can use user-provided content
+		// when the scraper returned nothing (e.g. Instagram).
 		const [current] = await db
-			.select({ aiEnrichedAt: savesTable.aiEnrichedAt, tags: savesTable.tags })
+			.select({
+				aiEnrichedAt: savesTable.aiEnrichedAt,
+				tags: savesTable.tags,
+				title: savesTable.title,
+				description: savesTable.description,
+				author: savesTable.author,
+			})
 			.from(savesTable)
 			.where(eq(savesTable.id, saveId));
 
@@ -192,12 +203,13 @@ async function enrichSave(
 			.where(eq(usersTable.id, userId));
 		const aiModel = (userRow?.aiModel ?? "sarvam") as AiModel;
 
-		// step 5: AI enrichment
+		// step 5: AI enrichment — prefer scraped data, fall back to DB content
+		// so that user-provided titles/descriptions are used when scraping fails.
 		console.log(`[ai] call saveId=${saveId} model=${aiModel} reason=${reason}`);
 		const ai = await aiOverview({
-			title: scraped.title || "",
-			description: scraped.description || "",
-			author: scraped.author,
+			title: scraped.title || current?.title || "",
+			description: scraped.description || current?.description || "",
+			author: scraped.author || current?.author,
 			note,
 			tags: existingTags,
 			lists: listNames,
