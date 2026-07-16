@@ -6,6 +6,7 @@ import {
 	IconBrandInstagram,
 	IconBrandReddit,
 	IconBrandYoutube,
+	IconCards,
 	IconChartBar,
 	IconFileText,
 	IconList,
@@ -27,10 +28,12 @@ import { SaveDetailView } from "@/components/saves/save-fullpage-drawer.componen
 
 const NAV_CARDS = [
 	{ label: "Quests", description: "Todos, events & dailies", icon: IconRocket, to: ROUTES.QUESTS, accent: "ocean-blue", shade: 4 },
-	{ label: "Notes", description: "Your notes & docs", icon: IconFileText, to: ROUTES.NOTES, accent: "gray", shade: 4 },
 	{ label: "Saves", description: "Bookmarks & links", icon: IconBookmark, to: ROUTES.SAVES, accent: "amber", shade: 5 },
+	{ label: "Notes", description: "Your notes & docs", icon: IconFileText, to: ROUTES.NOTES, accent: "gray", shade: 4 },
 	{ label: "Lists", description: "Organised collections", icon: IconList, to: ROUTES.LISTS, accent: "violet", shade: 5 },
 	{ label: "Timeline", description: "Memories over time", icon: IconTimeline, to: ROUTES.TIMELINE, accent: "pink", shade: 4 },
+	{ label: "Resurfaces", description: "What did I save??", icon: IconCards, to: ROUTES.RESURFACE, accent: "orange", shade: 5 },
+
 ]
 
 const PLATFORM_META: Record<Save["sourcePlatform"], { color: string; hex: string; Icon: React.ElementType }> = {
