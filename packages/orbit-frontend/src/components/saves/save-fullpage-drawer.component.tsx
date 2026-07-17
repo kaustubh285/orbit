@@ -229,7 +229,6 @@ export const SaveDetailView = ({
 						<Stack style={{ width: isDesktop ? "40%" : "60%", flexShrink: 0 }}>
 							{save.thumbnailUrl ? (
 								<img
-									loading="lazy"
 									onClick={() => window.open(save.sourceUrl, "_blank")}
 									src={save.thumbnailUrl}
 									alt=""

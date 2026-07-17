@@ -28,7 +28,6 @@ function SaveImage({ save, meta }: { save: Save; meta: (typeof PLATFORM_META)[Sa
 	return (
 		<>
 			<img
-			loading="lazy"
 				src={save.thumbnailUrl!}
 				alt=""
 				referrerPolicy="no-referrer"

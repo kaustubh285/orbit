@@ -84,7 +84,6 @@ function ResurfaceCard({ save, onUncache, isDesktop }: { save: ResurfacedSave; o
 				{save.thumbnailUrl ? (
 					<Box w={400} style={{ flexShrink: 0, position: "relative" }}>
 						<img
-						loading="lazy"
 							src={save.thumbnailUrl}
 							alt=""
 							referrerPolicy="no-referrer"
@@ -188,7 +187,6 @@ function ResurfaceCard({ save, onUncache, isDesktop }: { save: ResurfacedSave; o
 				{save.thumbnailUrl ? (
 					<>
 						<img
-						loading="lazy"
 							src={save.thumbnailUrl}
 							alt=""
 							referrerPolicy="no-referrer"
