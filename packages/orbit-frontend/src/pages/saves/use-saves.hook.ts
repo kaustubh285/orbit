@@ -1,10 +1,12 @@
 import { getSavesOptions, getSavesQueryKey, postSavesMutation } from "@orbit/client"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useOrbitAppStore } from "@/store/orbit-app.store"
+import { useMediaQuery } from "@mantine/hooks"
 
 export function useSaves() {
 	const queryClient = useQueryClient()
 	const { addPendingSubmission, removePendingSubmission } = useOrbitAppStore((s) => s.actions)
+	const isDesktop = useMediaQuery("(min-width: 48em)", false, { getInitialValueInEffect: false })
 
 	const saves = useQuery(getSavesOptions())
 
@@ -28,7 +30,7 @@ export function useSaves() {
 	}
 
 	const mostRecentFiveSaves = useQuery(
-		getSavesOptions({ query: { limit: 5 } })
+		getSavesOptions({ query: { limit: isDesktop ? 10 : 5 } })
 	)
 
 	return {

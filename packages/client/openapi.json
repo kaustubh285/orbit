@@ -3970,6 +3970,173 @@
           }
         }
       }
+    },
+    "/ai/query": {
+      "post": {
+        "tags": [
+          "AI",
+          "search"
+        ],
+        "requestBody": {
+          "description": "Query body is required",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ranked saves with reasons",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "interpretation": {
+                      "type": "string"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "userId": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "sourceUrl": {
+                            "type": "string",
+                            "format": "uri"
+                          },
+                          "sourcePlatform": {
+                            "type": "string",
+                            "enum": [
+                              "youtube",
+                              "reddit",
+                              "instagram",
+                              "web"
+                            ]
+                          },
+                          "title": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "description": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "thumbnailUrl": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "author": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "publishedAt": {
+                            "type": "string",
+                            "nullable": true,
+                            "format": "date-time"
+                          },
+                          "note": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "tags": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "active",
+                              "archived"
+                            ]
+                          },
+                          "aiTitle": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "aiSummary": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "aiEnrichedAt": {
+                            "type": "string",
+                            "nullable": true,
+                            "format": "date-time"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "lists": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "reason": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "userId",
+                          "sourceUrl",
+                          "sourcePlatform",
+                          "title",
+                          "description",
+                          "thumbnailUrl",
+                          "author",
+                          "publishedAt",
+                          "note",
+                          "tags",
+                          "status",
+                          "aiTitle",
+                          "aiSummary",
+                          "aiEnrichedAt",
+                          "createdAt",
+                          "updatedAt",
+                          "lists",
+                          "reason"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "interpretation",
+                    "results"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

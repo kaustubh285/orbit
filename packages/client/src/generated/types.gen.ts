@@ -1244,6 +1244,50 @@ export type PostUsersMeCaptureTokenResponses = {
 
 export type PostUsersMeCaptureTokenResponse = PostUsersMeCaptureTokenResponses[keyof PostUsersMeCaptureTokenResponses];
 
+export type PostAiQueryData = {
+    /**
+     * Query body is required
+     */
+    body: {
+        query: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/ai/query';
+};
+
+export type PostAiQueryResponses = {
+    /**
+     * Ranked saves with reasons
+     */
+    200: {
+        interpretation: string;
+        results: Array<{
+            id: string;
+            userId: string;
+            sourceUrl: string;
+            sourcePlatform: 'youtube' | 'reddit' | 'instagram' | 'web';
+            title: string | null;
+            description: string | null;
+            thumbnailUrl: string | null;
+            author: string | null;
+            publishedAt: string | null;
+            note: string | null;
+            tags: Array<string>;
+            status: 'active' | 'archived';
+            aiTitle: string | null;
+            aiSummary: string | null;
+            aiEnrichedAt: string | null;
+            createdAt: string;
+            updatedAt: string;
+            lists: Array<string>;
+            reason: string;
+        }>;
+    };
+};
+
+export type PostAiQueryResponse = PostAiQueryResponses[keyof PostAiQueryResponses];
+
 export type ClientOptions = {
     baseUrl: 'http://localhost:9999' | (string & {});
 };

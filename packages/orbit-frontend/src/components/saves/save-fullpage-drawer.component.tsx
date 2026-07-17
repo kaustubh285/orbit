@@ -322,15 +322,6 @@ export const SaveDetailView = ({
 					{/* View mode */}
 					{!editMode ? (
 						<Stack gap="md">
-							{save.title && (
-								<>
-									<Stack gap={2}>
-										<Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: "0.05em" }}>Original title</Text>
-										<PrivacyAwareText size="sm" fs="italic" c="blue.7">{save.title}</PrivacyAwareText>
-									</Stack>
-									<Divider />
-								</>
-							)}
 							{aiSummary && (() => {
 								const structured = parseStructuredSummary(aiSummary)
 								return (
@@ -429,6 +420,16 @@ export const SaveDetailView = ({
 									</>
 								)
 							})()}
+							{save.title && (
+								<>
+									<Stack gap={2}>
+										<Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: "0.05em" }}>Original title</Text>
+										<PrivacyAwareText size="sm" fs="italic" c="blue.7">{save.title}</PrivacyAwareText>
+									</Stack>
+									<Divider />
+								</>
+							)}
+
 							{note && (
 								<>
 									<Stack gap={2}>

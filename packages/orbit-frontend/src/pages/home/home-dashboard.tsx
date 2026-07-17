@@ -1,40 +1,34 @@
-import ROUTES from "@/routes"
 import type { Save } from "@/types"
-import { Box, Button, Group, ScrollArea, SimpleGrid, Stack, Text } from "@mantine/core"
+import { ActionIcon, Box, Button, Grid, Group, ScrollArea, Stack, Text, Textarea } from "@mantine/core"
 import {
-	IconBookmark,
 	IconBrandInstagram,
 	IconBrandReddit,
 	IconBrandYoutube,
-	IconCards,
-	IconChartBar,
-	IconFileText,
-	IconList,
-	IconPlus,
-	IconRocket,
-	IconTimeline,
+	IconSearch,
 	IconWorld,
+	IconX,
 } from "@tabler/icons-react"
-import { useNavigate } from "@tanstack/react-router"
 import { useOrbitAppStore } from "@/store/orbit-app.store"
 import { useSaves } from "../saves/use-saves.hook"
-import { client, getQuestsOptions } from "@orbit/client"
+import { getQuestsOptions } from "@orbit/client"
 import { useQuery } from "@tanstack/react-query"
 import { PrivacyAwareText } from "@/components/privacy-aware-text.component"
 
 import { useState } from "react"
 import { useDisclosure } from "@mantine/hooks"
 import { SaveDetailView } from "@/components/saves/save-fullpage-drawer.component"
+import { useHomeSearch } from "./use-home-search.hook"
 
-const NAV_CARDS = [
-	{ label: "Quests", description: "Todos, events & dailies", icon: IconRocket, to: ROUTES.QUESTS, accent: "ocean-blue", shade: 4 },
-	{ label: "Saves", description: "Bookmarks & links", icon: IconBookmark, to: ROUTES.SAVES, accent: "amber", shade: 5 },
-	{ label: "Notes", description: "Your notes & docs", icon: IconFileText, to: ROUTES.NOTES, accent: "gray", shade: 4 },
-	{ label: "Lists", description: "Organised collections", icon: IconList, to: ROUTES.LISTS, accent: "violet", shade: 5 },
-	{ label: "Timeline", description: "Memories over time", icon: IconTimeline, to: ROUTES.TIMELINE, accent: "pink", shade: 4 },
-	{ label: "Resurfaces", description: "What did I save??", icon: IconCards, to: ROUTES.RESURFACE, accent: "orange", shade: 5 },
-
-]
+// Topical chips only — each is a canned query through the same pipeline as free
+// text, so they only work as well as the keyword/summary data behind them.
+// Mood/duration chips ("bored", "30-40 min") are intentionally omitted: they
+// filter on duration/contentType, which aren't queryable columns yet.
+const INTENT_CHIPS = [
+	{ label: "Cooking tonight", query: "recipe dinner cooking", color: "teal" },
+	{ label: "Learn something new", query: "tutorial explainer how it works", color: "lime" },
+	{ label: "Watch a movie/series", query: "movie series show to watch", color: "grape" },
+	{ label: "Travel & places", query: "travel trip city places", color: "blue" },
+] as const
 
 const PLATFORM_META: Record<Save["sourcePlatform"], { color: string; hex: string; Icon: React.ElementType }> = {
 	youtube: { color: "red", hex: "#e03131", Icon: IconBrandYoutube },
@@ -44,7 +38,6 @@ const PLATFORM_META: Record<Save["sourcePlatform"], { color: string; hex: string
 }
 
 function RecentSaveCard({ save, onClick }: { save: Save; onClick: () => void }) {
-	const navigate = useNavigate()
 	const { privacyMode } = useOrbitAppStore()
 	const meta = PLATFORM_META[privacyMode ? "web" : save.sourcePlatform]
 	const PlatformIcon = meta.Icon
@@ -54,7 +47,6 @@ function RecentSaveCard({ save, onClick }: { save: Save; onClick: () => void }) 
 		<PrivacyAwareText
 			component="button"
 			onClick={onClick}
-			// href={save.sourceUrl}
 			target="_blank"
 			rel="noopener noreferrer"
 			style={{
@@ -118,38 +110,49 @@ function RecentSaveCardSkeleton() {
 	)
 }
 
-function NavCard({
-	label,
-	description,
-	icon: Icon,
-	to,
-	accent,
-	shade,
-}: (typeof NAV_CARDS)[number]) {
-	const navigate = useNavigate()
-	const color = `var(--mantine-color-${accent}-${shade})`
+function SearchResultCard({ save, reason, onClick }: { save: Save; reason: string; onClick: () => void }) {
+	const { privacyMode } = useOrbitAppStore()
+	const meta = PLATFORM_META[privacyMode ? "web" : save.sourcePlatform]
+	const PlatformIcon = meta.Icon
 
 	return (
 		<Box
-			onClick={() => navigate({ to })}
+			component="button"
+			onClick={onClick}
 			style={{
-				borderRadius: 12,
-				border: "1px solid var(--mantine-color-dark-4)",
-				borderTop: `3px solid ${color}`,
-				padding: "16px",
-				background: "var(--mantine-color-dark-7)",
+				display: "flex",
+				gap: 12,
+				width: "100%",
+				textAlign: "left",
+				alignItems: "flex-start",
+				padding: "12px 14px",
+				borderRadius: 10,
 				cursor: "pointer",
-				transition: "background 0.12s ease",
+				background: "var(--mantine-color-dark-7)",
+				border: "1px solid var(--mantine-color-dark-4)",
 			}}
-			onMouseEnter={(e) => { e.currentTarget.style.background = "var(--mantine-color-dark-6)" }}
-			onMouseLeave={(e) => { e.currentTarget.style.background = "var(--mantine-color-dark-7)" }}
 		>
-			<Stack gap={8}>
-				<Icon size={28} color={color} stroke={1.5} />
-				<Stack gap={2}>
-					<Text fw={600} size="sm">{label}</Text>
-					<Text size="xs" c="dimmed">{description}</Text>
-				</Stack>
+			<Box
+				style={{
+					width: 56,
+					height: 56,
+					flexShrink: 0,
+					borderRadius: 8,
+					background: save.thumbnailUrl && !privacyMode
+						? `url(${save.thumbnailUrl}) center/cover no-repeat`
+						: `linear-gradient(135deg, ${meta.hex}55, ${meta.hex}99)`,
+				}}
+			/>
+			<Stack gap={4} style={{ minWidth: 0, flex: 1 }}>
+				<Group gap={6} wrap="nowrap">
+					<PlatformIcon size={13} color={meta.hex} style={{ flexShrink: 0 }} />
+					<PrivacyAwareText size="sm" fw={600} lineClamp={1}>
+						{save.aiTitle ?? save.title ?? save.sourceUrl}
+					</PrivacyAwareText>
+				</Group>
+				{reason && (
+					<Text size="xs" c="dimmed" lineClamp={2}>{reason}</Text>
+				)}
 			</Stack>
 		</Box>
 	)
@@ -186,112 +189,111 @@ function InsightCard({ label, value }: { label: string; value: number | string }
 	)
 }
 
-type BackfillResult = { updated: number; failed: number; skipped: number }
-
 export function HomeDashboard() {
-	const setCreateNewOpen = useOrbitAppStore((s) => s.actions.setCreateNewOpen)
 	const { mostRecentFiveSaves, mostRecentFiveSavesIsLoading } = useSaves()
 	const { dueToday, completedToday, overdue } = useDashboardStats()
-	const navigate = useNavigate()
-	const [isBackfilling, setIsBackfilling] = useState(false)
-	const [backfillResult, setBackfillResult] = useState<BackfillResult | null>(null)
 	const [selectedSave, setSelectedSave] = useState<Save | null>(null)
 	const [opened, { open, close }] = useDisclosure(false);
+
+	const { searchTerm, setSearchTerm, searchResults, interpretation, handleSearch, clearSearch, isSearching } = useHomeSearch()
 
 	const selectSave = (save: Save) => {
 		setSelectedSave(save)
 		open();
 	}
 
-	async function runBackfill() {
-		setIsBackfilling(true)
-		setBackfillResult(null)
-		try {
-			const { data } = await client.post({ url: "/saves/backfill", throwOnError: false })
-			if (data) setBackfillResult(data as BackfillResult)
-		} finally {
-			setIsBackfilling(false)
-		}
-	}
-
 	return (
-		<Stack gap="xl" pt="sm">
+		<Stack gap="md" pt="sm">
+			{
+				!searchResults.length && !isSearching && (
+					<>
+						{/* Recent saves */}
+						<Stack gap="xs">
+							<Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: "0.08em" }}>
+								Recent saves
+							</Text>
+							<ScrollArea scrollbarSize={4} type="scroll">
+								<Group gap="xs" wrap="nowrap" pb={4}>
+									{mostRecentFiveSavesIsLoading
+										? [1, 2, 3, 4, 5].map((i) => <RecentSaveCardSkeleton key={i} />)
+										: (mostRecentFiveSaves ?? []).map((save) => (
+											<RecentSaveCard key={save.id} save={save} onClick={() => selectSave(save)} />
+										))
+									}
+								</Group>
+							</ScrollArea>
+						</Stack>
+
+						{/* Insights */}
+						<Stack gap="xs">
+							<Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: "0.08em" }}>Today</Text>
+							<Group grow>
+								<InsightCard label="Due today" value={dueToday} />
+								<InsightCard label="Completed" value={completedToday} />
+								<InsightCard label="Overdue" value={overdue} />
+							</Group>
+						</Stack>
+					</>
+				)
+			}
+
 			<Group justify="space-between" align="flex-end">
 				<Stack gap={2}>
-					<Text fw={700} size="xl">Orbit</Text>
-					<Text size="sm" c="dimmed">Your personal command centre</Text>
+					<Text size="md" ff="monospace">Command Centre</Text>
 				</Stack>
-				<Group gap="xs">
-					{/* TEMP — remove after running once */}
-					<Button
-						disabled
-						size="sm"
-						variant="subtle"
-						color="orange"
-						loading={isBackfilling}
-						onClick={runBackfill}
-					>
-						{backfillResult
-							? `✓ ${backfillResult.updated} fixed, ${backfillResult.failed} failed`
-							: "Backfill saves"}
-					</Button>
-					<Button
-						leftSection={<IconChartBar size={14} />}
-						size="sm"
-						variant="subtle"
-						color="gray"
-						onClick={() => navigate({ to: ROUTES.REPORT })}
-					>
-						Report
-					</Button>
-					<Button
-						leftSection={<IconPlus size={14} />}
-						size="sm"
-						onClick={() => setCreateNewOpen(true)}
-					>
-						New
-					</Button>
-				</Group>
+			</Group>
+			<Group>
+				<Textarea rows={1} autosize placeholder="What are you looking for?" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onBlur={() => handleSearch()} flex={1} rightSection={searchTerm ? <IconX size={18} style={{ cursor: "pointer" }} onClick={() => clearSearch()} /> : null} />
+				<ActionIcon onClick={() => handleSearch()} size="lg" loading={isSearching}><IconSearch size={18} /></ActionIcon>
 			</Group>
 
-		{selectedSave && <SaveDetailView save={selectedSave} opened={opened} onClose={close} />}
+			{/* Detail drawer — rendered regardless of recent/results view */}
+			{selectedSave && <SaveDetailView save={selectedSave} opened={opened} onClose={close} />}
 
-			{/* Insights */}
-			<Stack gap="xs">
-				<Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: "0.08em" }}>Today</Text>
-				<Group grow>
-					<InsightCard label="Due today" value={dueToday} />
-					<InsightCard label="Completed" value={completedToday} />
-					<InsightCard label="Overdue" value={overdue} />
-				</Group>
-			</Stack>
+			{isSearching && (
+				<Text size="sm" c="dimmed">Searching your saves…</Text>
+			)}
 
-			{/* Recent saves */}
-			<Stack gap="xs">
-				<Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: "0.08em" }}>
-					Recent saves
-				</Text>
-				<ScrollArea scrollbarSize={4} type="scroll">
-					<Group gap="xs" wrap="nowrap" pb={4}>
-						{mostRecentFiveSavesIsLoading
-							? [1, 2, 3, 4, 5].map((i) => <RecentSaveCardSkeleton key={i} />)
-							: (mostRecentFiveSaves ?? []).map((save) => (
-								<RecentSaveCard key={save.id} save={save} onClick={() => selectSave(save)} />
-							))
-						}
+			{!isSearching && searchResults.length > 0 && (
+				<Stack gap="xs">
+					<Group justify="space-between" align="flex-start" wrap="nowrap">
+						{interpretation && <Text size="xs" c="dimmed" style={{ flex: 1 }} lineClamp={2}>{interpretation}</Text>}
+						<Button variant="subtle" size="compact-xs" onClick={clearSearch}>Clear</Button>
 					</Group>
-				</ScrollArea>
-			</Stack>
-
-			{/* Navigation cards */}
-			<Stack gap="xs">
-				<Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: "0.08em" }}>Go to</Text>
-				<SimpleGrid cols={{ base: 2, sm: 3 }} spacing="sm">
-					{NAV_CARDS.map((card) => (
-						<NavCard key={card.to} {...card} />
+					{searchResults.map((save) => (
+						<SearchResultCard key={save.id} save={save} reason={save.reason} onClick={() => selectSave(save)} />
 					))}
-				</SimpleGrid>
-			</Stack>
+				</Stack>
+			)}
+
+			{!isSearching && searchResults.length === 0 && interpretation && (
+				<Stack gap="xs">
+					<Text size="sm" c="dimmed">{interpretation}</Text>
+					<Text size="xs" c="dimmed">No matches found — try different words.</Text>
+					<Button variant="subtle" size="compact-xs" onClick={clearSearch} w="fit-content">Clear</Button>
+				</Stack>
+			)}
+
+			{/* Intent chips — hidden once a search is in flight or has results */}
+			{!isSearching && searchResults.length === 0 && !interpretation && (
+				<Grid>
+					{INTENT_CHIPS.map((chip) => (
+						<Grid.Col span={6} key={chip.label}>
+							<Button
+								h="100%"
+								fullWidth
+								variant="light"
+								color={chip.color}
+								radius="lg"
+								onClick={() => { setSearchTerm(chip.query); handleSearch(chip.query) }}
+								styles={{ label: { whiteSpace: "normal", textAlign: "center", lineHeight: 1.3 }, root: { height: "auto", padding: "10px 12px" } }}
+							>
+								{chip.label}
+							</Button>
+						</Grid.Col>
+					))}
+				</Grid>
+			)}
 		</Stack>
 	)
 }
