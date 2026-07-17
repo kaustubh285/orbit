@@ -26,25 +26,34 @@ function SaveImage({ save, meta }: { save: Save; meta: (typeof PLATFORM_META)[Sa
 	const PlatformIcon = meta.Icon
 
 	return (
-		<>
+		<Box
+			style={{
+				position: "relative",
+				width: "100%",
+				// Reserve space while loading so the lazy image has a layout box
+				aspectRatio: loaded ? undefined : "16 / 9",
+			}}
+		>
 			<img
+				loading="lazy"
 				src={save.thumbnailUrl!}
 				alt=""
 				referrerPolicy="no-referrer"
 				onLoad={() => setLoaded(true)}
 				style={{
-					display: loaded ? "block" : "none",
+					display: "block",
 					width: "100%",
 					height: "auto",
 					objectFit: "cover",
+					opacity: loaded ? 1 : 0,
 					...CARD_STYLE,
 				}}
 			/>
 			{!loaded && (
 				<Box
 					style={{
-						width: "100%",
-						aspectRatio: "16 / 9",
+						position: "absolute",
+						inset: 0,
 						background: meta.color,
 						display: "flex",
 						alignItems: "center",
@@ -55,7 +64,7 @@ function SaveImage({ save, meta }: { save: Save; meta: (typeof PLATFORM_META)[Sa
 					<PlatformIcon size={28} color="rgba(255,255,255,0.4)" />
 				</Box>
 			)}
-		</>
+		</Box>
 	)
 }
 
