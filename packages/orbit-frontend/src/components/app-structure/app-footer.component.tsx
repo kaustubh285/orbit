@@ -21,7 +21,7 @@ export function AppFooter() {
 
 	const activeItem = NAV_ITEMS.find(({ to }) => location.pathname.startsWith(to))
 	return (
-		<AppShell.Footer style={{ borderTop: "1px solid var(--mantine-color-dark-4)", paddingBottom: "env(safe-area-inset-bottom)" }}>
+		<AppShell.Footer style={{ borderTop: "1px solid var(--mantine-color-dark-4)" }}>
 			<Group h="100%" justify="space-between" align="center" px="md" gap={0}>
 				{NAV_ITEMS.map(({ label, icon: Icon, to, accent, shade }) => {
 					const active = activeItem?.to === to

@@ -59,7 +59,7 @@ export function App() {
 			padding={{ base: "sm", sm: "md" }}
 			header={{ height: "calc(60px + env(safe-area-inset-top))" }}
 			navbar={{ width: 200, breakpoint: "sm", collapsed: { mobile: true } }}
-			footer={{ height: "calc(64px + env(safe-area-inset-bottom))", collapsed: isDesktop }}
+			footer={{ height: 64, collapsed: isDesktop }}
 		>
 			<AppHeader />
 			<AppNavbar />
