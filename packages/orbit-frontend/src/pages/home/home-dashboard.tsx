@@ -203,7 +203,7 @@ export function HomeDashboard() {
 	}
 
 	return (
-		<Stack gap="md" pt="sm">
+		<Stack gap="md" pt="sm" mih="100dvh">
 			{
 				!searchResults.length && !isSearching && (
 					<>
