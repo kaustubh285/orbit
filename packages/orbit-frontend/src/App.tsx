@@ -33,6 +33,26 @@ export function App() {
 		return () => clearTimeout(timer)
 	}, [isLoaded])
 
+	// iOS standalone PWAs compute `100dvh` incorrectly on the first paint (with
+	// black-translucent status bar + viewport-fit=cover) and don't correct it until
+	// a reflow is forced — which only happens on tall/scrollable pages. That left
+	// short pages (home/quests/resurface) with dead space below the fold. Drive the
+	// main region's height from the actual measured viewport instead.
+	useEffect(() => {
+		const setAppHeight = () => {
+			document.documentElement.style.setProperty("--app-height", `${window.innerHeight}px`)
+		}
+		setAppHeight()
+		window.addEventListener("resize", setAppHeight)
+		window.addEventListener("orientationchange", setAppHeight)
+		window.visualViewport?.addEventListener("resize", setAppHeight)
+		return () => {
+			window.removeEventListener("resize", setAppHeight)
+			window.removeEventListener("orientationchange", setAppHeight)
+			window.visualViewport?.removeEventListener("resize", setAppHeight)
+		}
+	}, [])
+
 	// getInitialValueInEffect: false reads synchronously so there's no flash on first render
 	const isDesktop = useMediaQuery("(min-width: 48em)", false, { getInitialValueInEffect: false })
 
@@ -63,7 +83,7 @@ export function App() {
 		>
 			<AppHeader />
 			<AppNavbar />
-			<AppShell.Main>
+			<AppShell.Main style={{ minHeight: "var(--app-height, 100dvh)" }}>
 				<Outlet />
 			</AppShell.Main>
 			<AppFooter />
