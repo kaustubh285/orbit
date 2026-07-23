@@ -137,7 +137,7 @@ export function ListDetailView({
 				</Tabs.Panel>
 
 				<Tabs.Panel value="quests">
-					<div style={{ borderBottom: '1px dotted var(--mantine-color-gray-4)' }}>
+					<Stack gap={12} my={"md"} style={{ borderBottom: '1px dotted var(--mantine-color-gray-4)' }}>
 						{questItems.map((item) => (
 							<Group key={item.id} wrap="nowrap" gap={0}>
 								<div style={{ flex: 1, minWidth: 0 }}>
@@ -161,7 +161,7 @@ export function ListDetailView({
 							</Group>
 						))}
 						<NewQuestRow onSubmit={submitQuest} />
-					</div>
+					</Stack>
 				</Tabs.Panel>
 
 			</Tabs>

@@ -69,7 +69,7 @@ export function QuestRow({
 				onClick={isToggleable ? () => onToggle(quest) : undefined}
 			/>
 			<Group align="center" justify="space-between" flex={1} style={{
-				border: "1px solid var(--mantine-color-gray-4)",
+				border: "1px solid var(--mantine-color-gray-6)",
 				borderRadius: 8,
 				padding: "4px 8px",
 		 }}>
@@ -140,7 +140,7 @@ export function NewQuestRow({ onSubmit }: { onSubmit: (title: string, type: Ques
 			<TypeIcon type={type} onClick={() => setType(cycleType(type))} />
 			<Textarea
 				variant="unstyled"
-				bd="1px solid var(--mantine-color-gray-4)"
+				bd="1px solid var(--mantine-color-gray-6)"
 				placeholder="New quest..."
 				value={title}
 				onChange={(e) => setTitle(e.currentTarget.value)}
