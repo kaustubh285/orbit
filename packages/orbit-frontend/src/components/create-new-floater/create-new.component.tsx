@@ -305,6 +305,7 @@ export function CreateNewComponent() {
 									</Button>
 								</Group>
 								<MultiSelect
+								searchable
 									placeholder="Add to one or more lists…"
 									value={listIds}
 									onChange={setListIds}

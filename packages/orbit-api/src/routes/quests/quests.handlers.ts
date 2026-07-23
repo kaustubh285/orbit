@@ -148,7 +148,9 @@ export const createQuest: AppRouteHandler<CreateRoute> = async (c) => {
 
 	if (quest.type === "todo") {
 		const timezone = c.req.header("x-timezone") ?? "UTC"
-		await parseQuest({ title: quest.title, body: quest.body, id: quest.id, timezone })
+		parseQuest({ title: quest.title, body: quest.body, id: quest.id, timezone }).catch((err) =>
+			console.error("[parseQuest] background error:", err),
+		);
 	}
 
 	return c.json(quest, HttpStatusCodes.CREATED);

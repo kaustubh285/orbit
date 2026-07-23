@@ -44,8 +44,11 @@ export function useHome() {
 
 	const createQuest = useMutation({
 		...postQuestsMutation(),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: getQuestsQueryKey() }),
-
+		onSuccess: () => {
+			// queryClient.invalidateQueries({ queryKey: getQuestsQueryKey() });
+			// Re-fetch after AI parse completes in the background (title cleanup, dueAt, priority)
+			setTimeout(() => queryClient.invalidateQueries({ queryKey: getQuestsQueryKey() }), 3500);
+		},
 	})
 
 	const updateQuest = useMutation({

@@ -1,7 +1,7 @@
 import { PRIORITY_COLOR, TYPE_COLOR, TYPE_ICON } from "@/CONSTANTS"
 import { useOrbitAppStore } from "@/store/orbit-app.store"
 import type { Quest } from "@/types"
-import { ActionIcon, Badge, Skeleton, Stack, Text, Textarea, TextInput } from "@mantine/core"
+import { ActionIcon, Badge, Group, Skeleton, Stack, Text, Textarea, TextInput } from "@mantine/core"
 import { IconCheck, IconCircleDot, IconDots } from "@tabler/icons-react"
 import { useState } from "react"
 import { PrivacyAwareText } from "../privacy-aware-text.component"
@@ -13,7 +13,7 @@ function cycleType(current: Quest["type"]): Quest["type"] {
 	return QUEST_TYPES[(idx + 1) % QUEST_TYPES.length]
 }
 
-function TypeIcon({ type, onClick, size = 16 }: { type: Quest["type"]; onClick?: () => void; size?: number }) {
+function TypeIcon({ type, onClick, size = 24 }: { type: Quest["type"]; onClick?: () => void; size?: number }) {
 	const Icon = TYPE_ICON[type]
 	const cssColor = `var(--mantine-color-${TYPE_COLOR[type]}-6)`
 	return (
@@ -58,9 +58,9 @@ export function QuestRow({
 				display: "flex",
 				alignItems: "center",
 				gap: 8,
-				padding: "6px 4px",
-				borderBottom: "1px dotted var(--mantine-color-gray-4)",
-				borderLeft: `3px solid var(--mantine-color-${TYPE_COLOR[quest.type]}-6)`,
+				padding: "0px 4px",
+				// borderBottom: "1px dotted var(--mantine-color-gray-4)",
+				// borderLeft: `3px solid var(--mantine-color-${TYPE_COLOR[quest.type]}-6)`,
 				paddingLeft: 8,
 			}}
 		>
@@ -68,6 +68,11 @@ export function QuestRow({
 				type={quest.type}
 				onClick={isToggleable ? () => onToggle(quest) : undefined}
 			/>
+			<Group align="center" justify="space-between" flex={1} style={{
+				border: "1px solid var(--mantine-color-gray-4)",
+				borderRadius: 8,
+				padding: "4px 8px",
+		 }}>
 			<PrivacyAwareText
 				size="md"
 				td={isCompleted ? "line-through" : undefined}
@@ -106,7 +111,8 @@ export function QuestRow({
 				onClick={() => onOpen(quest)}
 			>
 				<IconCircleDot size={8} />
-			</ActionIcon>
+				</ActionIcon>
+			</Group>
 		</div>
 	)
 }
@@ -128,19 +134,22 @@ export function NewQuestRow({ onSubmit }: { onSubmit: (title: string, type: Ques
 				alignItems: "center",
 				gap: 8,
 				padding: "1px 4px",
-				borderBottom: "1px dotted var(--mantine-color-gray-4)",
+				// borderBottom: "1px dotted var(--mantine-color-gray-4)",
 			}}
 		>
 			<TypeIcon type={type} onClick={() => setType(cycleType(type))} />
 			<Textarea
 				variant="unstyled"
+				bd="1px solid var(--mantine-color-gray-4)"
 				placeholder="New quest..."
 				value={title}
 				onChange={(e) => setTitle(e.currentTarget.value)}
 				onKeyDown={(e) => { if (e.key === "Enter") submit() }}
 				onBlur={submit}
 				size="md"
-				py={8}
+				p={8}
+				ml={5}
+				bdrs={8}
 				style={{ flex: 1 }}
 				styles={{ input: { padding: 0, fontSize: "var(--mantine-font-size-md)" } }}
 			/>
@@ -184,9 +193,10 @@ export default function ListQuestsComponent({
 	}
 
 	return (
-		<div
+		<Stack
+			gap={12}
 			style={{
-				borderBottom: "1px dotted var(--mantine-color-gray-4)",
+				// borderBottom: "1px dotted var(--mantine-color-gray-4)",
 				fontFamily: "inherit",
 			}}
 		>
@@ -194,6 +204,6 @@ export default function ListQuestsComponent({
 				<QuestRow key={q.id} quest={q} onToggle={onToggle} onOpen={onOpen} />
 			))}
 			<NewQuestRow onSubmit={onSubmit} />
-		</div>
+		</Stack>
 	)
 }
