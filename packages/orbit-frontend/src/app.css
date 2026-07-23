@@ -15,7 +15,7 @@
 	/* Firefox */
 	-ms-overflow-style: none;
 	/* Internet Explorer and Edge */
-	border-bottom: 1px solid #ccc;
+	/*border-bottom: 1px solid #ccc;*/
 }
 
 .mini-calendar::-webkit-scrollbar {

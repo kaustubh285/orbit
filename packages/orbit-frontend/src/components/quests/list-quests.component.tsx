@@ -69,9 +69,9 @@ export function QuestRow({
 				onClick={isToggleable ? () => onToggle(quest) : undefined}
 			/>
 			<Group align="center" justify="space-between" flex={1} style={{
-				border: "1px solid var(--mantine-color-gray-6)",
-				borderRadius: 8,
-				padding: "4px 8px",
+				borderLeft: `3px solid var(--mantine-color-${quest.priority ? PRIORITY_COLOR[quest.priority] : "gray"}-4)`,
+				borderRadius: 4,
+				padding: "6px 8px",
 		 }}>
 			<PrivacyAwareText
 				size="md"
@@ -140,7 +140,7 @@ export function NewQuestRow({ onSubmit }: { onSubmit: (title: string, type: Ques
 			<TypeIcon type={type} onClick={() => setType(cycleType(type))} />
 			<Textarea
 				variant="unstyled"
-				bd="1px solid var(--mantine-color-gray-6)"
+				bd="1px dashed var(--mantine-color-gray-4)"
 				placeholder="New quest..."
 				value={title}
 				onChange={(e) => setTitle(e.currentTarget.value)}
@@ -196,9 +196,9 @@ export default function ListQuestsComponent({
 		<Stack
 			gap={12}
 			style={{
-				// borderBottom: "1px dotted var(--mantine-color-gray-4)",
 				fontFamily: "inherit",
 			}}
+			pb={"lg"}
 		>
 			{quests.map((q) => (
 				<QuestRow key={q.id} quest={q} onToggle={onToggle} onOpen={onOpen} />

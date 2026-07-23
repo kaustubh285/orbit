@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Flex } from "@mantine/core"
+import { ActionIcon, Button, Flex, Group, Text } from "@mantine/core"
 import { useMediaQuery, useElementSize, useDisclosure } from "@mantine/hooks"
 import { MiniCalendar } from "@mantine/dates"
 import dayjs from "dayjs"
@@ -8,6 +8,7 @@ import { useQuestsStore } from "@/store/quests.store"
 import { useOrbitAppStore } from "@/store/orbit-app.store"
 import { MassiveCalendar } from "./calendars/massive-calendar.component"
 import { IconCalendar } from "@tabler/icons-react"
+import { SquaredText } from "./squared-text.component"
 
 const todayStr = dayjs().format("YYYY-MM-DD")
 
@@ -78,28 +79,41 @@ export default function CalendarScroll() {
 						...(date === todayStr ? { "data-today": true } : {}),
 						"data-weekday": dayjs(date).format("ddd"),
 					})}
+					monthLabelFormat={"MMM"}
 					styles={{
 						root: { width: "100%" },
 						day: { width: cellSize, minWidth: "unset", height: "unset", paddingTop: 2, paddingBottom: 2 },
 					}}
 				/>
 			</div>
-			<Flex px={8} gap={8} justify="space-between" align="center">
+			<Flex px={8} gap={8} justify="space-between" align="center" my={"sm"} pl={isDesktop ? 40 : "sm"}>
 				<Flex gap={8} align="center">
-					{/*<CachedItems />*/}
-					<ActionIcon size="compact-sm" variant="subtle" color="gray" onClick={openCalendar} aria-label="Open calendar">
-						<IconCalendar size={14} />
-					</ActionIcon>
+					<SquaredText>
+				<Text size="md" fw={600} ff="monospace" tt={"full-size-kana"}>
+					{new Date(selectedDate).toLocaleDateString("en-US", {
+						// localeMatcher: "best fit",
+						weekday: "short",
+						month: "short",
+							day: "numeric",
+						})}
+						</Text>
+					</SquaredText>
+					{"."}
+					<SquaredText>
+						{isToday ? <Text mx={0} c="dimmed" ff="monospace" size="sm">Today</Text> : <Text mx={0}
+							c="ocean-blue"
+							size="sm"
+							ff="monospace"
+							style={{ cursor: "pointer" }}
+							onClick={() => goToToday()}
+						>
+							Today
+						</Text>}
+					</SquaredText>
 				</Flex>
-				<Button
-					size="compact-xs"
-					variant={isToday ? "subtle" : "light"}
-					color="ocean-blue"
-					disabled={isToday}
-					onClick={goToToday}
-				>
-					Today
-				</Button>
+				<ActionIcon size="compact-sm" variant="subtle" color="gray" onClick={openCalendar} aria-label="Open calendar">
+					<IconCalendar size={22} />
+				</ActionIcon>
 			</Flex>
 			<MassiveCalendar opened={calendarOpened} onClose={closeCalendar} />
 		</div>
