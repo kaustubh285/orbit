@@ -285,16 +285,6 @@ export function CreateNewComponent() {
 						{title && effectiveType === 'todo' && <TodoFields value={fields.dueAt} onChange={(v) => patchFields({ dueAt: v })} />}
 						{title && effectiveType === 'event' && <EventFields fields={fields} onChange={patchFields} />}
 						{title && effectiveType === 'memory' && <MemoryFields fields={fields} onChange={patchFields} />}
-						{title && effectiveType === 'save' && (
-							<SaveFields
-								note={saveNote}
-								onNoteChange={setSaveNote}
-								shouldAISummaries={shouldAISummaries}
-								onShouldAISummariesChange={setShouldAISummaries}
-							/>
-						)}
-						{title && effectiveType === 'note' && <Text size="xs" c="dimmed">Opens in the note editor after creating.</Text>}
-
 
 						{title && lists.length > 0 && (
 							<Stack gap={4}>
@@ -315,6 +305,17 @@ export function CreateNewComponent() {
 								/>
 							</Stack>
 						)}
+						{title && effectiveType === 'save' && (
+							<SaveFields
+								note={saveNote}
+								onNoteChange={setSaveNote}
+								shouldAISummaries={shouldAISummaries}
+								onShouldAISummariesChange={setShouldAISummaries}
+							/>
+						)}
+						{title && effectiveType === 'note' && <Text size="xs" c="dimmed">Opens in the note editor after creating.</Text>}
+
+
 
 
 

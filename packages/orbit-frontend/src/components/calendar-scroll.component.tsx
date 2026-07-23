@@ -11,6 +11,7 @@ import { IconCalendar } from "@tabler/icons-react"
 import { SquaredText } from "./squared-text.component"
 
 const todayStr = dayjs().format("YYYY-MM-DD")
+const tomorrowStr = dayjs().add(1,'day').format("YYYY-MM-DD")
 
 const NAV_BUTTONS_PX = 72
 
@@ -26,6 +27,7 @@ export default function CalendarScroll() {
 	const daysBefore = Math.floor(numberOfDays / 2)
 
 	const todayViewStart = dayjs().subtract(daysBefore, "day").format("YYYY-MM-DD")
+	const tomorrowViewStart = dayjs().add(1,'day').subtract(daysBefore, "day").format("YYYY-MM-DD")
 	const [viewDate, setViewDate] = useState(todayViewStart)
 
 	const cellSize = width > 0
@@ -33,6 +35,7 @@ export default function CalendarScroll() {
 		: 40
 
 	const isToday = selectedDate === todayStr
+	const isTomorrow = selectedDate === tomorrowStr
 	const [calendarOpened, { open: openCalendar, close: closeCalendar }] = useDisclosure(false)
 
 	const setRef = useCallback((el: HTMLDivElement | null) => {
@@ -63,6 +66,11 @@ export default function CalendarScroll() {
 		setViewDate(todayViewStart)
 	}
 
+	function goToTomorrow() {
+		setSelectedDate(tomorrowStr)
+		setViewDate(tomorrowViewStart)
+	}
+
 
 
 	return (
@@ -87,18 +95,29 @@ export default function CalendarScroll() {
 				/>
 			</div>
 			<Flex px={8} gap={8} justify="space-between" align="center" my={"sm"} pl={isDesktop ? 40 : "sm"}>
-				<Flex gap={8} align="center">
-					<SquaredText>
+
 				<Text size="md" fw={600} ff="monospace" tt={"full-size-kana"}>
 					{new Date(selectedDate).toLocaleDateString("en-US", {
 						// localeMatcher: "best fit",
+						// month: "short",
 						weekday: "short",
-						month: "short",
-							day: "numeric",
+						day: "numeric",
 						})}
 						</Text>
+
+
+				<Flex gap={8} align="center">
+					<SquaredText>
+						{isTomorrow ? <Text mx={0} c="dimmed" ff="monospace" size="sm">Tomorrow</Text> : <Text mx={0}
+							c="ocean-blue"
+							size="sm"
+							ff="monospace"
+							style={{ cursor: "pointer" }}
+							onClick={() => goToTomorrow()}
+						>
+							Tomorrow
+						</Text>}
 					</SquaredText>
-					{"."}
 					<SquaredText>
 						{isToday ? <Text mx={0} c="dimmed" ff="monospace" size="sm">Today</Text> : <Text mx={0}
 							c="ocean-blue"
@@ -110,10 +129,10 @@ export default function CalendarScroll() {
 							Today
 						</Text>}
 					</SquaredText>
-				</Flex>
 				<ActionIcon size="compact-sm" variant="subtle" color="gray" onClick={openCalendar} aria-label="Open calendar">
 					<IconCalendar size={22} />
 				</ActionIcon>
+				</Flex>
 			</Flex>
 			<MassiveCalendar opened={calendarOpened} onClose={closeCalendar} />
 		</div>

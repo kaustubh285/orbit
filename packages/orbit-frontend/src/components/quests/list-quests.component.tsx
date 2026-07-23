@@ -74,7 +74,7 @@ export function QuestRow({
 				padding: "6px 8px",
 		 }}>
 			<PrivacyAwareText
-				size="md"
+				size="sm"
 				td={isCompleted ? "line-through" : undefined}
 				c={isCompleted ? "dimmed" : undefined}
 				style={{ flex: 1 }}
@@ -194,11 +194,11 @@ export default function ListQuestsComponent({
 
 	return (
 		<Stack
-			gap={12}
+			gap={10}
 			style={{
 				fontFamily: "inherit",
 			}}
-			pb={"lg"}
+			pb={"xl"}
 		>
 			{quests.map((q) => (
 				<QuestRow key={q.id} quest={q} onToggle={onToggle} onOpen={onOpen} />
