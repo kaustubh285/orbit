@@ -127,7 +127,7 @@ Rules:
 		if (model === "haiku") {
 			const response = await anthropicClient.messages.create({
 				model: "claude-haiku-4-5-20251001",
-				max_tokens: 1200,
+				max_tokens: 1500,
 				system: [{ type: "text", text: HAIKU_SYSTEM, cache_control: { type: "ephemeral" } }],
 				messages: [{ role: "user", content: userMessage }],
 			});
@@ -142,7 +142,7 @@ Rules:
 				model: "sarvam-105b",
 				temperature: 0.1,
 				reasoning_effort: "low",
-				max_tokens: 1500,
+				max_tokens: 3000,
 				messages: [
 					{ role: "system", content: "You are a structured data extractor. Output valid JSON only, no markdown fences. Never invent details not explicitly present in the source content." },
 					{ role: "user", content: sarvamPrompt },
