@@ -1221,7 +1221,7 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100,
+              "maximum": 200,
               "default": 50,
               "description": "Max results to return"
             },
@@ -1237,6 +1237,17 @@
             },
             "required": false,
             "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "description": "Search across title, description, notes, tags"
+            },
+            "required": false,
+            "name": "q",
             "in": "query"
           }
         ],

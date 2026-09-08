@@ -15,7 +15,7 @@ import {
 	TextInput,
 	Tooltip,
 } from "@mantine/core"
-import { useDisclosure } from "@mantine/hooks"
+import { useDebouncedValue, useDisclosure } from "@mantine/hooks"
 import {
 	IconBrandInstagram,
 	IconBrandReddit,
@@ -29,6 +29,8 @@ import {
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { getSavesOptions } from "@orbit/client"
 import { useSaves } from "./use-saves.hook"
 import { SaveDetailView } from "@/components/saves/save-fullpage-drawer.component"
 import SaveGrid from "@/components/saves/save-grid.component"
@@ -53,20 +55,6 @@ const PLATFORM_OPTIONS = [
 	{ label: "Web", value: "web" },
 ]
 
-function matchesSearch(save: Save, query: string): boolean {
-	if (!query) return true
-	const q = query.toLowerCase()
-	return (
-		(save.title?.toLowerCase().includes(q) ?? false) ||
-		(save.aiTitle?.toLowerCase().includes(q) ?? false) ||
-		(save.aiSummary?.toLowerCase().includes(q) ?? false) ||
-		(save.description?.toLowerCase().includes(q) ?? false) ||
-		(save.note?.toLowerCase().includes(q) ?? false) ||
-		PLATFORM_META[save.sourcePlatform].label.toLowerCase().includes(q) ||
-		save.sourcePlatform.toLowerCase().includes(q) ||
-		save.tags.some((t) => t.toLowerCase().includes(q))
-	)
-}
 
 function collectAllTags(saves: Save[]): string[] {
 	const counts = new Map<string, number>()
@@ -101,15 +89,25 @@ export default function SavesView({
 	const [activeLists, setActiveLists] = useState<string[]>([])
 	const [sortOrder, setSortOrder] = useState<SortOrder>("newest")
 
-	const allTags = collectAllTags(saves)
-	const allLists = collectAllLists(saves)
+	const [debouncedSearch] = useDebouncedValue(search, 350)
 
-	const filtered = saves
+	const searchQuery = useQuery({
+		...getSavesOptions({ query: { q: debouncedSearch, limit: 200 } }),
+		enabled: !!debouncedSearch,
+	})
+
+	const baseSaves = debouncedSearch ? (searchQuery.data as Save[] ?? []) : saves
+	const isSearching = !!debouncedSearch && searchQuery.isLoading
+
+	const allTags = collectAllTags(baseSaves)
+	const allLists = collectAllLists(baseSaves)
+
+	const filtered = baseSaves
 		.filter((s) => {
 			const platformMatch = platform === "all" || s.sourcePlatform === platform
 			const tagMatch = activeTags.length === 0 || activeTags.some((t) => s.tags.includes(t))
 			const listMatch = activeLists.length === 0 || activeLists.some((l) => s.lists?.includes(l))
-			return platformMatch && tagMatch && listMatch && matchesSearch(s, search)
+			return platformMatch && tagMatch && listMatch
 		})
 		.sort((a, b) => {
 			const diff = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
@@ -216,14 +214,14 @@ export default function SavesView({
 
 			<SaveGrid
 				saves={filtered}
-				isLoading={isLoading}
+				isLoading={isLoading || isSearching}
 				onRefetch={onRefetch}
 				onClick={(s) => { setSelectedSave(s); open() }}
 			/>
 
-			{!isLoading && filtered.length === 0 && (
+			{!isLoading && !isSearching && filtered.length === 0 && (
 				<Text c="dimmed" ta="center" size="sm" mt="xl">
-					{search || platform !== "all" || activeTags.length > 0 ? "No saves match your filters" : "No saves yet"}
+					{debouncedSearch ? "No saves match your search" : platform !== "all" || activeTags.length > 0 ? "No saves match your filters" : "No saves yet"}
 				</Text>
 			)}
 		</Stack>

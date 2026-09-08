@@ -60,8 +60,9 @@ const listQuerySchema = z.object({
 	platform: z.enum(savePlatformEnum.enumValues).optional(),
 	status: z.enum(saveStatusEnum.enumValues).optional(),
 	tag: z.string().optional(),
-	limit: z.coerce.number().int().min(1).max(100).default(50).openapi({ description: "Max results to return" }),
+	limit: z.coerce.number().int().min(1).max(200).default(50).openapi({ description: "Max results to return" }),
 	cursor: z.string().datetime({ offset: true }).optional().openapi({ description: "Return saves created before this ISO datetime (for pagination)" }),
+	q: z.string().min(1).max(200).optional().openapi({ description: "Search across title, description, notes, tags" }),
 });
 
 export const selectSaveWithListsSchema = selectSaveSchema.extend({

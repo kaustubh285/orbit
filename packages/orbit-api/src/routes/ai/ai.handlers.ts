@@ -1,4 +1,4 @@
-import { and, desc, eq, getTableColumns, ilike, isNull, or, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { db } from "../../db/db.js";
 import { savesTable } from "../../db/schemas/saves.schema.js";
@@ -8,7 +8,7 @@ import { aiQuery } from "@/lib/ai-query.js";
 import { aiRerank, type RerankCandidate } from "@/lib/ai-rerank.js";
 import type { AiQueryRoute } from "./routes.js";
 
-const CANDIDATE_CAP = 40;
+const CANDIDATE_CAP = 100;
 const RESULT_CAP = 8;
 
 // aiSummary is a JSON blob ({ summary, category, contentType, ... }). Pull just
@@ -23,20 +23,33 @@ function extractSummary(aiSummary: string | null): string {
 	}
 }
 
-// Stage B — retrieve. Wide keyword net over the topical text fields. Filters
-// widen the mesh, they don't shrink the net, so keywords are OR-ed and platform
-// is left to the reranker rather than applied as a hard WHERE.
-async function retrieveCandidates(userId: string, keywords: string[]) {
+// Stage B — retrieve. Wide keyword net over the topical text fields. Platforms
+// are applied as a hard WHERE when present (the user said "YouTube" — honour it).
+// No recency ordering: old saves matching the query must compete fairly with new
+// ones; the reranker handles ranking.
+async function retrieveCandidates(userId: string, keywords: string[], platforms: string[] | null) {
 	const keywordConds = keywords.map((kw) => {
 		const like = `%${kw}%`;
 		return or(
 			ilike(savesTable.title, like),
 			ilike(savesTable.aiTitle, like),
+			ilike(savesTable.description, like),
 			ilike(savesTable.aiSummary, like),
 			ilike(savesTable.note, like),
 			sql`array_to_string(${savesTable.tags}, ' ') ILIKE ${like}`,
 		);
 	});
+
+	const conditions = [
+		eq(savesTable.userId, userId),
+		isNull(savesTable.deletedAt),
+		eq(savesTable.status, "active"),
+		or(...keywordConds),
+	];
+
+	if (platforms && platforms.length > 0) {
+		conditions.push(inArray(savesTable.sourcePlatform, platforms as typeof savesTable.sourcePlatform.dataType[]));
+	}
 
 	return db
 		.select({
@@ -46,14 +59,8 @@ async function retrieveCandidates(userId: string, keywords: string[]) {
 		.from(savesTable)
 		.leftJoin(listItemsTable, and(eq(listItemsTable.saveId, savesTable.id), isNull(listItemsTable.deletedAt)))
 		.leftJoin(listsTable, eq(listsTable.id, listItemsTable.listId))
-		.where(and(
-			eq(savesTable.userId, userId),
-			isNull(savesTable.deletedAt),
-			eq(savesTable.status, "active"),
-			or(...keywordConds),
-		))
+		.where(and(...conditions))
 		.groupBy(savesTable.id)
-		.orderBy(desc(savesTable.createdAt))
 		.limit(CANDIDATE_CAP);
 }
 
@@ -65,7 +72,7 @@ export const getAiQueryResult: AppRouteHandler<AiQueryRoute> = async (c) => {
 	const plan = await aiQuery(query);
 
 	// Stage B — retrieve
-	const candidates = await retrieveCandidates(userId, plan.keywords);
+	const candidates = await retrieveCandidates(userId, plan.keywords, plan.platforms);
 
 	if (!candidates.length) {
 		return c.json(

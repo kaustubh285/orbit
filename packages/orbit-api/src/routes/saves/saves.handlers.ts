@@ -1,4 +1,4 @@
-import { and, desc, eq, getTableColumns, inArray, isNotNull, isNull, lt, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, ilike, inArray, isNotNull, isNull, lt, or, sql } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { db } from "../../db/db.js";
 import { savesTable } from "../../db/schemas/saves.schema.js";
@@ -23,13 +23,24 @@ import { resurfaceLogic } from "@/lib/resurface.js";
 
 export const listSaves: AppRouteHandler<ListRoute> = async (c) => {
 	const userId = c.var.userId;
-	const { platform, status, tag, limit, cursor } = c.req.valid("query");
+	const { platform, status, tag, limit, cursor, q } = c.req.valid("query");
 
 	const conditions = [eq(savesTable.userId, userId), isNull(savesTable.deletedAt)];
 	if (platform) conditions.push(eq(savesTable.sourcePlatform, platform));
 	if (status) conditions.push(eq(savesTable.status, status));
 	if (tag) conditions.push(sql`${tag} = ANY(${savesTable.tags})`);
 	if (cursor) conditions.push(lt(savesTable.createdAt, new Date(cursor)));
+	if (q) {
+		const like = `%${q}%`;
+		conditions.push(or(
+			ilike(savesTable.title, like),
+			ilike(savesTable.aiTitle, like),
+			ilike(savesTable.description, like),
+			ilike(savesTable.note, like),
+			ilike(savesTable.aiSummary, like),
+			sql`array_to_string(${savesTable.tags}, ' ') ILIKE ${like}`,
+		)!);
+	}
 
 	const saves = await db
 		.select({

@@ -366,6 +366,10 @@ export type GetSavesData = {
          * Return saves created before this ISO datetime (for pagination)
          */
         cursor?: string;
+        /**
+         * Search across title, description, notes, tags
+         */
+        q?: string;
     };
     url: '/saves';
 };

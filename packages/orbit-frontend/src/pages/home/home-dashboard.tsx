@@ -242,6 +242,37 @@ export function HomeDashboard() {
 					<Text size="md" ff="monospace">Command Centre</Text>
 				</Stack>
 			</Group>
+
+			{/*
+				Works well:
+
+				  - Topical: "Mexican recipes", "machine learning papers", "travel guides to
+				  Japan" — Stage A expands these into synonyms, ILIKE matches across title,
+				  description, summary, tags
+				  - Vague memory: "that video about how CPUs work", "the article I saved
+				  about productivity" — the keyword expansion handles approximate recall
+				  - Platform-specific: "YouTube tutorials about X", "Reddit posts about Y" —
+				  Stage A extracts the platform, Stage B now applies it as a hard filter
+				  (that was the bug we just fixed)
+				  - Intent/mood: "something to watch tonight", "I want to learn about
+				  investing" — falls back to broad keywords like "entertaining", "finance"
+				  - Your notes: if you added a personal note when saving ("save note: need
+				  this for the project"), that's searched
+				  - Tags and lists: "stuff I tagged with Python", "things in my cooking
+				  list" — the reranker sees list names and tags
+
+				  Won't work well:
+
+				  - Date queries: "things I saved last month" — Stage A doesn't extract
+				  dates, there's no date WHERE clause in Stage B
+				  - Content type filtering: "only show tutorials" — contentType lives inside
+				  the aiSummary JSON blob, not a queryable column. Keywords like "tutorial"
+				  will still match as text though
+				  - Author search: "videos by Fireship" — author field isn't in the ILIKE
+				  conditions in Stage B (it's also not passed to the reranker)
+				  - Negation: "recipes but not Indian" — keyword OR logic can't exclude
+				  - Quantity queries: "short videos under 10 minutes" — no duration column
+				*/}
 			<Group>
 				<Textarea rows={1} autosize placeholder="What are you looking for?" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onBlur={() => handleSearch()} flex={1} rightSection={searchTerm ? <IconX size={18} style={{ cursor: "pointer" }} onClick={() => clearSearch()} /> : null} />
 				<ActionIcon onClick={() => handleSearch()} size="lg" loading={isSearching}><IconSearch size={18} /></ActionIcon>
