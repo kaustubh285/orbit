@@ -1,8 +1,10 @@
+import Anthropic from "@anthropic-ai/sdk";
 import z from "zod";
-import { sarvamClient } from "./sarvam-ai.js";
 import { db } from "@/db/db.js";
 import { questsTable } from "@/db/schemas/quests.schema.js";
 import { eq } from "drizzle-orm";
+
+const anthropicClient = new Anthropic();
 
 type Props = {
 	title: string;
@@ -26,8 +28,6 @@ const aiParsedQuestSchema = z.object({
 	]),
 })
 
-type AiParsedQuest = z.infer<typeof aiParsedQuestSchema>;
-
 export const parseQuest = async (data: Props) => {
 	const { title, body, id, timezone } = data;
 
@@ -37,6 +37,7 @@ export const parseQuest = async (data: Props) => {
 	} catch {
 		now = new Date().toISOString();
 	}
+
 	const prompt = `Extract structured data from a todo item. Output valid JSON only — no markdown, no explanation.
 
 CURRENT TIME: ${now} (${timezone})
@@ -65,25 +66,25 @@ STRICT RULES:
 - Only use information explicitly present in the title/description. Do not infer or invent.
 - If a field is optional and not clearly present, omit it entirely.`;
 
-
-	const response = await sarvamClient.chat.completions({
-		model: "sarvam-105b",
-		temperature: 0.1,
-		reasoning_effort: "low",
-		max_tokens: 2048,
-		messages: [
-			{ role: "system", content: "You are a structured data extractor. Output valid JSON only, no markdown fences. Never invent details not explicitly present in the source content." },
-			{ role: "user", content: prompt },
-		],
+	const response = await anthropicClient.messages.create({
+		model: "claude-haiku-4-5-20251001",
+		max_tokens: 1024,
+		system: "You are a structured data extractor. Output valid JSON only, no markdown fences. Never invent details not explicitly present in the source content.",
+		messages: [{ role: "user", content: prompt }],
 	});
-	let rawText = response?.choices[0]?.message?.content ?? "";
-	console.log("[parseQuest] model=sarvam tokens — input:", response?.usage?.prompt_tokens, "output:", response?.usage?.completion_tokens, "total:", response?.usage?.total_tokens);
-	console.log("[parseQuest] finish_reason:", response?.choices[0]?.finish_reason);
+
+	const rawText = response.content
+		.filter((b) => b.type === "text")
+		.map((b) => b.text)
+		.join("");
+
+	console.log("[parseQuest] model=haiku tokens — input:", response.usage.input_tokens, "output:", response.usage.output_tokens);
+	console.log("[parseQuest] stop_reason:", response.stop_reason);
+
 	if (!rawText) {
-		console.error("[parseQuest] empty response — full response:", JSON.stringify(response));
+		console.error("[parseQuest] empty response");
 		return null;
 	}
-
 
 	const text = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
 	let parsed: unknown;
@@ -105,6 +106,4 @@ STRICT RULES:
 		...rest,
 		...(dueAt ? { dueAt: new Date(dueAt) } : {}),
 	}).where(eq(questsTable.id, id))
-
-	// return result.data;
 }
