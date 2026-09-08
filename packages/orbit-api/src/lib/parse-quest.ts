@@ -70,7 +70,7 @@ STRICT RULES:
 		model: "sarvam-105b",
 		temperature: 0.1,
 		reasoning_effort: "low",
-		max_tokens: 512,
+		max_tokens: 2048,
 		messages: [
 			{ role: "system", content: "You are a structured data extractor. Output valid JSON only, no markdown fences. Never invent details not explicitly present in the source content." },
 			{ role: "user", content: prompt },

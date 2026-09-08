@@ -21,13 +21,24 @@ export type QuestFields = {
 	emoji: string | null
 }
 
+export type DuplicateSave = {
+	previouslySavedAt: string
+	save: {
+		id: string
+		sourceUrl: string
+		title: string | null
+		aiTitle: string | null
+		thumbnailUrl: string | null
+	}
+}
+
 export function useCreateNew() {
 	const selectedDate = useQuestsStore((s) => s.selectedDate)
 	const queryClient = useQueryClient()
 	const { addPendingSubmission, removePendingSubmission, setCurrentLists } = useOrbitAppStore((s) => s.actions)
 	const lists = useOrbitAppStore((s) => s.currentLists)
 	const [isRefetchingLists, setIsRefetchingLists] = useState(false)
-	const [duplicateNotice, setDuplicateNotice] = useState<string | null>(null)
+	const [duplicateSave, setDuplicateSave] = useState<DuplicateSave | null>(null)
 
 	async function refetchLists() {
 		setIsRefetchingLists(true)
@@ -49,7 +60,7 @@ export function useCreateNew() {
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: getSavesQueryKey() }),
 	})
 
-	function submitSave(sourceUrl: string, note?: string, listIds?: string[], shouldAISummaries?: boolean) {
+	async function submitSave(sourceUrl: string, note?: string, listIds?: string[], shouldAISummaries?: boolean): Promise<boolean> {
 		const pendingId = crypto.randomUUID()
 		const payload = {
 			sourceUrl,
@@ -58,17 +69,27 @@ export function useCreateNew() {
 			shouldAISummaries: shouldAISummaries ?? false,
 		}
 		addPendingSubmission({ id: pendingId, createdAt: new Date().toISOString(), apiCallKey: 'postSave', payload })
-		createSave.mutate(
-			{ body: payload } as Parameters<typeof createSave.mutate>[0],
-			{
-				onSuccess: (data) => {
-					removePendingSubmission(pendingId)
-					if (data && 'duplicate' in data && data.duplicate) {
-						setDuplicateNotice(data.previouslySavedAt)
-					}
-				},
-			},
-		)
+		try {
+			const data = await createSave.mutateAsync({ body: payload } as Parameters<typeof createSave.mutate>[0])
+			removePendingSubmission(pendingId)
+			if (data && 'duplicate' in data && data.duplicate) {
+				setDuplicateSave({
+					previouslySavedAt: data.previouslySavedAt,
+					save: {
+						id: data.save.id,
+						sourceUrl: data.save.sourceUrl,
+						title: data.save.title,
+						aiTitle: data.save.aiTitle,
+						thumbnailUrl: data.save.thumbnailUrl,
+					},
+				})
+				return true
+			}
+			return false
+		} catch {
+			removePendingSubmission(pendingId)
+			return false
+		}
 	}
 
 	async function submitQuest(uiType: Exclude<UiType, 'save'>, title: string, fields: QuestFields, listIds?: string[]) {
@@ -107,8 +128,8 @@ export function useCreateNew() {
 		}
 
 		if (uiType === 'save') {
-			submitSave(trimmed, saveNote, listIds, shouldAISummaries)
-			return null
+			const isDuplicate = await submitSave(trimmed, saveNote, listIds, shouldAISummaries)
+			return isDuplicate ? ({ duplicate: true } as const) : null
 		}
 
 		return submitQuest(uiType, trimmed, fields, listIds)
@@ -126,7 +147,7 @@ export function useCreateNew() {
 		isPending: createQuest.isPending || createSave.isPending,
 		refetchLists,
 		isRefetchingLists,
-		duplicateNotice,
-		clearDuplicateNotice: () => setDuplicateNotice(null),
+		duplicateSave,
+		clearDuplicateSave: () => setDuplicateSave(null),
 	}
 }

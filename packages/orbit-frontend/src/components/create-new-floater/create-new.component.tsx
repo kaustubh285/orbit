@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import {
-	ActionIcon, Alert, Button, Chip, Drawer, Group,
+	ActionIcon, Anchor, Button, Card, Chip, Drawer, Group,
 	MultiSelect, Stack, Switch, Text, Textarea, TextInput,
 } from '@mantine/core'
 import { DateTimePicker } from '@mantine/dates'
 import {
-	IconBookmark, IconCalendarEvent, IconClipboardCheckFilled, IconFileText,
+	IconBookmark, IconCalendarEvent, IconClipboardCheckFilled, IconExternalLink, IconFileText,
 	IconPackageImport,
 	IconRefresh, IconSparkles, IconSquareCheck,
 } from '@tabler/icons-react'
@@ -176,7 +176,7 @@ export function CreateNewComponent() {
 	const [shouldAISummaries, setShouldAISummaries] = useState(true)
 	const [listIds, setListIds] = useState<string[]>([])
 
-	const { lists, onSubmit, isPending, refetchLists, isRefetchingLists, duplicateNotice, clearDuplicateNotice } = useCreateNew()
+	const { lists, onSubmit, isPending, refetchLists, isRefetchingLists, duplicateSave, clearDuplicateSave } = useCreateNew()
 	const navigate = useNavigate()
 	const isDesktop = useMediaQuery("(min-width: 48em)", false, { getInitialValueInEffect: false })
 
@@ -206,7 +206,7 @@ export function CreateNewComponent() {
 	function handleClose() {
 		setOpened(false)
 		reset()
-		clearDuplicateNotice()
+		clearDuplicateSave()
 	}
 
 	function handleTypeChange(t: UiType) {
@@ -219,9 +219,9 @@ export function CreateNewComponent() {
 
 	async function handleSubmit() {
 		const result = await onSubmit(effectiveType, title, fields, saveNote, listIds, shouldAISummaries)
-		if (!duplicateNotice)
-			handleClose()
-		if (result?.id && effectiveType === 'note') {
+		if (result && 'duplicate' in result) return
+		handleClose()
+		if (result && 'id' in result && result.id && effectiveType === 'note') {
 			navigate({ to: ROUTES.NOTE_DETAIL, params: { noteId: result.id } })
 		}
 	}
@@ -321,10 +321,35 @@ export function CreateNewComponent() {
 
 					</Stack>
 
-					{duplicateNotice && (
-						<Alert color="yellow" withCloseButton onClose={clearDuplicateNotice}>
-							You saved this on {new Date(duplicateNotice).toLocaleDateString()} — that&apos;s twice now. Maybe it matters?
-						</Alert>
+					{duplicateSave && (
+						<Card withBorder radius="md" p="sm" bg="yellow.0">
+							<Stack gap="xs">
+								<Text size="xs" c="dimmed">
+									Already saved on {new Date(duplicateSave.previouslySavedAt).toLocaleDateString()}
+								</Text>
+								<Text size="sm" fw={500} lineClamp={2}>
+									{duplicateSave.save.aiTitle ?? duplicateSave.save.title ?? duplicateSave.save.sourceUrl}
+								</Text>
+								<Anchor size="xs" c="dimmed" href={duplicateSave.save.sourceUrl} target="_blank" rel="noopener noreferrer" lineClamp={1}>
+									{duplicateSave.save.sourceUrl}
+								</Anchor>
+								<Group gap="xs" justify="flex-end" mt={4}>
+									<Button size="xs" variant="default" onClick={() => { navigate({ to: ROUTES.SAVES }); handleClose() }}>
+										View saves
+									</Button>
+									<Button
+										size="xs"
+										component="a"
+										href={duplicateSave.save.sourceUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										rightSection={<IconExternalLink size={12} />}
+									>
+										Open link
+									</Button>
+								</Group>
+							</Stack>
+						</Card>
 					)}
 
 					<Stack gap="xs">
