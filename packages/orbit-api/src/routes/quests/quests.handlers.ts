@@ -201,7 +201,7 @@ export const createQuest: AppRouteHandler<CreateRoute> = async (c) => {
 
 	if (quest.type !== "note") {
 		const timezone = c.req.header("x-timezone") ?? "UTC"
-		parseQuest({ title: quest.title, body: quest.body, id: quest.id, timezone }).catch((err) =>
+		parseQuest({ title: quest.title, body: quest.body, id: quest.id, timezone, userId }).catch((err) =>
 			console.error("[parseQuest] background error:", err),
 		);
 	}
@@ -271,7 +271,7 @@ export const updateQuest: AppRouteHandler<UpdateRoute> = async (c) => {
 
 	if (updated.type !== "note" && (rest.title !== undefined || rest.body !== undefined)) {
 		const timezone = c.req.header("x-timezone") ?? "UTC"
-		parseQuest({ title: updated.title, body: updated.body, id: updated.id, timezone }).catch((err) =>
+		parseQuest({ title: updated.title, body: updated.body, id: updated.id, timezone, userId }).catch((err) =>
 			console.error("[parseQuest] background error:", err),
 		);
 	}

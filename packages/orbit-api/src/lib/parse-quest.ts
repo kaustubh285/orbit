@@ -3,6 +3,7 @@ import z from "zod";
 import { db } from "@/db/db.js";
 import { questsTable } from "@/db/schemas/quests.schema.js";
 import { eq } from "drizzle-orm";
+import { logAiCall } from "@/lib/log-ai-call.js";
 
 const anthropicClient = new Anthropic();
 
@@ -11,6 +12,7 @@ type Props = {
 	body: string | null;
 	id: string;
 	timezone: string;
+	userId?: string;
 };
 
 const aiParsedQuestSchema = z.object({
@@ -29,7 +31,7 @@ const aiParsedQuestSchema = z.object({
 })
 
 export const parseQuest = async (data: Props) => {
-	const { title, body, id, timezone } = data;
+	const { title, body, id, timezone, userId } = data;
 
 	let now: string;
 	try {
@@ -78,8 +80,13 @@ STRICT RULES:
 		.map((b) => b.text)
 		.join("");
 
-	console.log("[parseQuest] model=haiku tokens — input:", response.usage.input_tokens, "output:", response.usage.output_tokens);
-	console.log("[parseQuest] stop_reason:", response.stop_reason);
+	logAiCall({
+		userId,
+		model: "claude-haiku-4-5-20251001",
+		feature: "parse_quest",
+		inputTokens: response.usage.input_tokens,
+		outputTokens: response.usage.output_tokens,
+	});
 
 	if (!rawText) {
 		console.error("[parseQuest] empty response");
