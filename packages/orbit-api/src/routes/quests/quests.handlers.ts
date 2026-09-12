@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lt, lte, or, ne, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, lt, lte, or, ne, sql } from "drizzle-orm";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { db } from "../../db/db.js";
 import { questsTable, questTypeEnum } from "../../db/schemas/quests.schema.js";
@@ -71,6 +71,36 @@ export const timelineQuests: AppRouteHandler<TimelineRoute> = async (c) => {
 	return c.json(quests, HttpStatusCodes.OK);
 };
 
+function sortWithChildren<T extends { id: string; parentId: string | null }>(quests: T[]): T[] {
+	const childrenByParent = new Map<string, T[]>();
+	const topLevel: T[] = [];
+
+	for (const q of quests) {
+		if (q.parentId) {
+			const bucket = childrenByParent.get(q.parentId) ?? [];
+			bucket.push(q);
+			childrenByParent.set(q.parentId, bucket);
+		} else {
+			topLevel.push(q);
+		}
+	}
+
+	const result: T[] = [];
+	const placedParentIds = new Set(topLevel.map((q) => q.id));
+
+	for (const q of topLevel) {
+		result.push(q);
+		result.push(...(childrenByParent.get(q.id) ?? []));
+	}
+
+	// Orphaned children whose parent wasn't in the result set
+	for (const [parentId, children] of childrenByParent) {
+		if (!placedParentIds.has(parentId)) result.push(...children);
+	}
+
+	return result;
+}
+
 export const listQuests: AppRouteHandler<ListRoute> = async (c) => {
 	const userId = c.var.userId;
 	const { type, status, priority, date, limit, cursor } = c.req.valid("query");
@@ -97,7 +127,30 @@ export const listQuests: AppRouteHandler<ListRoute> = async (c) => {
 		.orderBy(desc(questsTable.createdAt))
 		.limit(limit);
 
-	return c.json(quests, HttpStatusCodes.OK);
+	// When filtering by date, child quests have no dueAt so they won't match the
+	// date condition. Fetch them separately so they appear alongside their parent.
+	let combined = [...quests];
+	if (date && quests.length > 0) {
+		const parentIds = quests.filter((q) => !q.parentId).map((q) => q.id);
+		if (parentIds.length > 0) {
+			const childConditions = [
+				eq(questsTable.userId, userId),
+				inArray(questsTable.parentId, parentIds),
+			];
+			if (status) childConditions.push(eq(questsTable.status, status));
+
+			const children = await db
+				.select()
+				.from(questsTable)
+				.where(and(...childConditions))
+				.orderBy(questsTable.createdAt);
+
+			const existingIds = new Set(quests.map((q) => q.id));
+			combined = [...quests, ...children.filter((c) => !existingIds.has(c.id))];
+		}
+	}
+
+	return c.json(sortWithChildren(combined), HttpStatusCodes.OK);
 };
 
 export const createQuest: AppRouteHandler<CreateRoute> = async (c) => {
@@ -203,6 +256,17 @@ export const updateQuest: AppRouteHandler<UpdateRoute> = async (c) => {
 		await db.insert(listItemsTable)
 			.values({ listId, questId: updated.id, saveId: null })
 			.onConflictDoNothing();
+	}
+
+	// Completing a parent quest completes all its children too
+	if (rest.status === "completed" && updated.parentId === null) {
+		await db.update(questsTable)
+			.set({ status: "completed", completedAt: resolvedCompletedAt ?? new Date() })
+			.where(and(
+				eq(questsTable.userId, userId),
+				eq(questsTable.parentId, updated.id),
+				ne(questsTable.status, "completed"),
+			));
 	}
 
 	if (updated.type !== "note" && (rest.title !== undefined || rest.body !== undefined)) {

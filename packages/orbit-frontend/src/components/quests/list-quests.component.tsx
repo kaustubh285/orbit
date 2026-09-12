@@ -59,9 +59,7 @@ export function QuestRow({
 				alignItems: "center",
 				gap: 8,
 				padding: "0px 4px",
-				// borderBottom: "1px dotted var(--mantine-color-gray-4)",
-				// borderLeft: `3px solid var(--mantine-color-${TYPE_COLOR[quest.type]}-6)`,
-				paddingLeft: 8,
+				paddingLeft: quest.parentId ? 24 : 8,
 			}}
 		>
 			<TypeIcon
@@ -81,7 +79,16 @@ export function QuestRow({
 				onClick={() => onOpen(quest)}
 			>
 				{quest.title}
-			</PrivacyAwareText>
+				</PrivacyAwareText>
+
+				{quest.dueAt ? <PrivacyAwareText
+					size="sm"
+					c={"dimmed"}
+					// style={{ flex: 1 }}
+					onClick={() => onOpen(quest)}
+				>
+					{new Date(quest.dueAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })}
+				</PrivacyAwareText> : null}
 			{showLastDone && (
 				<Badge
 					color="green"

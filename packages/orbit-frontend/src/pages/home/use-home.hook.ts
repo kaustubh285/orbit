@@ -29,18 +29,42 @@ export function useHome() {
 		}
 	}, [quests.isSuccess, quests.data, selectedDate])
 
-	const questsData = (quests.isError
+	const rawQuests = (quests.isError
 		? (questsCache[selectedDate] ?? [])
 		: (quests.data ?? [])
-	).filter((q) => q.type !== "note").sort((a, b) => {
-		const statusOrder = { active: 0, completed: 1 }
-		const statusDiff = (statusOrder[a.status as keyof typeof statusOrder] ?? 0) - (statusOrder[b.status as keyof typeof statusOrder] ?? 0)
-		if (statusDiff !== 0) return statusDiff
-		if (!a.dueAt && !b.dueAt) return 0
-		if (!a.dueAt) return 1
-		if (!b.dueAt) return -1
-		return a.dueAt.localeCompare(b.dueAt)
-	})
+	).filter((q) => q.type !== "note")
+
+	const questsData = (() => {
+		const childrenByParent = new Map<string, typeof rawQuests>()
+		const topLevel: typeof rawQuests = []
+
+		for (const q of rawQuests) {
+			if (q.parentId) {
+				const bucket = childrenByParent.get(q.parentId) ?? []
+				bucket.push(q)
+				childrenByParent.set(q.parentId, bucket)
+			} else {
+				topLevel.push(q)
+			}
+		}
+
+		topLevel.sort((a, b) => {
+			const statusOrder = { active: 0, completed: 1 }
+			const statusDiff = (statusOrder[a.status as keyof typeof statusOrder] ?? 0) - (statusOrder[b.status as keyof typeof statusOrder] ?? 0)
+			if (statusDiff !== 0) return statusDiff
+			if (!a.dueAt && !b.dueAt) return 0
+			if (!a.dueAt) return 1
+			if (!b.dueAt) return -1
+			return a.dueAt.localeCompare(b.dueAt)
+		})
+
+		const result: typeof rawQuests = []
+		for (const q of topLevel) {
+			result.push(q)
+			result.push(...(childrenByParent.get(q.id) ?? []))
+		}
+		return result
+	})()
 
 	const createQuest = useMutation({
 		...postQuestsMutation(),
@@ -60,7 +84,7 @@ export function useHome() {
 		const trimmed = title.trim()
 		if (!trimmed) return
 		const id = crypto.randomUUID()
-		const payload = { type, title: trimmed, dueAt: selectedDate ? new Date(`${selectedDate}T00:00:00.000Z`).toISOString() : null }
+		const payload = { type, title: trimmed, dueAt: selectedDate ? new Date(`${selectedDate}T00:00:00`).toISOString() : null }
 		addPendingSubmission({ id, createdAt: new Date().toISOString(), apiCallKey: "postQuest", payload })
 		createQuest.mutate(
 			{ body: payload } as Parameters<typeof createQuest.mutate>[0],

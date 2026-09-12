@@ -230,6 +230,11 @@
                         "type": "string",
                         "nullable": true
                       },
+                      "parentId": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uuid"
+                      },
                       "createdAt": {
                         "type": "string",
                         "format": "date-time"
@@ -255,6 +260,7 @@
                       "lastCompletedAt",
                       "isRemembral",
                       "emoji",
+                      "parentId",
                       "createdAt",
                       "updatedAt"
                     ]
@@ -438,6 +444,11 @@
                         "type": "string",
                         "nullable": true
                       },
+                      "parentId": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uuid"
+                      },
                       "createdAt": {
                         "type": "string",
                         "format": "date-time"
@@ -463,6 +474,7 @@
                       "lastCompletedAt",
                       "isRemembral",
                       "emoji",
+                      "parentId",
                       "createdAt",
                       "updatedAt"
                     ]
@@ -560,6 +572,11 @@
                     "nullable": true
                   },
                   "listId": {
+                    "type": "string",
+                    "nullable": true,
+                    "format": "uuid"
+                  },
+                  "parentId": {
                     "type": "string",
                     "nullable": true,
                     "format": "uuid"
@@ -661,6 +678,11 @@
                       "type": "string",
                       "nullable": true
                     },
+                    "parentId": {
+                      "type": "string",
+                      "nullable": true,
+                      "format": "uuid"
+                    },
                     "createdAt": {
                       "type": "string",
                       "format": "date-time"
@@ -686,6 +708,7 @@
                     "lastCompletedAt",
                     "isRemembral",
                     "emoji",
+                    "parentId",
                     "createdAt",
                     "updatedAt"
                   ]
@@ -819,6 +842,11 @@
                       "type": "string",
                       "nullable": true
                     },
+                    "parentId": {
+                      "type": "string",
+                      "nullable": true,
+                      "format": "uuid"
+                    },
                     "createdAt": {
                       "type": "string",
                       "format": "date-time"
@@ -844,6 +872,7 @@
                     "lastCompletedAt",
                     "isRemembral",
                     "emoji",
+                    "parentId",
                     "createdAt",
                     "updatedAt"
                   ]
@@ -972,6 +1001,11 @@
                     "type": "string",
                     "nullable": true,
                     "format": "uuid"
+                  },
+                  "parentId": {
+                    "type": "string",
+                    "nullable": true,
+                    "format": "uuid"
                   }
                 }
               }
@@ -1066,6 +1100,11 @@
                       "type": "string",
                       "nullable": true
                     },
+                    "parentId": {
+                      "type": "string",
+                      "nullable": true,
+                      "format": "uuid"
+                    },
                     "createdAt": {
                       "type": "string",
                       "format": "date-time"
@@ -1091,6 +1130,7 @@
                     "lastCompletedAt",
                     "isRemembral",
                     "emoji",
+                    "parentId",
                     "createdAt",
                     "updatedAt"
                   ]
@@ -2800,6 +2840,11 @@
                                 "type": "string",
                                 "nullable": true
                               },
+                              "parentId": {
+                                "type": "string",
+                                "nullable": true,
+                                "format": "uuid"
+                              },
                               "createdAt": {
                                 "type": "string",
                                 "format": "date-time"
@@ -2825,6 +2870,7 @@
                               "lastCompletedAt",
                               "isRemembral",
                               "emoji",
+                              "parentId",
                               "createdAt",
                               "updatedAt"
                             ]
@@ -3317,6 +3363,11 @@
                           "type": "string",
                           "nullable": true
                         },
+                        "parentId": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "uuid"
+                        },
                         "createdAt": {
                           "type": "string",
                           "format": "date-time"
@@ -3342,6 +3393,7 @@
                         "lastCompletedAt",
                         "isRemembral",
                         "emoji",
+                        "parentId",
                         "createdAt",
                         "updatedAt"
                       ]

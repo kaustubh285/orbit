@@ -32,6 +32,7 @@ export const selectQuestSchema = z.object({
 	lastCompletedAt: coerceDatetime,
 	isRemembral: z.boolean(),
 	emoji: z.string().nullable(),
+	parentId: z.string().uuid().nullable(),
 	createdAt: z.string().datetime({ offset: true }),
 	updatedAt: z.string().datetime({ offset: true }),
 });
@@ -51,6 +52,7 @@ export const insertQuestSchema = z.object({
 	isRemembral: z.boolean().optional(),
 	emoji: z.string().nullable().optional(),
 	listId: z.string().uuid().nullable().optional(),
+	parentId: z.string().uuid().nullable().optional(),
 });
 
 export const patchQuestSchema = insertQuestSchema.partial();

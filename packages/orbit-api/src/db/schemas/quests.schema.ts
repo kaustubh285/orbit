@@ -6,6 +6,7 @@ import {
 	timestamp,
 	boolean,
 	index,
+	type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { id, createdAt, updatedAt, deletedAt } from "../schema.helper";
 import { usersTable } from "./users.schema";
@@ -66,6 +67,9 @@ export const questsTable = pgTable(
 		// remembral-specific
 		isRemembral: boolean("is_remembral").notNull().default(false),
 		emoji: text("emoji"),
+
+		// subtasks — child quests reference their parent
+		parentId: uuid("parent_id").references((): AnyPgColumn => questsTable.id, { onDelete: "set null" }),
 	},
 	(table) => ({
 		userStatusIdx: index("quests_user_status_idx").on(table.userId, table.status),

@@ -80,6 +80,7 @@ export type GetQuestsTimelineResponses = {
         lastCompletedAt: string | null;
         isRemembral: boolean;
         emoji: string | null;
+        parentId: string | null;
         createdAt: string;
         updatedAt: string;
     }>;
@@ -130,6 +131,7 @@ export type GetQuestsResponses = {
         lastCompletedAt: string | null;
         isRemembral: boolean;
         emoji: string | null;
+        parentId: string | null;
         createdAt: string;
         updatedAt: string;
     }>;
@@ -156,6 +158,7 @@ export type PostQuestsData = {
         isRemembral?: boolean;
         emoji?: string | null;
         listId?: string | null;
+        parentId?: string | null;
     };
     path?: never;
     query?: never;
@@ -195,6 +198,7 @@ export type PostQuestsResponses = {
         lastCompletedAt: string | null;
         isRemembral: boolean;
         emoji: string | null;
+        parentId: string | null;
         createdAt: string;
         updatedAt: string;
     };
@@ -271,6 +275,7 @@ export type GetQuestsByIdResponses = {
         lastCompletedAt: string | null;
         isRemembral: boolean;
         emoji: string | null;
+        parentId: string | null;
         createdAt: string;
         updatedAt: string;
     };
@@ -297,6 +302,7 @@ export type PatchQuestsByIdData = {
         isRemembral?: boolean;
         emoji?: string | null;
         listId?: string | null;
+        parentId?: string | null;
     };
     path: {
         id: string;
@@ -344,6 +350,7 @@ export type PatchQuestsByIdResponses = {
         lastCompletedAt: string | null;
         isRemembral: boolean;
         emoji: string | null;
+        parentId: string | null;
         createdAt: string;
         updatedAt: string;
     };
@@ -884,6 +891,7 @@ export type GetListsByIdResponses = {
                 lastCompletedAt: string | null;
                 isRemembral: boolean;
                 emoji: string | null;
+                parentId: string | null;
                 createdAt: string;
                 updatedAt: string;
             } | null;
@@ -1028,6 +1036,7 @@ export type PostListsByIdItemsResponses = {
             lastCompletedAt: string | null;
             isRemembral: boolean;
             emoji: string | null;
+            parentId: string | null;
             createdAt: string;
             updatedAt: string;
         } | null;

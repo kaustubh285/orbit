@@ -13,6 +13,7 @@ export type Quest = {
 	lastCompletedAt: string | null
 	isRemembral: boolean
 	emoji: string | null
+	parentId: string | null
 	createdAt: string
 }
 

@@ -97,7 +97,7 @@ export function useCreateNew() {
 		const payload: Record<string, unknown> = { type: questType, title }
 
 		if (uiType === 'todo') {
-			payload.dueAt = fields.dueAt ?? (selectedDate ? new Date(`${selectedDate}T00:00:00.000Z`).toISOString() : null)
+			payload.dueAt = fields.dueAt ?? (selectedDate ? new Date(`${selectedDate}T00:00:00`).toISOString() : null)
 		} else if (uiType === 'event') {
 			payload.startAt = fields.startAt
 			payload.endAt = fields.endAt
