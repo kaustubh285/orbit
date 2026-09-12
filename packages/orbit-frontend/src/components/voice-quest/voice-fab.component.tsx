@@ -42,7 +42,7 @@ export function VoiceFAB() {
 
 	const bottom = isDesktop
 		? '24px'
-		: 'calc(64px + env(safe-area-inset-bottom) + 16px)'
+		: 'calc(64px + env(safe-area-inset-bottom) + 24px)'
 
 	const tooltipLabel = error ?? (isRecording ? 'Tap to stop' : 'Tap to record')
 
@@ -60,7 +60,7 @@ export function VoiceFAB() {
 					variant="filled"
 					color={isRecording ? 'red' : 'dark'}
 					radius="md"
-					size="lg"
+					size="xl"
 					onClick={handleClick}
 					disabled={isLoading}
 					style={{
@@ -72,10 +72,10 @@ export function VoiceFAB() {
 					}}
 				>
 					{isLoading
-						? <Loader size={14} color="white" />
+						? <Loader size={16} color="white" />
 						: isRecording
 							? <IconPlayerStopFilled size={16} />
-							: <IconMicrophone size={18} />}
+							: <IconMicrophone size={24} />}
 				</ActionIcon>
 			</Tooltip>
 
