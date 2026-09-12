@@ -12,6 +12,7 @@ router
 	.openapi(routes.timeline, handlers.timelineQuests)
 	.openapi(routes.list, handlers.listQuests)
 	.openapi(routes.create, handlers.createQuest)
+	.openapi(routes.voiceTranscribe, handlers.voiceTranscribeQuest)
 	.openapi(routes.getOne, handlers.getOneQuest)
 	.openapi(routes.update, handlers.updateQuest)
 	.openapi(routes.remove, handlers.removeQuest);

@@ -166,6 +166,39 @@ export const timeline = createRoute({
 	},
 });
 
+const parsedVoiceQuestSchema = z.object({
+	type: z.enum(questTypeEnum.enumValues),
+	title: z.string(),
+	body: z.string().optional(),
+	dueAt: z.string().datetime({ offset: true }).optional(),
+	startAt: z.string().datetime({ offset: true }).optional(),
+	endAt: z.string().datetime({ offset: true }).optional(),
+	location: z.string().optional(),
+	priority: z.enum(questPriorityEnum.enumValues).optional(),
+});
+
+const voiceTranscribeResponseSchema = z.object({
+	transcript: z.string(),
+	quests: z.array(parsedVoiceQuestSchema),
+});
+
+export const voiceTranscribe = createRoute({
+	path: "/quests/voice",
+	method: "post",
+	tags: ["Quests"],
+	request: {
+		body: {
+			content: { "multipart/form-data": { schema: z.object({ audio: z.any() }) } },
+			required: true,
+		},
+	},
+	responses: {
+		[HttpStatusCodes.OK]: jsonContent(voiceTranscribeResponseSchema, "Transcript and parsed quests"),
+		[HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(validationErrorSchema, "Missing or invalid audio"),
+		[HttpStatusCodes.BAD_GATEWAY]: jsonContent(z.object({ message: z.string() }), "Transcription service error"),
+	},
+});
+
 export type CountRoute = typeof count;
 export type TimelineRoute = typeof timeline;
 export type ListRoute = typeof list;
@@ -173,3 +206,4 @@ export type CreateRoute = typeof create;
 export type GetOneRoute = typeof getOne;
 export type UpdateRoute = typeof update;
 export type RemoveRoute = typeof remove;
+export type VoiceTranscribeRoute = typeof voiceTranscribe;

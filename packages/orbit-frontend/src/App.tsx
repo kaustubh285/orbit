@@ -7,6 +7,7 @@ import { AppHeader } from "./components/app-structure/app-header.component"
 import { AppFooter } from "./components/app-structure/app-footer.component"
 import { AppNavbar } from "./components/app-structure/app-navbar.component"
 import { CreateNewComponent } from "./components/create-new-floater/create-new.component"
+import { VoiceFAB } from "./components/voice-quest/voice-fab.component"
 import { useOrbitAppStore } from "./store/orbit-app.store"
 import { useEffect, useState } from "react"
 import '@gfazioli/mantine-picker/styles.css';
@@ -68,6 +69,7 @@ export function App() {
 			</AppShell.Main>
 			<AppFooter />
 			<CreateNewComponent />
+			<VoiceFAB />
 		</AppShell>
 	)
 }

@@ -206,6 +206,55 @@ export type PostQuestsResponses = {
 
 export type PostQuestsResponse = PostQuestsResponses[keyof PostQuestsResponses];
 
+export type PostQuestsVoiceData = {
+    body: {
+        audio?: unknown;
+    };
+    path?: never;
+    query?: never;
+    url: '/quests/voice';
+};
+
+export type PostQuestsVoiceErrors = {
+    /**
+     * Missing or invalid audio
+     */
+    422: {
+        error: {
+            [key: string]: unknown;
+        };
+    };
+    /**
+     * Transcription service error
+     */
+    502: {
+        message: string;
+    };
+};
+
+export type PostQuestsVoiceError = PostQuestsVoiceErrors[keyof PostQuestsVoiceErrors];
+
+export type PostQuestsVoiceResponses = {
+    /**
+     * Transcript and parsed quests
+     */
+    200: {
+        transcript: string;
+        quests: Array<{
+            type: 'todo' | 'note' | 'event' | 'daily';
+            title: string;
+            body?: string;
+            dueAt?: string;
+            startAt?: string;
+            endAt?: string;
+            location?: string;
+            priority?: 'urgent' | 'important' | 'quick_win' | 'deep_work' | 'someday' | 'waiting';
+        }>;
+    };
+};
+
+export type PostQuestsVoiceResponse = PostQuestsVoiceResponses[keyof PostQuestsVoiceResponses];
+
 export type DeleteQuestsByIdData = {
     body?: never;
     path: {

@@ -13,8 +13,11 @@ import type {
 	ListRoute,
 	RemoveRoute,
 	UpdateRoute,
+	VoiceTranscribeRoute,
 } from "./routes.js";
 import { parseQuest } from "@/lib/parse-quest.js";
+import { transcribeVoice } from "@/lib/transcribe-voice.js";
+import { parseVoiceQuests } from "@/lib/parse-voice-quests.js";
 
 export const countQuests: AppRouteHandler<CountRoute> = async (c) => {
 	const userId = c.var.userId;
@@ -293,4 +296,28 @@ export const removeQuest: AppRouteHandler<RemoveRoute> = async (c) => {
 		return c.json({ message: "Quest not found" }, HttpStatusCodes.NOT_FOUND);
 	}
 	return c.body(null, HttpStatusCodes.NO_CONTENT);
+};
+
+export const voiceTranscribeQuest: AppRouteHandler<VoiceTranscribeRoute> = async (c) => {
+	const userId = c.var.userId;
+	const timezone = c.req.header("x-timezone") ?? "UTC";
+
+	const body = await c.req.parseBody();
+	const audio = body["audio"];
+
+	if (!(audio instanceof File) || audio.size === 0) {
+		return c.json({ error: { message: "audio field must be a non-empty audio file" } }, HttpStatusCodes.UNPROCESSABLE_ENTITY);
+	}
+
+	let transcript: string;
+	try {
+		transcript = await transcribeVoice(audio, userId);
+	} catch (err) {
+		console.error("[voiceTranscribeQuest] STT error:", err);
+		return c.json({ message: "Transcription service error" }, HttpStatusCodes.BAD_GATEWAY);
+	}
+
+	const quests = await parseVoiceQuests(transcript, timezone, userId);
+
+	return c.json({ transcript, quests }, HttpStatusCodes.OK);
 };
