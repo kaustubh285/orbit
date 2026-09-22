@@ -34,9 +34,6 @@ const rootRoute = createRootRouteWithContext<{
 	auth: AuthContext
 }>()({
 	component: App,
-	validateSearch: (search: Record<string, unknown>) => ({
-		save: typeof search.save === "string" ? search.save : undefined,
-	}),
 })
 
 function requireAuth({ context, location }: { context: { auth: AuthContext }, location: { href: string } }) {
