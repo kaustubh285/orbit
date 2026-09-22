@@ -78,19 +78,16 @@ export async function scrapeReddit(url: string): Promise<ProviderResult> {
 	})
 }
 
-// Instagram oEmbed via Facebook Graph API — disabled until token auth is confirmed working.
-// export async function scrapeInstagram(url: string): Promise<ProviderResult> {
-// 	const token = process.env.INSTAGRAM_ACCESS_TOKEN
-// 	if (!token) return {}
-// 	const oembedUrl = `https://graph.facebook.com/v25.0/instagram_oembed?url=${encodeURIComponent(url)}&access_token=${encodeURIComponent(token)}&fields=title,author_name,thumbnail_url`
-// 	const data = await fetchJson<OEmbedResponse>(oembedUrl)
-// 	if (!data) return {}
-// 	return sanitize({
-// 		title: data.title ?? null,
-// 		author: data.author_name ?? null,
-// 		thumbnailUrl: data.thumbnail_url ?? null,
-// 	})
-// }
+export async function scrapeInstagram(url: string): Promise<ProviderResult> {
+	const oembedUrl = `https://www.instagram.com/api/v1/oembed/?url=${encodeURIComponent(url)}&hidecaption=false`
+	const data = await fetchJson<OEmbedResponse>(oembedUrl)
+	if (!data) return {}
+	return sanitize({
+		title: data.title ?? null,
+		author: data.author_name ?? null,
+		thumbnailUrl: data.thumbnail_url ?? null,
+	})
+}
 
 export async function scrapeGeneric(url: string): Promise<ProviderResult> {
 	const html = await fetchHtml(url)

@@ -1,5 +1,5 @@
 import { detectPlatform } from "./platform.js"
-import { scrapeGeneric, scrapeReddit, scrapeYouTube } from "./providers.js"
+import { scrapeGeneric, scrapeInstagram, scrapeReddit, scrapeYouTube } from "./providers.js"
 import { generateTags } from "./tags.js"
 import type { ScrapedMeta } from "./types.js"
 
@@ -18,7 +18,8 @@ export async function scrapeUrl(url: string): Promise<ScrapeResult> {
 	const provider =
 		sourcePlatform === "youtube" ? scrapeYouTube :
 			sourcePlatform === "reddit" ? scrapeReddit :
-				scrapeGeneric
+				sourcePlatform === "instagram" ? scrapeInstagram :
+					scrapeGeneric
 
 	const meta: ProviderResult = await provider(url).catch(() => ({}))
 
