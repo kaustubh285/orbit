@@ -8,13 +8,40 @@ import reports from "./routes/reports/reports.route.js"
 import users from "./routes/users/users.route.js"
 import ai from "./routes/ai/ai.route.js"
 import queue from "./routes/queue/queue.route.js"
-import proxy from "./routes/proxy/proxy.route.js"
 import env from "./env.js"
+
+const PROXY_ALLOWED_HOSTS = [".cdninstagram.com", ".fbcdn.net"]
+function isProxyAllowed(url: string): boolean {
+	try {
+		const { hostname } = new URL(url)
+		return PROXY_ALLOWED_HOSTS.some((s) => hostname.endsWith(s))
+	} catch { return false }
+}
 
 const app = createApp()
 configureOpenAPI(app)
 
-const routes = [index, quests, saves, lists, reports, users, ai, queue, proxy]
+// Must be registered before sub-routers whose use("*") wildcard middleware
+// would otherwise intercept this unauthenticated endpoint.
+app.get("/proxy/image", async (c) => {
+	const url = c.req.query("url")
+	if (!url) return c.text("Missing url", 400)
+	if (!isProxyAllowed(url)) return c.text("Forbidden", 403)
+	let upstream: Response
+	try {
+		upstream = await fetch(url, {
+			headers: { "User-Agent": "Mozilla/5.0 (compatible; OrbitBot/1.0)", Accept: "image/*,*/*" },
+		})
+	} catch { return c.text("Upstream fetch failed", 502) }
+	if (!upstream.ok) return c.text("Upstream error", upstream.status as 502)
+	const contentType = upstream.headers.get("content-type") ?? "image/jpeg"
+	return new Response(upstream.body, {
+		status: 200,
+		headers: { "Content-Type": contentType, "Cache-Control": "public, max-age=86400, immutable" },
+	})
+})
+
+const routes = [index, quests, saves, lists, reports, users, ai, queue]
 routes.forEach((route) => {
 	app.route("/", route)
 })
