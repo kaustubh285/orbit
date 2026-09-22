@@ -8,6 +8,7 @@ import {
 	IconWorld,
 } from "@tabler/icons-react"
 import { useState } from "react"
+import { getThumbnailUrl } from "@/lib/thumbnail"
 
 const PLATFORM_META: Record<Save["sourcePlatform"], { color: string; Icon: React.ElementType }> = {
 	youtube: { color: "var(--mantine-color-red-9)", Icon: IconBrandYoutube },
@@ -36,9 +37,8 @@ function SaveImage({ save, meta }: { save: Save; meta: (typeof PLATFORM_META)[Sa
 		>
 			<img
 				loading="lazy"
-				src={save.thumbnailUrl!}
+				src={getThumbnailUrl(save.thumbnailUrl)!}
 				alt=""
-				referrerPolicy="no-referrer"
 				onLoad={() => setLoaded(true)}
 				style={{
 					display: "block",

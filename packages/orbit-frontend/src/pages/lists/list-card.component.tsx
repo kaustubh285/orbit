@@ -7,6 +7,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { listAccentColor } from './lists.utils'
 import { ListMenu } from './list-menu.component'
 import { PrivacyAwareText } from '@/components/privacy-aware-text.component'
+import { getThumbnailUrl } from '@/lib/thumbnail'
 
 dayjs.extend(relativeTime)
 
@@ -80,7 +81,7 @@ export function ListCard({
 									height: 36,
 									flexShrink: 0,
 									borderRadius: 5,
-									backgroundImage: `url(${list.recentSave.thumbnailUrl})`,
+									backgroundImage: `url(${getThumbnailUrl(list.recentSave.thumbnailUrl)})`,
 									backgroundSize: 'cover',
 									backgroundPosition: 'center',
 									border: '1px solid var(--mantine-color-dark-4)',

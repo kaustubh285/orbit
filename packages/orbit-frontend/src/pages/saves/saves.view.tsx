@@ -15,7 +15,8 @@ import {
 	TextInput,
 	Tooltip,
 } from "@mantine/core"
-import { useDebouncedValue, useDisclosure } from "@mantine/hooks"
+import { useDebouncedValue } from "@mantine/hooks"
+import { useSaveDrawer } from "@/hooks/use-save-drawer"
 import {
 	IconBrandInstagram,
 	IconBrandReddit,
@@ -32,7 +33,6 @@ import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { getSavesOptions } from "@orbit/client"
 import { useSaves } from "./use-saves.hook"
-import { SaveDetailView } from "@/components/saves/save-fullpage-drawer.component"
 import SaveGrid from "@/components/saves/save-grid.component"
 
 dayjs.extend(relativeTime)
@@ -114,8 +114,7 @@ export default function SavesView({
 			return sortOrder === "newest" ? -diff : diff
 		})
 
-	const [opened, { open, close }] = useDisclosure(false)
-	const [selectedSave, setSelectedSave] = useState<Save | null>(null)
+	const { open: openSaveDrawer } = useSaveDrawer()
 
 	const activeFilterCount =
 		(platform !== "all" ? 1 : 0) +
@@ -125,8 +124,7 @@ export default function SavesView({
 
 	return (
 		<Stack gap="md">
-			{selectedSave && <SaveDetailView save={selectedSave} opened={opened} onClose={close} />}
-			<Group wrap="nowrap" gap="sm">
+				<Group wrap="nowrap" gap="sm">
 				<TextInput
 					placeholder="Search title, description, notes, platform..."
 					leftSection={<IconSearch size={14} />}
@@ -216,7 +214,7 @@ export default function SavesView({
 				saves={filtered}
 				isLoading={isLoading || isSearching}
 				onRefetch={onRefetch}
-				onClick={(s) => { setSelectedSave(s); open() }}
+				onClick={(s) => openSaveDrawer(s.id)}
 			/>
 
 			{!isLoading && !isSearching && filtered.length === 0 && (

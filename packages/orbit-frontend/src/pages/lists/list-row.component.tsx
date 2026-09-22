@@ -5,6 +5,7 @@ import { Link } from '@tanstack/react-router'
 import { listAccentColor } from './lists.utils'
 import { ListMenu } from './list-menu.component'
 import { PrivacyAwareText } from '@/components/privacy-aware-text.component'
+import { getThumbnailUrl } from '@/lib/thumbnail'
 
 export function ListRow({
 	list,
@@ -61,7 +62,7 @@ export function ListRow({
 								height: 44,
 								flexShrink: 0,
 								borderRadius: 6,
-								backgroundImage: `url(${list.recentSave.thumbnailUrl})`,
+								backgroundImage: `url(${getThumbnailUrl(list.recentSave.thumbnailUrl)})`,
 								backgroundSize: 'cover',
 								backgroundPosition: 'center',
 								border: '1px solid var(--mantine-color-dark-4)',

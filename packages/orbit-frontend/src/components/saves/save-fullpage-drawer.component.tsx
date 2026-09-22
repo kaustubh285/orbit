@@ -2,6 +2,7 @@ import { useUpdateSaveHook } from "@/hooks/use-update-save.hook"
 import type { Save } from "@/types"
 import {
 	ActionIcon,
+	Alert,
 	Badge,
 	Box,
 	Button,
@@ -19,12 +20,14 @@ import {
 	TextInput,
 	Tooltip,
 } from "@mantine/core"
+import { IconClock } from "@tabler/icons-react"
 import {
 	IconBrandInstagram,
 	IconBrandReddit,
 	IconBrandYoutube,
 	IconEditCircle,
 	IconExternalLink,
+	IconPhotoSearch,
 	IconPlaylistAdd,
 	IconSparkles2,
 	IconTrashFilled,
@@ -33,7 +36,7 @@ import {
 	IconSparkles,
 	IconMapPin,
 } from "@tabler/icons-react"
-import { postQueueMutation, getQueueQueryKey } from "@orbit/client"
+import { postQueueMutation, getQueueQueryKey, getSavesByIdQueryKey, client } from "@orbit/client"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
@@ -42,6 +45,7 @@ import { MultiSelectCreatable } from "../multi-select-creatable.component"
 import { PrivacyAwareText } from "../privacy-aware-text.component"
 import { useMediaQuery } from "@mantine/hooks"
 import { useOrbitAppStore } from "@/store/orbit-app.store"
+import { getThumbnailUrl } from "@/lib/thumbnail"
 
 dayjs.extend(relativeTime)
 
@@ -91,6 +95,11 @@ export const SaveDetailView = ({
 	const addToQueue = useMutation({
 		...postQueueMutation(),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: getQueueQueryKey() }),
+	})
+
+	const rescrape = useMutation({
+		mutationFn: () => client.post({ url: `/saves/${save.id}/rescrape` }),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: getSavesByIdQueryKey({ path: { id: save.id } }) }),
 	})
 
 	const [title, setTitle] = useState(save.title ?? "")
@@ -182,6 +191,17 @@ export const SaveDetailView = ({
 
 
 
+				<Tooltip label="Re-scrape title, description & thumbnail">
+					<ActionIcon
+						variant="subtle"
+						color="gray"
+						loading={rescrape.isPending}
+						onClick={() => rescrape.mutate()}
+					>
+						<IconPhotoSearch size={16} />
+					</ActionIcon>
+				</Tooltip>
+
 				<Tooltip label="Retrigger AI summary">
 					<ActionIcon variant="subtle" color="gray" disabled>
 						<IconSparkles2 size={16} />
@@ -243,6 +263,11 @@ export const SaveDetailView = ({
 
 			<ScrollArea style={{ flex: 1 }}>
 				<Stack gap="md" p="md">
+					{save.queuedAt && (
+						<Alert icon={<IconClock size={15} />} color="teal" variant="light" radius="md" p="sm">
+							<Text size="xs">Queued up for you · added {dayjs(save.queuedAt).fromNow()}</Text>
+						</Alert>
+					)}
 					{/* Thumbnail + hero metadata side by side */}
 					<Flex gap="md" align={isDesktop ? "stretch" : "center"} wrap="nowrap" direction={isDesktop ? "row" : "column"}>
 						<Stack style={{ width: isDesktop ? "40%" : "60%", flexShrink: 0 }}>
@@ -250,9 +275,8 @@ export const SaveDetailView = ({
 								<img
 									loading="lazy"
 									onClick={() => window.open(save.sourceUrl, "_blank")}
-									src={save.thumbnailUrl}
+									src={getThumbnailUrl(save.thumbnailUrl)}
 									alt=""
-									referrerPolicy="no-referrer"
 									style={{
 										display: "block",
 										width: "100%",

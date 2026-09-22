@@ -14,6 +14,7 @@ router
 	.openapi(routes.getOne, handlers.getOneSave)
 	.openapi(routes.update, handlers.updateSave)
 	.openapi(routes.resurfaceSaves, handlers.resurfaceSaves)
+	.openapi(routes.rescrape, handlers.rescrapeSave)
 	.openapi(routes.remove, handlers.removeSave);
 
 export default router;

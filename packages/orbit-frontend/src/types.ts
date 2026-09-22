@@ -50,4 +50,5 @@ export type Save = {
 	updatedAt: string;
 	lists?: string[];
 	aiTitle: string | null;
+	queuedAt?: string | null;
 }

@@ -36,6 +36,7 @@ async function retrieveCandidates(userId: string, keywords: string[], platforms:
 			ilike(savesTable.description, like),
 			ilike(savesTable.aiSummary, like),
 			ilike(savesTable.note, like),
+			ilike(savesTable.sourceUrl, like),
 			sql`array_to_string(${savesTable.tags}, ' ') ILIKE ${like}`,
 		);
 	});

@@ -29,6 +29,7 @@ import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { useEffect, useState } from "react"
 import { MultiSelectCreatable } from "../multi-select-creatable.component"
+import { getThumbnailUrl } from "@/lib/thumbnail"
 
 dayjs.extend(relativeTime)
 
@@ -102,7 +103,7 @@ export const UpdateSaveModal = ({
 						style={{
 							width: "100%",
 							aspectRatio: "5/2",
-							backgroundImage: `url(${save.thumbnailUrl})`,
+							backgroundImage: `url(${getThumbnailUrl(save.thumbnailUrl)})`,
 							backgroundSize: "cover",
 							backgroundPosition: "center",
 							borderRadius: 8,

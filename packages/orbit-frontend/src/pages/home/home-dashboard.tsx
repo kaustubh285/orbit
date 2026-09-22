@@ -16,10 +16,9 @@ import { getQuestsOptions } from "@orbit/client"
 import { useQuery } from "@tanstack/react-query"
 import { PrivacyAwareText } from "@/components/privacy-aware-text.component"
 
-import { useState } from "react"
-import { useDisclosure } from "@mantine/hooks"
-import { SaveDetailView } from "@/components/saves/save-fullpage-drawer.component"
 import { useHomeSearch } from "./use-home-search.hook"
+import { useSaveDrawer } from "@/hooks/use-save-drawer"
+import { getThumbnailUrl } from "@/lib/thumbnail"
 
 // Topical chips only — each is a canned query through the same pipeline as free
 // text, so they only work as well as the keyword/summary data behind them.
@@ -60,10 +59,9 @@ function RecentSaveCard({ save, onClick }: { save: Save; onClick: () => void }) 
 				overflow: "hidden",
 				cursor: "pointer",
 				background: save.thumbnailUrl
-					? save.sourcePlatform === "instagram"
-						? `${meta.hex}33 url(${save.thumbnailUrl}) center/contain no-repeat`
-						: `url(${save.thumbnailUrl}) center/cover no-repeat`
+					? `url(${getThumbnailUrl(save.thumbnailUrl)}) center/${save.sourcePlatform === "instagram" ? "contain" : "cover"} no-repeat`
 					: `linear-gradient(135deg, ${meta.hex}55, ${meta.hex}99)`,
+				backgroundColor: save.thumbnailUrl && save.sourcePlatform === "instagram" ? `${meta.hex}33` : undefined,
 				border: "1px solid var(--mantine-color-dark-4)",
 			}}
 		>
@@ -141,7 +139,7 @@ function SearchResultCard({ save, reason, onClick }: { save: Save; reason: strin
 					flexShrink: 0,
 					borderRadius: 8,
 					background: save.thumbnailUrl && !privacyMode
-						? `url(${save.thumbnailUrl}) center/cover no-repeat`
+						? `url(${getThumbnailUrl(save.thumbnailUrl)}) center/cover no-repeat`
 						: `linear-gradient(135deg, ${meta.hex}55, ${meta.hex}99)`,
 				}}
 			/>
@@ -191,7 +189,7 @@ function InsightCard({ label, value }: { label: string; value: number | string }
 	)
 }
 
-function QueueItem({ id, save, onRemove }: { id: string; save: Save; onRemove: (id: string) => void }) {
+function QueueItem({ id, save, onRemove, onOpen }: { id: string; save: Save; onRemove: (id: string) => void; onOpen: (id: string) => void }) {
 	const { privacyMode } = useOrbitAppStore()
 	const meta = PLATFORM_META[privacyMode ? "web" : save.sourcePlatform]
 	const PlatformIcon = meta.Icon
@@ -205,7 +203,9 @@ function QueueItem({ id, save, onRemove }: { id: string; save: Save; onRemove: (
 				borderRadius: 10,
 				background: "var(--mantine-color-dark-7)",
 				border: "1px solid var(--mantine-color-dark-4)",
+				cursor: "pointer",
 			}}
+			onClick={() => onOpen(save.id)}
 		>
 			<Box
 				style={{
@@ -214,10 +214,9 @@ function QueueItem({ id, save, onRemove }: { id: string; save: Save; onRemove: (
 					flexShrink: 0,
 					borderRadius: 8,
 					background: save.thumbnailUrl && !privacyMode
-						? save.sourcePlatform === "instagram"
-							? `${meta.hex}33 url(${save.thumbnailUrl}) center/contain no-repeat`
-							: `url(${save.thumbnailUrl}) center/cover no-repeat`
+						? `url(${getThumbnailUrl(save.thumbnailUrl)}) center/${save.sourcePlatform === "instagram" ? "contain" : "cover"} no-repeat`
 						: `linear-gradient(135deg, ${meta.hex}55, ${meta.hex}99)`,
+					backgroundColor: save.thumbnailUrl && !privacyMode && save.sourcePlatform === "instagram" ? `${meta.hex}33` : undefined,
 				}}
 			/>
 			<Stack gap={3} style={{ minWidth: 0, flex: 1 }}>
@@ -237,7 +236,7 @@ function QueueItem({ id, save, onRemove }: { id: string; save: Save; onRemove: (
 				size="md"
 				radius="xl"
 				style={{ flexShrink: 0 }}
-				onClick={() => onRemove(id)}
+				onClick={(e) => { e.stopPropagation(); onRemove(id) }}
 				title="Mark as watched"
 			>
 				<IconCheck size={15} />
@@ -250,15 +249,9 @@ export function HomeDashboard() {
 	const { mostRecentFiveSaves, mostRecentFiveSavesIsLoading } = useSaves()
 	const { dueToday, completedToday, overdue } = useDashboardStats()
 	const { items: queueItems, isLoading: queueLoading, removeItem } = useQueue()
-	const [selectedSave, setSelectedSave] = useState<Save | null>(null)
-	const [opened, { open, close }] = useDisclosure(false);
+	const { open: openSaveDrawer } = useSaveDrawer()
 
 	const { searchTerm, setSearchTerm, searchResults, interpretation, handleSearch, clearSearch, isSearching } = useHomeSearch()
-
-	const selectSave = (save: Save) => {
-		setSelectedSave(save)
-		open();
-	}
 
 	return (
 		<Stack gap="md" pt="sm" mih="100dvh">
@@ -275,7 +268,7 @@ export function HomeDashboard() {
 									{mostRecentFiveSavesIsLoading
 										? [1, 2, 3, 4, 5].map((i) => <RecentSaveCardSkeleton key={i} />)
 										: (mostRecentFiveSaves ?? []).map((save) => (
-											<RecentSaveCard key={save.id} save={save} onClick={() => selectSave(save)} />
+											<RecentSaveCard key={save.id} save={save} onClick={() => openSaveDrawer(save.id)} />
 										))
 									}
 								</Group>
@@ -315,7 +308,7 @@ export function HomeDashboard() {
 							/>
 						))
 						: queueItems.map((item) => (
-							<QueueItem key={item.id} id={item.id} save={item.save as Save} onRemove={removeItem} />
+							<QueueItem key={item.id} id={item.id} save={item.save as Save} onRemove={removeItem} onOpen={openSaveDrawer} />
 						))
 					}
 				</Stack>
@@ -363,9 +356,6 @@ export function HomeDashboard() {
 				<ActionIcon onClick={() => handleSearch()} size="lg" loading={isSearching}><IconSearch size={18} /></ActionIcon>
 			</Group>
 
-			{/* Detail drawer — rendered regardless of recent/results view */}
-			{selectedSave && <SaveDetailView save={selectedSave} opened={opened} onClose={close} />}
-
 			{isSearching && (
 				<Text size="sm" c="dimmed">Searching your saves…</Text>
 			)}
@@ -377,7 +367,7 @@ export function HomeDashboard() {
 						<Button variant="subtle" size="compact-xs" onClick={clearSearch}>Clear</Button>
 					</Group>
 					{searchResults.map((save) => (
-						<SearchResultCard key={save.id} save={save} reason={save.reason} onClick={() => selectSave(save)} />
+						<SearchResultCard key={save.id} save={save} reason={save.reason} onClick={() => openSaveDrawer(save.id)} />
 					))}
 				</Stack>
 			)}

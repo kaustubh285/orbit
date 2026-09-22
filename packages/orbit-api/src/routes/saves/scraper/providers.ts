@@ -78,14 +78,25 @@ export async function scrapeReddit(url: string): Promise<ProviderResult> {
 	})
 }
 
+const MOBILE_UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+
 export async function scrapeInstagram(url: string): Promise<ProviderResult> {
 	const oembedUrl = `https://www.instagram.com/api/v1/oembed/?url=${encodeURIComponent(url)}&hidecaption=false`
 	const data = await fetchJson<OEmbedResponse>(oembedUrl)
-	if (!data) return {}
+
+	let thumbnailUrl = data?.thumbnail_url ?? null
+
+	// oEmbed returns type "rich" for reels and doesn't always include thumbnail_url.
+	// Fall back to og:image from the page with a mobile UA which Instagram serves properly.
+	if (!thumbnailUrl) {
+		const html = await fetchHtml(url, { headers: { "User-Agent": MOBILE_UA } })
+		if (html) thumbnailUrl = parseOpenGraph(html).thumbnailUrl ?? null
+	}
+
 	return sanitize({
-		title: data.title ?? null,
-		author: data.author_name ?? null,
-		thumbnailUrl: data.thumbnail_url ?? null,
+		title: data?.title ?? null,
+		author: data?.author_name ?? null,
+		thumbnailUrl,
 	})
 }
 

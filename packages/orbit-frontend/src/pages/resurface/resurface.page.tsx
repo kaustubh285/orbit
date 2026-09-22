@@ -10,6 +10,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useEffect } from "react";
 import { useResurface } from "./use-resurface.hook";
+import { getThumbnailUrl } from "@/lib/thumbnail";
 import type { PostSavesResurfaceResponses } from "@orbit/client";
 
 dayjs.extend(relativeTime);
@@ -85,9 +86,8 @@ function ResurfaceCard({ save, onUncache, isDesktop }: { save: ResurfacedSave; o
 					<Box w={400} style={{ flexShrink: 0, position: "relative" }}>
 						<img
 						loading="lazy"
-							src={save.thumbnailUrl}
+							src={getThumbnailUrl(save.thumbnailUrl)}
 							alt=""
-							referrerPolicy="no-referrer"
 							style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
 						/>
 						<Box style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, transparent 60%, var(--mantine-color-dark-7))" }} />
@@ -189,9 +189,8 @@ function ResurfaceCard({ save, onUncache, isDesktop }: { save: ResurfacedSave; o
 					<>
 						<img
 						loading="lazy"
-							src={save.thumbnailUrl}
+							src={getThumbnailUrl(save.thumbnailUrl)}
 							alt=""
-							referrerPolicy="no-referrer"
 							style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
 						/>
 						<Box style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, var(--mantine-color-dark-7))" }} />

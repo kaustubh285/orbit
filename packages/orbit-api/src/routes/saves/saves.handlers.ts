@@ -2,6 +2,7 @@ import { and, desc, eq, getTableColumns, ilike, inArray, isNotNull, isNull, lt, 
 import * as HttpStatusCodes from "stoker/http-status-codes";
 import { db } from "../../db/db.js";
 import { savesTable } from "../../db/schemas/saves.schema.js";
+import { queueTable } from "../../db/schemas/queue.schema.js";
 import { listItemsTable, listsTable } from "../../db/schemas/lists.schema.js";
 import type { AppRouteHandler } from "@/lib/types.js";
 import { detectPlatform, scrapeUrl, type ScrapeResult } from "./scraper/index.js";
@@ -13,6 +14,7 @@ import type {
 	GetOneRoute,
 	ListRoute,
 	RemoveRoute,
+	RescrapeRoute,
 	ResurfaceSavesRoute,
 	UpdateRoute,
 	UpdateSaveListRoute,
@@ -38,6 +40,7 @@ export const listSaves: AppRouteHandler<ListRoute> = async (c) => {
 			ilike(savesTable.description, like),
 			ilike(savesTable.note, like),
 			ilike(savesTable.aiSummary, like),
+			ilike(savesTable.sourceUrl, like),
 			sql`array_to_string(${savesTable.tags}, ' ') ILIKE ${like}`,
 		)!);
 	}
@@ -279,15 +282,27 @@ export const getOneSave: AppRouteHandler<GetOneRoute> = async (c) => {
 	const userId = c.var.userId;
 	const { id } = c.req.valid("param");
 
-	const [save] = await db
-		.select()
+	const [row] = await db
+		.select({
+			...getTableColumns(savesTable),
+			lists: sql<string[]>`ARRAY_REMOVE(ARRAY_AGG(DISTINCT ${listsTable.name}), NULL)`,
+			queuedAt: queueTable.createdAt,
+		})
 		.from(savesTable)
-		.where(and(eq(savesTable.id, id), eq(savesTable.userId, userId)));
+		.leftJoin(listItemsTable, and(eq(listItemsTable.saveId, savesTable.id), isNull(listItemsTable.deletedAt)))
+		.leftJoin(listsTable, eq(listsTable.id, listItemsTable.listId))
+		.leftJoin(queueTable, and(eq(queueTable.saveId, savesTable.id), eq(queueTable.userId, userId)))
+		.where(and(eq(savesTable.id, id), eq(savesTable.userId, userId)))
+		.groupBy(savesTable.id, queueTable.createdAt);
 
-	if (!save) {
+	if (!row) {
 		return c.json({ message: "Save not found" }, HttpStatusCodes.NOT_FOUND);
 	}
-	return c.json(save, HttpStatusCodes.OK);
+
+	return c.json({
+		...row,
+		queuedAt: row.queuedAt?.toISOString() ?? null,
+	}, HttpStatusCodes.OK);
 };
 
 export const updateSave: AppRouteHandler<UpdateRoute> = async (c) => {
@@ -511,4 +526,30 @@ export const backfillSaves: AppRouteHandler<BackfillRoute> = async (c) => {
 		queued: saves.length,
 		message: `Backfill started for ${saves.length} saves. Watch logs for [ai] progress.`,
 	}, HttpStatusCodes.OK);
+};
+
+export const rescrapeSave: AppRouteHandler<RescrapeRoute> = async (c) => {
+	const userId = c.var.userId;
+	const { id } = c.req.valid("param");
+
+	const [save] = await db
+		.select({ id: savesTable.id, sourceUrl: savesTable.sourceUrl })
+		.from(savesTable)
+		.where(and(eq(savesTable.id, id), eq(savesTable.userId, userId), isNull(savesTable.deletedAt)));
+
+	if (!save) return c.json({ message: "Save not found" }, HttpStatusCodes.NOT_FOUND);
+
+	const scraped = await scrapeUrl(save.sourceUrl);
+
+	const [updated] = await db
+		.update(savesTable)
+		.set({
+			title: scraped.title,
+			description: scraped.description,
+			thumbnailUrl: scraped.thumbnailUrl,
+		})
+		.where(eq(savesTable.id, id))
+		.returning();
+
+	return c.json(updated, HttpStatusCodes.OK);
 };

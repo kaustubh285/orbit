@@ -69,6 +69,11 @@ export const selectSaveWithListsSchema = selectSaveSchema.extend({
 	lists: z.array(z.string()),
 });
 
+export const selectSaveDetailSchema = selectSaveSchema.extend({
+	lists: z.array(z.string()),
+	queuedAt: z.string().datetime({ offset: true }).nullable(),
+});
+
 export const backfill = createRoute({
 	path: "/saves/backfill",
 	method: "post",
@@ -114,7 +119,7 @@ export const getOne = createRoute({
 	tags: ["Saves"],
 	request: { params: idParamsSchema },
 	responses: {
-		[HttpStatusCodes.OK]: jsonContent(selectSaveSchema, "A save"),
+		[HttpStatusCodes.OK]: jsonContent(selectSaveDetailSchema, "A save"),
 		[HttpStatusCodes.NOT_FOUND]: jsonContent(notFoundSchema, "Save not found"),
 	},
 });
@@ -157,6 +162,17 @@ export const updateSaveList = createRoute({
 });
 
 
+export const rescrape = createRoute({
+	path: "/saves/{id}/rescrape",
+	method: "post",
+	tags: ["Saves"],
+	request: { params: idParamsSchema },
+	responses: {
+		[HttpStatusCodes.OK]: jsonContent(selectSaveSchema, "Re-scraped save"),
+		[HttpStatusCodes.NOT_FOUND]: jsonContent(notFoundSchema, "Save not found"),
+	},
+});
+
 export const resurfaceSaves = createRoute({
 	path: "/saves/resurface",
 	method: "post",
@@ -175,3 +191,4 @@ export type UpdateRoute = typeof update;
 export type RemoveRoute = typeof remove;
 export type UpdateSaveListRoute = typeof updateSaveList;
 export type ResurfaceSavesRoute = typeof resurfaceSaves;
+export type RescrapeRoute = typeof rescrape;
