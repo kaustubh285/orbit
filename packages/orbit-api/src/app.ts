@@ -30,6 +30,7 @@ app.get("/proxy/image", async (c) => {
 	let upstream: Response
 	try {
 		upstream = await fetch(url, {
+			redirect: "error", // never follow redirects — prevents SSRF via open-redirect chains
 			headers: { "User-Agent": "Mozilla/5.0 (compatible; OrbitBot/1.0)", Accept: "image/*,*/*" },
 		})
 	} catch { return c.text("Upstream fetch failed", 502) }
