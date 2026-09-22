@@ -4,10 +4,12 @@ import {
 	IconBrandInstagram,
 	IconBrandReddit,
 	IconBrandYoutube,
+	IconCheck,
 	IconSearch,
 	IconWorld,
 	IconX,
 } from "@tabler/icons-react"
+import { useQueue } from "./use-queue.hook"
 import { useOrbitAppStore } from "@/store/orbit-app.store"
 import { useSaves } from "../saves/use-saves.hook"
 import { getQuestsOptions } from "@orbit/client"
@@ -189,9 +191,65 @@ function InsightCard({ label, value }: { label: string; value: number | string }
 	)
 }
 
+function QueueItem({ id, save, onRemove }: { id: string; save: Save; onRemove: (id: string) => void }) {
+	const { privacyMode } = useOrbitAppStore()
+	const meta = PLATFORM_META[privacyMode ? "web" : save.sourcePlatform]
+	const PlatformIcon = meta.Icon
+
+	return (
+		<Group
+			gap={12}
+			wrap="nowrap"
+			style={{
+				padding: "10px 12px",
+				borderRadius: 10,
+				background: "var(--mantine-color-dark-7)",
+				border: "1px solid var(--mantine-color-dark-4)",
+			}}
+		>
+			<Box
+				style={{
+					width: 56,
+					height: 56,
+					flexShrink: 0,
+					borderRadius: 8,
+					background: save.thumbnailUrl && !privacyMode
+						? save.sourcePlatform === "instagram"
+							? `${meta.hex}33 url(${save.thumbnailUrl}) center/contain no-repeat`
+							: `url(${save.thumbnailUrl}) center/cover no-repeat`
+						: `linear-gradient(135deg, ${meta.hex}55, ${meta.hex}99)`,
+				}}
+			/>
+			<Stack gap={3} style={{ minWidth: 0, flex: 1 }}>
+				<Group gap={5} wrap="nowrap">
+					<PlatformIcon size={12} color={meta.hex} style={{ flexShrink: 0 }} />
+					<PrivacyAwareText size="xs" c="dimmed" style={{ flexShrink: 0 }}>
+						{save.author ?? save.sourcePlatform}
+					</PrivacyAwareText>
+				</Group>
+				<PrivacyAwareText size="sm" fw={600} lineClamp={2} style={{ lineHeight: 1.3 }}>
+					{save.aiTitle ?? save.title ?? save.sourceUrl}
+				</PrivacyAwareText>
+			</Stack>
+			<ActionIcon
+				variant="light"
+				color="teal"
+				size="md"
+				radius="xl"
+				style={{ flexShrink: 0 }}
+				onClick={() => onRemove(id)}
+				title="Mark as watched"
+			>
+				<IconCheck size={15} />
+			</ActionIcon>
+		</Group>
+	)
+}
+
 export function HomeDashboard() {
 	const { mostRecentFiveSaves, mostRecentFiveSavesIsLoading } = useSaves()
 	const { dueToday, completedToday, overdue } = useDashboardStats()
+	const { items: queueItems, isLoading: queueLoading, removeItem } = useQueue()
 	const [selectedSave, setSelectedSave] = useState<Save | null>(null)
 	const [opened, { open, close }] = useDisclosure(false);
 
@@ -237,11 +295,38 @@ export function HomeDashboard() {
 				)
 			}
 
-			<Group justify="space-between" align="flex-end">
+			{/* Queue */}
+			{(queueLoading || queueItems.length > 0) && (
+				<Stack gap="xs">
+					<Text size="xs" c="dimmed" tt="uppercase" fw={600} style={{ letterSpacing: "0.08em" }}>
+						Up next
+					</Text>
+					{queueLoading
+						? [1, 2].map((i) => (
+							<Box
+								key={i}
+								style={{
+									height: 76,
+									borderRadius: 10,
+									background: "var(--mantine-color-dark-6)",
+									border: "1px solid var(--mantine-color-dark-4)",
+									animation: "pulse 1.5s ease-in-out infinite",
+								}}
+							/>
+						))
+						: queueItems.map((item) => (
+							<QueueItem key={item.id} id={item.id} save={item.save as Save} onRemove={removeItem} />
+						))
+					}
+				</Stack>
+			)}
+
+			{/* Command Centre */}
+			{/* <Group justify="space-between" align="flex-end">
 				<Stack gap={2}>
 					<Text size="md" ff="monospace">Command Centre</Text>
 				</Stack>
-			</Group>
+			</Group> */}
 
 			{/*
 				Works well:

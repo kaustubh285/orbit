@@ -25,6 +25,7 @@ import {
 	IconBrandYoutube,
 	IconEditCircle,
 	IconExternalLink,
+	IconPlaylistAdd,
 	IconSparkles2,
 	IconTrashFilled,
 	IconWorld,
@@ -32,6 +33,8 @@ import {
 	IconSparkles,
 	IconMapPin,
 } from "@tabler/icons-react"
+import { postQueueMutation, getQueueQueryKey } from "@orbit/client"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { useEffect, useState } from "react"
@@ -84,6 +87,11 @@ export const SaveDetailView = ({
 	onClose: () => void
 }) => {
 	const { updateSave, isUpdating, deleteSave } = useUpdateSaveHook()
+	const queryClient = useQueryClient()
+	const addToQueue = useMutation({
+		...postQueueMutation(),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: getQueueQueryKey() }),
+	})
 
 	const [title, setTitle] = useState(save.title ?? "")
 	const [url, setUrl] = useState(save.sourceUrl ?? "")
@@ -177,6 +185,17 @@ export const SaveDetailView = ({
 				<Tooltip label="Retrigger AI summary">
 					<ActionIcon variant="subtle" color="gray" disabled>
 						<IconSparkles2 size={16} />
+					</ActionIcon>
+				</Tooltip>
+
+				<Tooltip label="Add to queue">
+					<ActionIcon
+						variant="subtle"
+						color="gray"
+						loading={addToQueue.isPending}
+						onClick={() => addToQueue.mutate({ body: { saveId: save.id } })}
+					>
+						<IconPlaylistAdd size={16} />
 					</ActionIcon>
 				</Tooltip>
 

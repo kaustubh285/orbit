@@ -60,6 +60,8 @@ export const savesTable = pgTable(
 		lastSurfacedAt: timestamp("last_surfaced_at", { withTimezone: true }),
 		resurfaceCount: integer("resurface_count").notNull().default(0),
 		lastInteractedAt: timestamp("last_interacted_at", { withTimezone: true }),
+		watchedCount: integer().default(0),
+		lastWatchedAt: timestamp("last_watched_at", { withTimezone: true }),
 
 		// AI
 		shouldAISummaries: boolean("should_ai_summaries").notNull().default(false),

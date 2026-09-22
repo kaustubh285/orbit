@@ -4333,6 +4333,380 @@
           }
         }
       }
+    },
+    "/queue": {
+      "get": {
+        "tags": [
+          "Queue"
+        ],
+        "responses": {
+          "200": {
+            "description": "User's queue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "save": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "userId": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "sourceUrl": {
+                            "type": "string",
+                            "format": "uri"
+                          },
+                          "sourcePlatform": {
+                            "type": "string",
+                            "enum": [
+                              "youtube",
+                              "reddit",
+                              "instagram",
+                              "web"
+                            ]
+                          },
+                          "title": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "description": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "thumbnailUrl": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "author": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "publishedAt": {
+                            "type": "string",
+                            "nullable": true,
+                            "format": "date-time"
+                          },
+                          "note": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "tags": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "active",
+                              "archived"
+                            ]
+                          },
+                          "aiTitle": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "aiSummary": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "aiEnrichedAt": {
+                            "type": "string",
+                            "nullable": true,
+                            "format": "date-time"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "userId",
+                          "sourceUrl",
+                          "sourcePlatform",
+                          "title",
+                          "description",
+                          "thumbnailUrl",
+                          "author",
+                          "publishedAt",
+                          "note",
+                          "tags",
+                          "status",
+                          "aiTitle",
+                          "aiSummary",
+                          "aiEnrichedAt",
+                          "createdAt",
+                          "updatedAt"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "createdAt",
+                      "save"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Queue"
+        ],
+        "requestBody": {
+          "description": "Save to add",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "saveId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "saveId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Queue item created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "save": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "userId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "sourceUrl": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "sourcePlatform": {
+                          "type": "string",
+                          "enum": [
+                            "youtube",
+                            "reddit",
+                            "instagram",
+                            "web"
+                          ]
+                        },
+                        "title": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "description": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "thumbnailUrl": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "author": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "publishedAt": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "date-time"
+                        },
+                        "note": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "tags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "active",
+                            "archived"
+                          ]
+                        },
+                        "aiTitle": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "aiSummary": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "aiEnrichedAt": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "date-time"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "userId",
+                        "sourceUrl",
+                        "sourcePlatform",
+                        "title",
+                        "description",
+                        "thumbnailUrl",
+                        "author",
+                        "publishedAt",
+                        "note",
+                        "tags",
+                        "status",
+                        "aiTitle",
+                        "aiSummary",
+                        "aiEnrichedAt",
+                        "createdAt",
+                        "updatedAt"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "createdAt",
+                    "save"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Save not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Already in queue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/queue/:id": {
+      "delete": {
+        "tags": [
+          "Queue"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Removed from queue"
+          },
+          "404": {
+            "description": "Queue item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

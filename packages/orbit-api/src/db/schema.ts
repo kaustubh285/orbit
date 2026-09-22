@@ -3,3 +3,4 @@ export * from "./schemas/quests.schema";
 export * from "./schemas/saves.schema";
 export * from "./schemas/lists.schema";
 export * from "./schemas/ai-calls.schema";
+export * from "./schemas/queue.schema";

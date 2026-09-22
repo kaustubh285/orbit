@@ -1350,6 +1350,133 @@ export type PostAiQueryResponses = {
 
 export type PostAiQueryResponse = PostAiQueryResponses[keyof PostAiQueryResponses];
 
+export type GetQueueData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/queue';
+};
+
+export type GetQueueResponses = {
+    /**
+     * User's queue
+     */
+    200: Array<{
+        id: string;
+        createdAt: string;
+        save: {
+            id: string;
+            userId: string;
+            sourceUrl: string;
+            sourcePlatform: 'youtube' | 'reddit' | 'instagram' | 'web';
+            title: string | null;
+            description: string | null;
+            thumbnailUrl: string | null;
+            author: string | null;
+            publishedAt: string | null;
+            note: string | null;
+            tags: Array<string>;
+            status: 'active' | 'archived';
+            aiTitle: string | null;
+            aiSummary: string | null;
+            aiEnrichedAt: string | null;
+            createdAt: string;
+            updatedAt: string;
+        };
+    }>;
+};
+
+export type GetQueueResponse = GetQueueResponses[keyof GetQueueResponses];
+
+export type PostQueueData = {
+    /**
+     * Save to add
+     */
+    body: {
+        saveId: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/queue';
+};
+
+export type PostQueueErrors = {
+    /**
+     * Save not found
+     */
+    404: {
+        message: string;
+    };
+    /**
+     * Already in queue
+     */
+    409: {
+        message: string;
+    };
+};
+
+export type PostQueueError = PostQueueErrors[keyof PostQueueErrors];
+
+export type PostQueueResponses = {
+    /**
+     * Queue item created
+     */
+    201: {
+        id: string;
+        createdAt: string;
+        save: {
+            id: string;
+            userId: string;
+            sourceUrl: string;
+            sourcePlatform: 'youtube' | 'reddit' | 'instagram' | 'web';
+            title: string | null;
+            description: string | null;
+            thumbnailUrl: string | null;
+            author: string | null;
+            publishedAt: string | null;
+            note: string | null;
+            tags: Array<string>;
+            status: 'active' | 'archived';
+            aiTitle: string | null;
+            aiSummary: string | null;
+            aiEnrichedAt: string | null;
+            createdAt: string;
+            updatedAt: string;
+        };
+    };
+};
+
+export type PostQueueResponse = PostQueueResponses[keyof PostQueueResponses];
+
+export type DeleteQueueIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/queue/:id';
+};
+
+export type DeleteQueueIdErrors = {
+    /**
+     * Queue item not found
+     */
+    404: {
+        message: string;
+    };
+};
+
+export type DeleteQueueIdError = DeleteQueueIdErrors[keyof DeleteQueueIdErrors];
+
+export type DeleteQueueIdResponses = {
+    /**
+     * Removed from queue
+     */
+    204: void;
+};
+
+export type DeleteQueueIdResponse = DeleteQueueIdResponses[keyof DeleteQueueIdResponses];
+
 export type ClientOptions = {
     baseUrl: 'http://localhost:9999' | (string & {});
 };
