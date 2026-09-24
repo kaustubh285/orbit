@@ -19,7 +19,7 @@ import { Picker, type PickerProps } from '@gfazioli/mantine-picker';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const REMEMBRAL_EMOJIS = ['🍞', '🚀', '✈️', '🎵', '🏃', '📚', '🎉', '❤️', '🍕', '⚽', '🎬', '🌟', '☺️', '😛', '🤮', '😭', '✅']
+const REMEMBRAL_EMOJIS = ['🍞', '🚀', '✈️', '🎵', '🏃', '📚', '🎉', '❤️', '🍕', '⚽', '🎬', '🌟', '☺️', '😛', '🤮', '😭', '✅','👔','👖','🩳','🧣','🧢','🥼','🥋','🦺','👕']
 
 const QUICK_DATES = [
 	{ label: 'Today', iso: () => dayjs().startOf('day').toISOString() },
